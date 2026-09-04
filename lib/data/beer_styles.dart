@@ -96,6 +96,47 @@ const List<BeerStyle> beerStyles = [
         'Lager très légère utilisant du maïs ou du riz en complément du '
         'malt d\'orge, peu amère, très rafraîchissante.',
   ),
+  BeerStyle(
+    id: 'kellerbier',
+    name: 'Kellerbier / Zwickelbier',
+    family: BeerFamily.lagerBasse,
+    origin: 'Allemagne (Franconie)',
+    abvRange: '4,5 – 5,5 %',
+    description:
+        'Lager non filtrée servie directement depuis la cave de garde, '
+        'trouble, aux notes de levure et de houblon frais.',
+  ),
+  BeerStyle(
+    id: 'rauchbierLager',
+    name: 'Rauchbier',
+    family: BeerFamily.lagerBasse,
+    origin: 'Allemagne (Bamberg)',
+    abvRange: '4,8 – 5,4 %',
+    description:
+        'Lager ambrée brassée avec du malt fumé au bois de hêtre, '
+        'signature de la ville de Bamberg.',
+  ),
+  BeerStyle(
+    id: 'balticPorter',
+    name: 'Baltic Porter',
+    family: BeerFamily.lagerBasse,
+    origin: 'Europe de la Baltique',
+    abvRange: '6,5 – 9,5 %',
+    description:
+        'Porter fort brassé en fermentation basse, hérité des échanges '
+        'commerciaux entre l\'Angleterre et la mer Baltique, notes de '
+        'fruits secs et de réglisse.',
+  ),
+  BeerStyle(
+    id: 'indiaPaleLager',
+    name: 'India Pale Lager (IPL)',
+    family: BeerFamily.lagerBasse,
+    origin: 'États-Unis',
+    abvRange: '5,5 – 6,5 %',
+    description:
+        'Lager très houblonnée, hybride moderne entre la fraîcheur d\'une '
+        'lager et l\'intensité aromatique d\'une IPA.',
+  ),
 
   // --- Fermentation haute (Ale) ---
   BeerStyle(
@@ -120,6 +161,56 @@ const List<BeerStyle> beerStyles = [
         '(NEIPA, Double IPA, Session IPA...).',
   ),
   BeerStyle(
+    id: 'neipa',
+    name: 'New England IPA (Hazy IPA)',
+    family: BeerFamily.aleHaute,
+    origin: 'États-Unis',
+    abvRange: '6 – 9 %',
+    description:
+        'IPA trouble et juteuse, texture soyeuse, houblonnage massif à '
+        'cru pour des arômes de fruits tropicaux sans amertume agressive.',
+  ),
+  BeerStyle(
+    id: 'doubleIpa',
+    name: 'Double / Imperial IPA',
+    family: BeerFamily.aleHaute,
+    origin: 'États-Unis',
+    abvRange: '7,5 – 10,5 %',
+    description:
+        'Version renforcée de l\'IPA, plus maltée, plus alcoolisée et '
+        'encore plus houblonnée.',
+  ),
+  BeerStyle(
+    id: 'blackIpa',
+    name: 'Black IPA / Cascadian Dark Ale',
+    family: BeerFamily.aleHaute,
+    origin: 'États-Unis',
+    abvRange: '6,5 – 9 %',
+    description:
+        'IPA noire, torréfaction discrète pour ne pas masquer le '
+        'houblonnage caractéristique de l\'IPA.',
+  ),
+  BeerStyle(
+    id: 'sessionIpa',
+    name: 'Session IPA',
+    family: BeerFamily.aleHaute,
+    origin: 'États-Unis',
+    abvRange: '3,5 – 5 %',
+    description:
+        'Toute l\'aromatique houblonnée d\'une IPA, dans un degré '
+        'd\'alcool réduit pour une bière plus "session".',
+  ),
+  BeerStyle(
+    id: 'americanAmberAle',
+    name: 'American Amber Ale',
+    family: BeerFamily.aleHaute,
+    origin: 'États-Unis',
+    abvRange: '4,5 – 6,2 %',
+    description:
+        'Ale ambrée américaine, équilibre entre malt caramel et '
+        'houblonnage franc, plus ronde qu\'une Pale Ale.',
+  ),
+  BeerStyle(
     id: 'bitter',
     name: 'Bitter / ESB',
     family: BeerFamily.aleHaute,
@@ -128,6 +219,37 @@ const List<BeerStyle> beerStyles = [
     description:
         'Ale anglaise traditionnelle de pub, équilibrée, faiblement '
         'carbonatée, souvent servie en fût à température de cave.',
+  ),
+  BeerStyle(
+    id: 'kolsch',
+    name: 'Kölsch',
+    family: BeerFamily.aleHaute,
+    origin: 'Allemagne (Cologne)',
+    abvRange: '4,4 – 5,2 %',
+    description:
+        'Ale fermentée à froid puis garde à la manière d\'une lager, '
+        'blonde, légère et délicate, protégée par une appellation limitée '
+        'à Cologne.',
+  ),
+  BeerStyle(
+    id: 'altbier',
+    name: 'Altbier',
+    family: BeerFamily.aleHaute,
+    origin: 'Allemagne (Düsseldorf)',
+    abvRange: '4,5 – 5,2 %',
+    description:
+        'Ale cuivrée de Düsseldorf, fermentée haute puis gardée au froid, '
+        'équilibrée entre malt toasté et houblon.',
+  ),
+  BeerStyle(
+    id: 'creamAle',
+    name: 'Cream Ale',
+    family: BeerFamily.aleHaute,
+    origin: 'États-Unis',
+    abvRange: '4,2 – 5,6 %',
+    description:
+        'Ale américaine légère et douce, pensée pour ressembler à une '
+        'lager facile à boire.',
   ),
   BeerStyle(
     id: 'brownAle',
@@ -158,6 +280,36 @@ const List<BeerStyle> beerStyles = [
     description:
         'Ale noire brassée avec de l\'orge torréfiée, texture crémeuse, '
         'amertume de café et de chocolat noir.',
+  ),
+  BeerStyle(
+    id: 'milkStout',
+    name: 'Milk Stout / Sweet Stout',
+    family: BeerFamily.aleHaute,
+    origin: 'Royaume-Uni',
+    abvRange: '4 – 6 %',
+    description:
+        'Stout adouci par l\'ajout de lactose (sucre du lait, non '
+        'fermentescible), rond et légèrement sucré.',
+  ),
+  BeerStyle(
+    id: 'oatmealStout',
+    name: 'Oatmeal Stout',
+    family: BeerFamily.aleHaute,
+    origin: 'Royaume-Uni',
+    abvRange: '4,2 – 5,9 %',
+    description:
+        'Stout brassé avec une part d\'avoine, texture soyeuse et '
+        'onctueuse.',
+  ),
+  BeerStyle(
+    id: 'imperialStout',
+    name: 'Imperial Stout / Russian Imperial Stout',
+    family: BeerFamily.aleHaute,
+    origin: 'Royaume-Uni / Russie',
+    abvRange: '8 – 12 %',
+    description:
+        'Stout très fort brassé à l\'origine pour supporter le voyage '
+        'jusqu\'à la cour impériale russe, dense et complexe.',
   ),
   BeerStyle(
     id: 'barleywine',
@@ -218,6 +370,26 @@ const List<BeerStyle> beerStyles = [
     description:
         'Ale belge forte, blonde et pétillante, très sèche en finale '
         'malgré un fort degré d\'alcool.',
+  ),
+  BeerStyle(
+    id: 'quadrupel',
+    name: 'Quadrupel / Belgian Dark Strong Ale',
+    family: BeerFamily.aleHaute,
+    origin: 'Belgique',
+    abvRange: '9 – 14 %',
+    description:
+        'Ale belge sombre et très forte, notes de fruits confits, de '
+        'caramel brûlé et d\'alcool bien intégré.',
+  ),
+  BeerStyle(
+    id: 'patersbier',
+    name: 'Patersbier / Abbey Single',
+    family: BeerFamily.aleHaute,
+    origin: 'Belgique',
+    abvRange: '4,5 – 6 %',
+    description:
+        'La bière légère et peu alcoolisée que les moines trappistes se '
+        'réservent au quotidien, rarement commercialisée.',
   ),
   BeerStyle(
     id: 'saison',
@@ -281,6 +453,16 @@ const List<BeerStyle> beerStyles = [
         'Lambic mis à macérer sur fruits (cerise, framboise...), acidulé '
         'et fruité.',
   ),
+  BeerStyle(
+    id: 'faro',
+    name: 'Faro',
+    family: BeerFamily.spontanee,
+    origin: 'Belgique',
+    abvRange: '4 – 6 %',
+    description:
+        'Lambic jeune adouci avec du sucre candi, doux et acidulé, '
+        'historiquement la bière la plus populaire de Bruxelles.',
+  ),
 
   // --- Fermentation mixte ---
   BeerStyle(
@@ -292,6 +474,26 @@ const List<BeerStyle> beerStyles = [
     description:
         'Ale rouge-brune vieillie en fût de bois, fermentation mixte '
         '(levure + bactéries), acidité vineuse et notes de fruits rouges.',
+  ),
+  BeerStyle(
+    id: 'gose',
+    name: 'Gose',
+    family: BeerFamily.mixte,
+    origin: 'Allemagne (Leipzig)',
+    abvRange: '4,2 – 4,8 %',
+    description:
+        'Ale de blé acidulée par des bactéries lactiques, salée et '
+        'relevée de coriandre, originaire de Leipzig.',
+  ),
+  BeerStyle(
+    id: 'berlinerWeisse',
+    name: 'Berliner Weisse',
+    family: BeerFamily.mixte,
+    origin: 'Allemagne (Berlin)',
+    abvRange: '2,8 – 3,8 %',
+    description:
+        'Ale de blé très légère et acidulée par fermentation mixte, '
+        'traditionnellement servie avec un sirop pour adoucir l\'acidité.',
   ),
 ];
 
