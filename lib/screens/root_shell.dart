@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'my_collection_tab.dart';
 import 'origins_tab.dart';
 import 'search_screen.dart';
 import 'styles_tab.dart';
@@ -14,8 +15,8 @@ class RootShell extends StatefulWidget {
 class _RootShellState extends State<RootShell> {
   int _tabIndex = 0;
 
-  static const _tabs = [StylesTab(), OriginsTab()];
-  static const _titles = ['Styles de bières', 'Par pays'];
+  static const _tabs = [StylesTab(), OriginsTab(), MyCollectionTab()];
+  static const _titles = ['Styles de bières', 'Par pays', 'Ma collection'];
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +48,11 @@ class _RootShellState extends State<RootShell> {
             icon: Icon(Icons.public_outlined),
             selectedIcon: Icon(Icons.public),
             label: 'Origines',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.local_bar_outlined),
+            selectedIcon: Icon(Icons.local_bar),
+            label: 'Collection',
           ),
         ],
       ),

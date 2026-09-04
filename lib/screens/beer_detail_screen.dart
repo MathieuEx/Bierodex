@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../data/beer_styles.dart';
 import '../data/beers.dart';
 import '../screens/style_detail_screen.dart';
+import '../services/beer_collection_service.dart';
+import '../widgets/star_rating.dart';
 
 class BeerDetailScreen extends StatelessWidget {
   final String beerId;
@@ -67,6 +69,8 @@ class BeerDetailScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text(beer.description, style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 24),
+          _MyOpinionCard(beerId: beer.id),
+          const SizedBox(height: 16),
           if (style != null)
             Card(
               child: ListTile(
@@ -85,6 +89,69 @@ class BeerDetailScreen extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _MyOpinionCard extends StatelessWidget {
+  final String beerId;
+
+  const _MyOpinionCard({required this.beerId});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: BeerCollectionService.instance,
+      builder: (context, _) {
+        final service = BeerCollectionService.instance;
+        final tried = service.isTried(beerId);
+        final rating = service.ratingFor(beerId);
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Mon avis',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('J\'ai bu cette bière'),
+                  value: tried,
+                  onChanged: (value) {
+                    service.setTried(beerId, value);
+                    if (!value) service.setRating(beerId, null);
+                  },
+                ),
+                if (tried) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Text('Ma note :'),
+                      const SizedBox(width: 8),
+                      StarRating(
+                        rating: rating,
+                        size: 28,
+                        onChanged: (value) => service.setRating(beerId, value),
+                      ),
+                      if (rating != null)
+                        IconButton(
+                          tooltip: 'Effacer la note',
+                          icon: const Icon(Icons.close, size: 18),
+                          onPressed: () => service.setRating(beerId, null),
+                        ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
