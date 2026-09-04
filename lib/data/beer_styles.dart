@@ -392,6 +392,16 @@ const List<BeerStyle> beerStyles = [
         'réservent au quotidien, rarement commercialisée.',
   ),
   BeerStyle(
+    id: 'biereDeGarde',
+    name: 'Bière de Garde',
+    family: BeerFamily.aleHaute,
+    origin: 'France (Nord-Pas-de-Calais)',
+    abvRange: '6 – 8,5 %',
+    description:
+        'Ale fermière du nord de la France, ambrée et maltée, brassée '
+        'traditionnellement en hiver puis gardée en cave avant l\'été.',
+  ),
+  BeerStyle(
     id: 'saison',
     name: 'Saison',
     family: BeerFamily.aleHaute,

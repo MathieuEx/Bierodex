@@ -25,6 +25,24 @@ const List<Beer> beers = [
     description: 'Pilsner allemande sèche, référence de l\'Eifel.',
   ),
   Beer(
+    id: 'veltins-pilsener',
+    name: 'Veltins Pilsener',
+    brewery: 'Veltins',
+    country: 'Allemagne',
+    styleId: 'pilsner',
+    abv: 4.8,
+    description: 'Pilsner de Sauerland, amertume franche et bien maltée.',
+  ),
+  Beer(
+    id: 'meteor-pils',
+    name: 'Meteor Pils',
+    brewery: 'Brasserie Meteor',
+    country: 'France',
+    styleId: 'pilsner',
+    abv: 4.8,
+    description: 'Pilsner alsacienne brassée selon la méthode allemande.',
+  ),
+  Beer(
     id: 'jupiler',
     name: 'Jupiler',
     brewery: 'AB InBev',
@@ -89,6 +107,15 @@ const List<Beer> beers = [
     abv: 5.5,
     description: 'Lager blonde marseillaise devenue une figure locale.',
   ),
+  Beer(
+    id: 'pelforth-blonde',
+    name: 'Pelforth Blonde',
+    brewery: 'Pelforth',
+    country: 'France',
+    styleId: 'euroPaleLager',
+    abv: 5.8,
+    description: 'Lager blonde du Nord de la France, plus corsée que la moyenne.',
+  ),
 
   // Helles
   Beer(
@@ -108,6 +135,15 @@ const List<Beer> beers = [
     styleId: 'helles',
     abv: 5.1,
     description: 'Brassée par la plus ancienne brasserie du monde.',
+  ),
+  Beer(
+    id: 'tegernseer-hell',
+    name: 'Tegernseer Hell',
+    brewery: 'Herzoglich Bayerisches Brauhaus Tegernsee',
+    country: 'Allemagne',
+    styleId: 'helles',
+    abv: 5.2,
+    description: 'Helles bavaroise très prisée dans les biergartens de Munich.',
   ),
 
   // Dunkel
@@ -169,6 +205,15 @@ const List<Beer> beers = [
     abv: 5.8,
     description: 'Märzen munichoise, l\'une des six bières officielles de la fête.',
   ),
+  Beer(
+    id: 'spaten-oktoberfestbier',
+    name: 'Spaten Oktoberfestbier',
+    brewery: 'Spaten',
+    country: 'Allemagne',
+    styleId: 'marzen',
+    abv: 5.9,
+    description: 'Spaten a inventé le style Märzen moderne en 1872.',
+  ),
 
   // Vienna Lager
   Beer(
@@ -189,6 +234,15 @@ const List<Beer> beers = [
     abv: 5.4,
     description: 'Lager ambrée mexicaine héritée des brasseurs viennois.',
   ),
+  Beer(
+    id: 'fischer-tradition',
+    name: 'Fischer Tradition',
+    brewery: 'Brasserie Fischer',
+    country: 'France',
+    styleId: 'vienna',
+    abv: 6.0,
+    description: 'Lager ambrée alsacienne, malt toasté et finale ronde.',
+  ),
 
   // Bock
   Beer(
@@ -208,6 +262,15 @@ const List<Beer> beers = [
     styleId: 'bock',
     abv: 6.5,
     description: 'Le Bock originel, brassé à Einbeck depuis le Moyen Âge.',
+  ),
+  Beer(
+    id: 'paulaner-salvator',
+    name: 'Paulaner Salvator',
+    brewery: 'Paulaner',
+    country: 'Allemagne',
+    styleId: 'bock',
+    abv: 7.9,
+    description: 'Le Doppelbock originel des moines de Paulaner, malté et intense.',
   ),
 
   // American / Adjunct Lager
@@ -432,6 +495,15 @@ const List<Beer> beers = [
     abv: 4.8,
     description: 'Autre grande Kölsch traditionnelle de Cologne.',
   ),
+  Beer(
+    id: 'gaffel-koelsch',
+    name: 'Gaffel Kölsch',
+    brewery: 'Gaffel',
+    country: 'Allemagne',
+    styleId: 'kolsch',
+    abv: 4.8,
+    description: 'La Kölsch la plus vendue de Cologne.',
+  ),
 
   // Altbier
   Beer(
@@ -451,6 +523,15 @@ const List<Beer> beers = [
     styleId: 'altbier',
     abv: 4.9,
     description: 'Altbier produite à plus grande échelle, cuivrée et sèche.',
+  ),
+  Beer(
+    id: 'schumacher-alt',
+    name: 'Schumacher Alt',
+    brewery: 'Schumacher',
+    country: 'Allemagne',
+    styleId: 'altbier',
+    abv: 4.6,
+    description: 'Altbier de brewpub, l\'une des plus anciennes de Düsseldorf.',
   ),
 
   // Cream Ale
@@ -551,6 +632,15 @@ const List<Beer> beers = [
     styleId: 'sessionIpa',
     abv: 4.0,
     description: 'Session IPA légère mais pleinement aromatique.',
+  ),
+  Beer(
+    id: 'la-debauche-blonde-de-soif',
+    name: 'La Débauche Blonde de Soif',
+    brewery: 'La Débauche',
+    country: 'France',
+    styleId: 'sessionIpa',
+    abv: 4.0,
+    description: 'Bière nantaise légère et houblonnée, pensée pour désaltérer.',
   ),
 
   // American Amber Ale
@@ -781,6 +871,15 @@ const List<Beer> beers = [
     abv: 6.8,
     description: 'Blonde d\'abbaye héritée d\'une tradition monastique de 1074.',
   ),
+  Beer(
+    id: 'grimbergen-blonde',
+    name: 'Grimbergen Blonde',
+    brewery: 'Grimbergen',
+    country: 'Belgique',
+    styleId: 'belgianBlonde',
+    abv: 6.7,
+    description: 'Blonde d\'abbaye, ronde et légèrement caramélisée.',
+  ),
 
   // Dubbel
   Beer(
@@ -800,6 +899,24 @@ const List<Beer> beers = [
     styleId: 'belgianDubbel',
     abv: 7.0,
     description: 'Dubbel trappiste de Chimay, fruitée et épicée.',
+  ),
+  Beer(
+    id: 'grimbergen-double',
+    name: 'Grimbergen Double',
+    brewery: 'Grimbergen',
+    country: 'Belgique',
+    styleId: 'belgianDubbel',
+    abv: 6.5,
+    description: 'Dubbel d\'abbaye, notes de fruits secs et de caramel brun.',
+  ),
+  Beer(
+    id: 'mont-des-cats',
+    name: 'Mont des Cats',
+    brewery: 'Abbaye du Mont des Cats',
+    country: 'France',
+    styleId: 'belgianDubbel',
+    abv: 7.6,
+    description: 'Bière trappiste française, dans la tradition des Dubbel belges.',
   ),
 
   // Tripel
@@ -821,6 +938,15 @@ const List<Beer> beers = [
     abv: 8.0,
     description: 'Tripel trappiste de Chimay, sèche et houblonnée.',
   ),
+  Beer(
+    id: 'grimbergen-tripel',
+    name: 'Grimbergen Tripel',
+    brewery: 'Grimbergen',
+    country: 'Belgique',
+    styleId: 'belgianTripel',
+    abv: 8.0,
+    description: 'Tripel d\'abbaye ronde, épicée et légèrement sucrée.',
+  ),
 
   // Strong Golden Ale
   Beer(
@@ -840,6 +966,24 @@ const List<Beer> beers = [
     styleId: 'belgianStrongGolden',
     abv: 8.5,
     description: 'Strong Golden Ale belge reconnaissable à sa bouteille tachetée.',
+  ),
+  Beer(
+    id: 'la-chouffe',
+    name: 'La Chouffe',
+    brewery: 'Brasserie d\'Achouffe',
+    country: 'Belgique',
+    styleId: 'belgianStrongGolden',
+    abv: 8.0,
+    description: 'Strong Golden Ale ardennaise épicée à la coriandre.',
+  ),
+  Beer(
+    id: 'chouffe-houblon-ipa-tripel',
+    name: 'La Chouffe Houblon Dobbelen IPA Tripel',
+    brewery: 'Brasserie d\'Achouffe',
+    country: 'Belgique',
+    styleId: 'ipa',
+    abv: 9.0,
+    description: 'Rencontre belge entre la Tripel et l\'IPA américaine, très houblonnée.',
   ),
 
   // Quadrupel / Belgian Dark Strong Ale
@@ -861,6 +1005,15 @@ const List<Beer> beers = [
     abv: 10.0,
     description: 'Quadrupel réputée, proche historiquement de Westvleteren 12.',
   ),
+  Beer(
+    id: 'rochefort-8',
+    name: 'Rochefort 8',
+    brewery: 'Abbaye Notre-Dame de Saint-Rémy',
+    country: 'Belgique',
+    styleId: 'quadrupel',
+    abv: 9.2,
+    description: 'La Quadrupel intermédiaire de la gamme Rochefort.',
+  ),
 
   // Patersbier / Abbey Single
   Beer(
@@ -871,6 +1024,15 @@ const List<Beer> beers = [
     styleId: 'patersbier',
     abv: 5.8,
     description: 'La bière du quotidien des moines de Westvleteren.',
+  ),
+  Beer(
+    id: 'chimay-doree',
+    name: 'Chimay Dorée',
+    brewery: 'Abbaye de Scourmont',
+    country: 'Belgique',
+    styleId: 'patersbier',
+    abv: 4.8,
+    description: 'La bière légère que les moines de Chimay se réservent.',
   ),
 
   // Saison
@@ -892,6 +1054,35 @@ const List<Beer> beers = [
     abv: 8.0,
     description: 'Saison fermière atypique, souvent épicée ou fruitée.',
   ),
+  Beer(
+    id: 'saison-silly',
+    name: 'Saison Silly',
+    brewery: 'Brasserie de Silly',
+    country: 'Belgique',
+    styleId: 'saison',
+    abv: 5.0,
+    description: 'Saison wallonne légère et rafraîchissante.',
+  ),
+
+  // Bière de Garde
+  Beer(
+    id: '3-monts',
+    name: '3 Monts',
+    brewery: 'Brasserie de Saint-Sylvestre',
+    country: 'France',
+    styleId: 'biereDeGarde',
+    abv: 8.5,
+    description: 'Bière de garde du Nord, blonde, maltée et fruitée.',
+  ),
+  Beer(
+    id: 'jenlain-ambree',
+    name: 'Jenlain Ambrée',
+    brewery: 'Brasserie Duyck',
+    country: 'France',
+    styleId: 'biereDeGarde',
+    abv: 7.5,
+    description: 'La bière de garde la plus emblématique du Nord de la France.',
+  ),
 
   // Witbier
   Beer(
@@ -911,6 +1102,15 @@ const List<Beer> beers = [
     styleId: 'witbier',
     abv: 5.4,
     description: 'Witbier américaine à l\'écorce d\'orange, très populaire.',
+  ),
+  Beer(
+    id: 'st-bernardus-wit',
+    name: 'St. Bernardus Wit',
+    brewery: 'St. Bernardus',
+    country: 'Belgique',
+    styleId: 'witbier',
+    abv: 5.5,
+    description: 'Witbier belge crémeuse, l\'une des références du style.',
   ),
 
   // Weissbier
@@ -932,6 +1132,24 @@ const List<Beer> beers = [
     abv: 5.3,
     description: 'La plus grande brasserie de bière de blé au monde.',
   ),
+  Beer(
+    id: 'franziskaner-hefe-weissbier',
+    name: 'Franziskaner Hefe-Weissbier',
+    brewery: 'Spaten-Franziskaner',
+    country: 'Allemagne',
+    styleId: 'weissbier',
+    abv: 5.0,
+    description: 'Weissbier munichoise douce, notes de banane bien marquées.',
+  ),
+  Beer(
+    id: 'weihenstephaner-vitus',
+    name: 'Weihenstephaner Vitus',
+    brewery: 'Weihenstephaner',
+    country: 'Allemagne',
+    styleId: 'weissbier',
+    abv: 7.7,
+    description: 'Weizenbock, version forte et maltée de la bière de blé bavaroise.',
+  ),
 
   // Lambic
   Beer(
@@ -951,6 +1169,15 @@ const List<Beer> beers = [
     styleId: 'lambic',
     abv: 6.0,
     description: 'Lambic pur de Beersel, sec et complexe.',
+  ),
+  Beer(
+    id: 'oud-beersel-oude-lambiek',
+    name: 'Oud Beersel Oude Lambiek',
+    brewery: 'Oud Beersel',
+    country: 'Belgique',
+    styleId: 'lambic',
+    abv: 6.0,
+    description: 'Lambic traditionnel de Beersel, sec et acidulé.',
   ),
 
   // Gueuze
@@ -972,6 +1199,15 @@ const List<Beer> beers = [
     abv: 7.0,
     description: 'Gueuze de Lembeek, acidulée et vive.',
   ),
+  Beer(
+    id: 'girardin-gueuze',
+    name: 'Girardin Gueuze',
+    brewery: 'Girardin',
+    country: 'Belgique',
+    styleId: 'gueuze',
+    abv: 5.0,
+    description: 'Gueuze artisanale non filtrée, très prisée des amateurs.',
+  ),
 
   // Fruit lambic
   Beer(
@@ -991,6 +1227,15 @@ const List<Beer> beers = [
     styleId: 'fruitLambic',
     abv: 5.0,
     description: 'Lambic macéré à la framboise, acidulé et peu sucré.',
+  ),
+  Beer(
+    id: 'timmermans-kriek',
+    name: 'Timmermans Kriek',
+    brewery: 'Timmermans',
+    country: 'Belgique',
+    styleId: 'fruitLambic',
+    abv: 4.0,
+    description: 'Kriek accessible, l\'une des plus anciennes brasseries de lambic.',
   ),
 
   // Faro
@@ -1032,6 +1277,15 @@ const List<Beer> beers = [
     abv: 6.2,
     description: 'Flanders Red très acidulée, notes de cerise et de vinaigre balsamique.',
   ),
+  Beer(
+    id: 'petrus-aged-red',
+    name: 'Petrus Aged Red',
+    brewery: 'De Brabandere',
+    country: 'Belgique',
+    styleId: 'flandersRed',
+    abv: 5.5,
+    description: 'Flanders Red vieillie en fûts de chêne pendant deux ans.',
+  ),
 
   // Gose
   Beer(
@@ -1052,6 +1306,15 @@ const List<Beer> beers = [
     abv: 4.0,
     description: 'Gose américaine qui a relancé le style dans le craft.',
   ),
+  Beer(
+    id: 'ritterguts-gose',
+    name: 'Ritterguts Gose',
+    brewery: 'Rittergut Döllnitzsche',
+    country: 'Allemagne',
+    styleId: 'gose',
+    abv: 4.6,
+    description: 'Gose historique de Leipzig, salée et légèrement acidulée.',
+  ),
 
   // Berliner Weisse
   Beer(
@@ -1062,6 +1325,15 @@ const List<Beer> beers = [
     styleId: 'berlinerWeisse',
     abv: 3.0,
     description: 'Berliner Weisse historique, très légère et acidulée.',
+  ),
+  Beer(
+    id: 'berliner-berg-rixdorfer',
+    name: 'Berliner Berg Rixdorfer',
+    brewery: 'Berliner Berg',
+    country: 'Allemagne',
+    styleId: 'berlinerWeisse',
+    abv: 3.0,
+    description: 'Relecture artisanale moderne de la Berliner Weisse.',
   ),
 ];
 
