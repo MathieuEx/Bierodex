@@ -4,6 +4,7 @@ import 'my_collection_tab.dart';
 import 'origins_tab.dart';
 import 'search_screen.dart';
 import 'styles_tab.dart';
+import 'world_map_tab.dart';
 
 class RootShell extends StatefulWidget {
   const RootShell({super.key});
@@ -15,8 +16,18 @@ class RootShell extends StatefulWidget {
 class _RootShellState extends State<RootShell> {
   int _tabIndex = 0;
 
-  static const _tabs = [StylesTab(), OriginsTab(), MyCollectionTab()];
-  static const _titles = ['Styles de bières', 'Par pays', 'Ma collection'];
+  static const _tabs = [
+    StylesTab(),
+    OriginsTab(),
+    WorldMapTab(),
+    MyCollectionTab(),
+  ];
+  static const _titles = [
+    'Styles de bières',
+    'Par pays',
+    'Carte du monde',
+    'Ma collection',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +59,11 @@ class _RootShellState extends State<RootShell> {
             icon: Icon(Icons.public_outlined),
             selectedIcon: Icon(Icons.public),
             label: 'Origines',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.map_outlined),
+            selectedIcon: Icon(Icons.map),
+            label: 'Carte',
           ),
           NavigationDestination(
             icon: Icon(Icons.local_bar_outlined),

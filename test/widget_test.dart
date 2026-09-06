@@ -64,4 +64,22 @@ void main() {
     expect(find.text('Sierra Nevada Pale Ale'), findsOneWidget);
     expect(find.textContaining('1 / '), findsOneWidget);
   });
+
+  testWidgets('L\'onglet Carte affiche la carte et réagit aux boutons de '
+      'continent', (WidgetTester tester) async {
+    await tester.pumpWidget(const BierodexApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.map_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Carte du monde'), findsOneWidget);
+    expect(find.text('Europe'), findsOneWidget);
+
+    await tester.tap(find.text('Europe'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Monde'));
+    await tester.pumpAndSettle();
+  });
 }

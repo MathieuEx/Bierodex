@@ -2890,6 +2890,9 @@ List<Beer> beersForStyle(String styleId) =>
 List<Beer> beersForCountry(String country) =>
     beers.where((b) => b.country == country).toList();
 
+List<Beer> beersForCountries(List<String> countries) =>
+    beers.where((b) => countries.contains(b.country)).toList();
+
 List<String> get allCountries {
   final set = <String>{for (final b in beers) b.country};
   final list = set.toList()..sort();
