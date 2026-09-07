@@ -2898,3 +2898,16 @@ List<String> get allCountries {
   final list = set.toList()..sort();
   return list;
 }
+
+List<Beer> beersForBrewery(String brewery) =>
+    beers.where((b) => b.brewery == brewery).toList();
+
+/// Les brasseries ayant au moins une bière référencée dans [country].
+List<String> breweriesForCountry(String country) {
+  final set = <String>{
+    for (final b in beers)
+      if (b.country == country) b.brewery,
+  };
+  final list = set.toList()..sort();
+  return list;
+}

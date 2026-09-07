@@ -46,3 +46,6 @@ web/build/
 
 # Coverage
 coverage/
+
+# Secrets / config locale (voir env.example.json pour le format attendu)
+env.json
