@@ -17,4 +17,14 @@ class Beer {
     required this.abv,
     required this.description,
   });
+
+  factory Beer.fromJson(Map<String, dynamic> row) => Beer(
+        id: row['id'] as String,
+        name: row['name'] as String,
+        brewery: row['brewery'] as String,
+        country: row['country'] as String,
+        styleId: row['style_id'] as String,
+        abv: (row['abv'] as num).toDouble(),
+        description: row['description'] as String,
+      );
 }

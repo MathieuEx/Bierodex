@@ -65,4 +65,13 @@ class BeerStyle {
     required this.abvRange,
     required this.description,
   });
+
+  factory BeerStyle.fromJson(Map<String, dynamic> row) => BeerStyle(
+        id: row['id'] as String,
+        name: row['name'] as String,
+        family: BeerFamily.values.byName(row['family'] as String),
+        origin: row['origin'] as String,
+        abvRange: row['abv_range'] as String,
+        description: row['description'] as String,
+      );
 }

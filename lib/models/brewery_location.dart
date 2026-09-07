@@ -16,4 +16,11 @@ class BreweryLocation {
     required this.city,
     required this.address,
   });
+
+  factory BreweryLocation.fromJson(Map<String, dynamic> row) => BreweryLocation(
+        lat: (row['lat'] as num).toDouble(),
+        lng: (row['lng'] as num).toDouble(),
+        city: row['city'] as String? ?? '',
+        address: row['address'] as String? ?? '',
+      );
 }

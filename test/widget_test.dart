@@ -1,3 +1,8 @@
+import 'package:bierodex/data/beer_styles.dart' as beer_styles_data;
+import 'package:bierodex/data/beers.dart' as beers_data;
+import 'package:bierodex/data/brewery_locations.dart' as brewery_locations_data;
+import 'package:bierodex/models/beer.dart';
+import 'package:bierodex/models/beer_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +18,34 @@ Future<void> settle(WidgetTester tester, {int pumps = 6}) async {
   for (var i = 0; i < pumps; i++) {
     await tester.pump(const Duration(milliseconds: 250));
   }
+}
+
+/// Le catalogue (styles/bières/brasseries) vit maintenant dans Supabase :
+/// on peuple ici un petit jeu de données de test directement, plutôt que
+/// de faire un vrai appel réseau (bloqué par flutter_test de toute façon).
+void _seedFixtureCatalog() {
+  beer_styles_data.beerStyles = const [
+    BeerStyle(
+      id: 'paleAle',
+      name: 'Pale Ale',
+      family: BeerFamily.aleHaute,
+      origin: 'Royaume-Uni',
+      abvRange: '4,5 – 6,2 %',
+      description: 'Ale ambrée équilibrée entre malt et houblon.',
+    ),
+  ];
+  beers_data.beers = const [
+    Beer(
+      id: 'sierra-nevada-pale-ale',
+      name: 'Sierra Nevada Pale Ale',
+      brewery: 'Sierra Nevada',
+      country: 'États-Unis',
+      styleId: 'paleAle',
+      abv: 5.6,
+      description: 'La Pale Ale américaine fondatrice du mouvement craft.',
+    ),
+  ];
+  brewery_locations_data.breweryLocations = {};
 }
 
 void main() {
@@ -32,11 +65,16 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    _seedFixtureCatalog();
   });
+
+  Future<void> pumpApp(WidgetTester tester) => tester.pumpWidget(
+        BierodexApp(catalogFuture: Future<void>.value()),
+      );
 
   testWidgets('Bierodex affiche le globe au démarrage',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const BierodexApp());
+    await pumpApp(tester);
     await settle(tester);
 
     expect(find.text('Bierodex'), findsOneWidget);
@@ -45,7 +83,7 @@ void main() {
 
   testWidgets('Ouvrir les styles depuis le globe affiche la liste des styles',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const BierodexApp());
+    await pumpApp(tester);
     await settle(tester);
 
     await tester.tap(find.byIcon(Icons.local_drink_outlined));
@@ -57,7 +95,7 @@ void main() {
 
   testWidgets('Naviguer vers un style affiche ses bières',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const BierodexApp());
+    await pumpApp(tester);
     await settle(tester);
 
     await tester.tap(find.byIcon(Icons.local_drink_outlined));
@@ -73,7 +111,7 @@ void main() {
 
   testWidgets('Marquer une bière comme bue et la noter la fait apparaître '
       'dans Ma collection', (WidgetTester tester) async {
-    await tester.pumpWidget(const BierodexApp());
+    await pumpApp(tester);
     await settle(tester);
 
     await tester.tap(find.byIcon(Icons.local_drink_outlined));
@@ -113,7 +151,7 @@ void main() {
 
   testWidgets('Le globe réagit aux boutons de continent sans planter',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const BierodexApp());
+    await pumpApp(tester);
     await settle(tester);
 
     await tester.tap(find.text('Europe'));
