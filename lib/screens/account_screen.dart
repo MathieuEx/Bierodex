@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../services/beer_collection_service.dart';
+import '../theme/app_theme.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -33,15 +34,24 @@ class _SignedInView extends StatelessWidget {
       children: [
         Card(
           child: ListTile(
-            leading: const CircleAvatar(child: Icon(Icons.person)),
+            contentPadding: const EdgeInsets.all(14),
+            leading: const CircleAvatar(
+              backgroundColor: Color(0x29C9752B),
+              foregroundColor: AppColors.copper,
+              child: Icon(Icons.person),
+            ),
             title: Text(email),
-            subtitle: const Text('Connecté'),
+            subtitle: Text(
+              'Connecté',
+              style: TextStyle(color: AppColors.success),
+            ),
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
+        Text(
           'Ta collection (bières bues et notées) est synchronisée avec ce '
           'compte et accessible depuis n\'importe quel appareil.',
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 24),
         OutlinedButton.icon(
@@ -145,7 +155,12 @@ class _SignInFormState extends State<_SignInForm> {
         ],
         if (_error != null) ...[
           const SizedBox(height: 12),
-          Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          Text(
+            _error!,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.error,
+                ),
+          ),
         ],
         const SizedBox(height: 20),
         FilledButton(

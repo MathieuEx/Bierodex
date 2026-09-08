@@ -25,8 +25,11 @@ class StyleDetailScreen extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            color: color.withValues(alpha: 0.1),
-            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              border: Border(bottom: BorderSide(color: color, width: 3)),
+            ),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -34,12 +37,17 @@ class StyleDetailScreen extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    Chip(label: Text(style.family.label)),
+                    Chip(
+                      label: Text(style.family.label),
+                      backgroundColor: color.withValues(alpha: 0.16),
+                      labelStyle: TextStyle(color: color),
+                      side: BorderSide(color: color.withValues(alpha: 0.4)),
+                    ),
                     Chip(label: Text('Origine : ${style.origin}')),
                     Chip(label: Text('ABV : ${style.abvRange}')),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 Text(
                   style.description,
                   style: Theme.of(context).textTheme.bodyLarge,
@@ -47,11 +55,11 @@ class StyleDetailScreen extends StatelessWidget {
               ],
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 16, 8),
             child: Text(
-              'Exemples de bières',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              'EXEMPLES DE BIÈRES',
+              style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
           if (beersOfStyle.isEmpty)

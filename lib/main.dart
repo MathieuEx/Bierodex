@@ -5,6 +5,7 @@ import 'config/supabase_config.dart';
 import 'screens/world_globe_screen.dart';
 import 'services/beer_collection_service.dart';
 import 'services/catalog_service.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,21 +49,11 @@ class _BierodexAppState extends State<BierodexApp> {
 
   @override
   Widget build(BuildContext context) {
-    const seedColor = Color(0xFFC9752B);
     return MaterialApp(
       title: 'Bierodex',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: seedColor),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: seedColor,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       home: FutureBuilder<void>(
         future: _catalogFuture,
         builder: (context, snapshot) {
@@ -87,16 +78,24 @@ class _CatalogLoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sports_bar, size: 48, color: Color(0xFFC9752B)),
-            SizedBox(height: 16),
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Chargement du catalogue...'),
+            const Icon(Icons.sports_bar, size: 48, color: AppColors.copper),
+            const SizedBox(height: 20),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 20),
+            Text(
+              'Bierodex',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Chargement du catalogue...',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
       ),
@@ -119,11 +118,11 @@ class _CatalogErrorScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.cloud_off, size: 48, color: Colors.redAccent),
+              const Icon(Icons.cloud_off, size: 48, color: AppColors.error),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Impossible de charger le catalogue.',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),

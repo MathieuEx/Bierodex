@@ -8,6 +8,7 @@ import '../data/beers.dart';
 import '../data/brewery_locations.dart';
 import '../models/brewery_location.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/beer_tile.dart';
 import 'account_screen.dart';
 import 'my_collection_tab.dart';
@@ -50,11 +51,13 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
       surface: const AssetImage('assets/globe/2k_earth-day.jpg'),
       background: const AssetImage('assets/globe/2k_stars.jpg'),
       isBackgroundFollowingSphereRotation: true,
+      showAtmosphere: true,
+      atmosphereColor: AppColors.gold,
+      atmosphereOpacity: 0.35,
     )..onLoaded = _addBreweryPoints;
   }
 
   void _addBreweryPoints() {
-    final color = Colors.deepOrange;
     for (final entry in breweryLocations.entries) {
       final brewery = entry.key;
       final location = entry.value;
@@ -62,7 +65,7 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
         Point(
           id: brewery,
           coordinates: GlobeCoordinates(location.lat, location.lng),
-          style: PointStyle(color: color, size: 1),
+          style: const PointStyle(color: AppColors.copper, size: 1),
           onTap: () => _showBreweryBeers(brewery, location),
         ),
       );
@@ -87,6 +90,7 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return DraggableScrollableSheet(
           initialChildSize: 0.5,
@@ -94,31 +98,68 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
           maxChildSize: 0.9,
           expand: false,
           builder: (context, scrollController) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(brewery, style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 2),
-                      Text(
-                        location.address.isNotEmpty ? location.address : location.city,
-                        style: Theme.of(context).textTheme.bodySmall,
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                const Divider(height: 1),
-                Expanded(
-                  child: ListView(
-                    controller: scrollController,
-                    children: breweryBeers.map((b) => BeerTile(beer: b)).toList(),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          color: AppColors.copper,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                brewery,
+                                style: Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                location.address.isNotEmpty
+                                    ? location.address
+                                    : location.city,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const Divider(height: 1),
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.only(bottom: 24),
+                      children:
+                          breweryBeers.map((b) => BeerTile(beer: b)).toList(),
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         );
@@ -157,22 +198,33 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.stout,
       body: Stack(
         children: [
           Positioned.fill(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final radius =
-                    constraints.biggest.shortestSide / 2 * 0.62;
-                return GestureDetector(
-                  onPanDown: (_) => _controller.stopRotation(),
-                  child: FlutterEarthGlobe(
-                    radius: radius,
-                    controller: _controller,
-                  ),
-                );
-              },
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.center,
+                  radius: 0.95,
+                  colors: [
+                    AppColors.stoutDim,
+                    AppColors.stout,
+                  ],
+                ),
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final radius = constraints.biggest.shortestSide / 2 * 0.62;
+                  return GestureDetector(
+                    onPanDown: (_) => _controller.stopRotation(),
+                    child: FlutterEarthGlobe(
+                      radius: radius,
+                      controller: _controller,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           SafeArea(
@@ -188,7 +240,7 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
                   onCollection: _openCollection,
                   onAccount: _openAccount,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 _ContinentChips(onContinent: _goToContinent),
               ],
             ),
@@ -222,13 +274,15 @@ class _TopBar extends StatelessWidget {
             child: _Pill(
               child: Row(
                 children: [
-                  const SizedBox(width: 12),
-                  const Icon(Icons.sports_bar, color: Colors.deepOrange),
+                  const SizedBox(width: 14),
+                  const Icon(Icons.sports_bar, color: AppColors.copper),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Bierodex',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      'BIERODEX',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            letterSpacing: 1.2,
+                          ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -261,7 +315,8 @@ class _TopBar extends StatelessWidget {
                   builder: (context, _) {
                     final signedIn = AuthService.instance.isSignedIn;
                     return IconButton(
-                      icon: Icon(signedIn ? Icons.person : Icons.person_outline),
+                      icon:
+                          Icon(signedIn ? Icons.person : Icons.person_outline),
                       tooltip: 'Mon compte',
                       onPressed: onAccount,
                     );
@@ -281,7 +336,13 @@ class _ContinentChips extends StatelessWidget {
 
   const _ContinentChips({required this.onContinent});
 
-  static const _continents = ['Europe', 'Amériques', 'Asie', 'Afrique', 'Océanie'];
+  static const _continents = [
+    'Europe',
+    'Amériques',
+    'Asie',
+    'Afrique',
+    'Océanie',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -293,9 +354,19 @@ class _ContinentChips extends StatelessWidget {
         children: [
           for (final continent in _continents) ...[
             _Pill(
-              child: ActionChip(
-                label: Text(continent),
-                onPressed: () => onContinent(continent),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: () => onContinent(continent),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    continent,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -314,8 +385,9 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
-      elevation: 3,
+      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.96),
+      elevation: 4,
+      shadowColor: Colors.black.withValues(alpha: 0.4),
       borderRadius: BorderRadius.circular(24),
       child: child,
     );

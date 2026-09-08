@@ -4,6 +4,7 @@ import '../data/beer_styles.dart';
 import '../data/beers.dart';
 import '../screens/style_detail_screen.dart';
 import '../services/beer_collection_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/star_rating.dart';
 
 class BeerDetailScreen extends StatelessWidget {
@@ -18,7 +19,7 @@ class BeerDetailScreen extends StatelessWidget {
       return const Scaffold(body: Center(child: Text('Bière introuvable')));
     }
     final style = findStyleById(beer.styleId);
-    final color = style?.family.color ?? Colors.brown;
+    final color = style?.family.color ?? AppColors.walnut;
 
     return Scaffold(
       appBar: AppBar(title: Text(beer.name)),
@@ -32,7 +33,8 @@ class BeerDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                border: Border(left: BorderSide(color: color, width: 4)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +77,13 @@ class BeerDetailScreen extends StatelessWidget {
             runSpacing: 8,
             children: [
               Chip(label: Text('${beer.abv.toStringAsFixed(1)}% ABV')),
-              if (style != null) Chip(label: Text(style.family.label)),
+              if (style != null)
+                Chip(
+                  label: Text(style.family.label),
+                  backgroundColor: color.withValues(alpha: 0.16),
+                  labelStyle: TextStyle(color: color),
+                  side: BorderSide(color: color.withValues(alpha: 0.4)),
+                ),
             ],
           ),
           const SizedBox(height: 16),
@@ -86,7 +94,7 @@ class BeerDetailScreen extends StatelessWidget {
           if (style != null)
             Card(
               child: ListTile(
-                leading: const Icon(Icons.local_drink_outlined),
+                leading: Icon(Icons.local_drink_outlined, color: color),
                 title: Text('Style : ${style.name}'),
                 subtitle: Text(style.description, maxLines: 2, overflow: TextOverflow.ellipsis),
                 trailing: const Icon(Icons.chevron_right),

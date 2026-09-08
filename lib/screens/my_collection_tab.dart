@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/beers.dart';
 import '../models/beer.dart';
 import '../services/beer_collection_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/beer_tile.dart';
 
 class MyCollectionTab extends StatelessWidget {
@@ -62,23 +63,46 @@ class _StatsHeader extends StatelessWidget {
     final ratio = total == 0 ? 0.0 : triedCount / total;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '$triedCount / $total bières essayées',
-            style: Theme.of(context).textTheme.titleMedium,
+            'MA COLLECTION',
+            style: Theme.of(context).textTheme.titleSmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
+          Text(
+            '$triedCount / $total bières essayées',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 10),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(value: ratio, minHeight: 6),
+            child: LinearProgressIndicator(
+              value: ratio,
+              minHeight: 6,
+              backgroundColor:
+                  Theme.of(context).colorScheme.outlineVariant.withValues(
+                        alpha: 0.4,
+                      ),
+              valueColor: const AlwaysStoppedAnimation(AppColors.copper),
+            ),
           ),
           if (averageRating != null) ...[
-            const SizedBox(height: 8),
-            Text('Note moyenne donnée : ${averageRating!.toStringAsFixed(1)} / 5'),
+            const SizedBox(height: 10),
+            Text(
+              'Note moyenne donnée : ${averageRating!.toStringAsFixed(1)} / 5',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ],
       ),
@@ -103,11 +127,12 @@ class _EmptyState extends StatelessWidget {
               color: Theme.of(context).colorScheme.outline,
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Aucune bière essayée pour l\'instant.\n'
               'Ouvre une bière et coche "J\'ai bu cette bière" '
               'pour commencer ta collection.',
               textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
         ),

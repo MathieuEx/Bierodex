@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+
 /// Affiche une note sur 5 étoiles. Si [onChanged] est fourni, les étoiles
 /// deviennent interactives (tap pour noter).
 class StarRating extends StatelessWidget {
@@ -17,7 +19,7 @@ class StarRating extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final value = rating ?? 0;
-    final color = Colors.amber[700];
+    const color = AppColors.gold;
     final emptyColor = Theme.of(context).colorScheme.outlineVariant;
 
     return Row(

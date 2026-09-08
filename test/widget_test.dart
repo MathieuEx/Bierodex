@@ -77,7 +77,7 @@ void main() {
     await pumpApp(tester);
     await settle(tester);
 
-    expect(find.text('Bierodex'), findsOneWidget);
+    expect(find.text('BIERODEX'), findsOneWidget);
     expect(find.text('Europe'), findsOneWidget);
   });
 

@@ -16,13 +16,12 @@ class StylesTab extends StatelessWidget {
           Container(
             width: double.infinity,
             color: family.color.withValues(alpha: 0.12),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Text(
-              family.label,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: family.color,
-              ),
+              family.label.toUpperCase(),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: family.color,
+                  ),
             ),
           ),
           for (final style in stylesForFamily(family)) StyleTile(style: style),

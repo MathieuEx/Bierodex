@@ -7,6 +7,20 @@ import '../widgets/beer_tile.dart';
 
 class BeerSearchDelegate extends SearchDelegate<void> {
   @override
+  ThemeData appBarTheme(BuildContext context) {
+    final theme = Theme.of(context);
+    return theme.copyWith(
+      appBarTheme: theme.appBarTheme.copyWith(
+        backgroundColor: theme.colorScheme.surface,
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: InputBorder.none,
+        hintStyle: TextStyle(color: Colors.grey),
+      ),
+    );
+  }
+
+  @override
   List<Widget>? buildActions(BuildContext context) => [
         if (query.isNotEmpty)
           IconButton(
@@ -37,8 +51,15 @@ class _SearchResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (query.trim().isEmpty) {
-      return const Center(
-        child: Text('Cherche une bière, une brasserie, un style ou un pays'),
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'Cherche une bière, une brasserie, un style ou un pays',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
       );
     }
     final q = query.trim().toLowerCase();
@@ -51,7 +72,12 @@ class _SearchResults extends StatelessWidget {
     }).toList();
 
     if (results.isEmpty) {
-      return const Center(child: Text('Aucun résultat'));
+      return Center(
+        child: Text(
+          'Aucun résultat',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
     }
     return ListView(
       children: results.map((b) => BeerTile(beer: b)).toList(),
