@@ -25,39 +25,51 @@ class BeerDetailScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: color.withValues(alpha: 0.2),
-                  foregroundColor: color,
-                  child: const Icon(Icons.sports_bar_outlined, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        beer.name,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Text('${beer.brewery} · ${beer.country}'),
-                    ],
+          if (beer.imageUrl != null)
+            _BeerPhoto(imageUrl: beer.imageUrl!, color: color)
+          else
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: color.withValues(alpha: 0.2),
+                    foregroundColor: color,
+                    child: const Icon(Icons.sports_bar_outlined, size: 28),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          beer.name,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text('${beer.brewery} · ${beer.country}'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
           const SizedBox(height: 16),
+          if (beer.imageUrl != null) ...[
+            Text(
+              beer.name,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 4),
+            Text('${beer.brewery} · ${beer.country}'),
+            const SizedBox(height: 16),
+          ],
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -89,6 +101,52 @@ class BeerDetailScreen extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _BeerPhoto extends StatelessWidget {
+  final String imageUrl;
+  final Color color;
+
+  const _BeerPhoto({required this.imageUrl, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            width: double.infinity,
+            height: 260,
+            color: color.withValues(alpha: 0.08),
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.contain,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                );
+              },
+              errorBuilder: (context, error, stack) => Center(
+                child: Icon(
+                  Icons.sports_bar_outlined,
+                  size: 48,
+                  color: color,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Photo : Open Food Facts (CC BY-SA)',
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
     );
   }
 }

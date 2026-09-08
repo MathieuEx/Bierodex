@@ -29,7 +29,12 @@ class BeerTile extends StatelessWidget {
               CircleAvatar(
                 backgroundColor: familyColor.withValues(alpha: 0.15),
                 foregroundColor: familyColor,
-                child: const Icon(Icons.sports_bar_outlined),
+                backgroundImage: beer.imageUrl != null
+                    ? NetworkImage(beer.imageUrl!)
+                    : null,
+                child: beer.imageUrl == null
+                    ? const Icon(Icons.sports_bar_outlined)
+                    : null,
               ),
               if (tried)
                 Positioned(

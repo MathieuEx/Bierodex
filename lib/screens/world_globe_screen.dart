@@ -164,7 +164,7 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final radius =
-                    constraints.biggest.shortestSide / 2 * 0.92;
+                    constraints.biggest.shortestSide / 2 * 0.62;
                 return GestureDetector(
                   onPanDown: (_) => _controller.stopRotation(),
                   child: FlutterEarthGlobe(
