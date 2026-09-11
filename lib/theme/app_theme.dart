@@ -30,6 +30,11 @@ class AppColors {
 
   static const success = Color(0xFF3F7D4C);
   static const error = Color(0xFFB3432B);
+
+  /// Reflet clair du laiton, utilisé pour le cerclage du globe (voir
+  /// `lib/screens/world_globe_screen.dart`) — jamais comme couleur de texte
+  /// ou de fond, seulement comme point chaud sur du métal.
+  static const brassHighlight = Color(0xFFF0D9A0);
 }
 
 class AppTheme {

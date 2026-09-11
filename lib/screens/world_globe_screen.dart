@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_earth_globe/flutter_earth_globe.dart';
 import 'package:flutter_earth_globe/flutter_earth_globe_controller.dart';
@@ -16,11 +18,12 @@ import 'my_collection_tab.dart';
 import 'search_screen.dart';
 import 'styles_tab.dart';
 
-/// Écran unique de l'app : un globe 3D qu'on fait tourner et sur lequel on
-/// zoome pour repérer les brasseries, référencées à leur position réelle.
-/// Toucher un repère ouvre la liste des bières de cette brasserie. Styles,
-/// recherche, collection et compte restent accessibles via les icônes en
-/// haut de l'écran.
+/// Écran unique de l'app : le globe est vu comme à travers le hublot en
+/// laiton d'une brasserie — on le fait tourner et on zoome dessus pour
+/// repérer les brasseries, référencées à leur position réelle. Toucher un
+/// repère ouvre la liste des bières de cette brasserie. Styles, recherche,
+/// collection et compte restent accessibles via les icônes en haut de
+/// l'écran.
 class WorldGlobeScreen extends StatefulWidget {
   const WorldGlobeScreen({super.key});
 
@@ -91,25 +94,36 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
   }
 
   Point _buildCountryPoint(String country, ({double lat, double lng}) centroid) {
+    final ratio = _progressRatio(country);
     return Point(
       id: country,
       coordinates: GlobeCoordinates(centroid.lat, centroid.lng),
-      style: PointStyle(color: _progressColor(country), size: 1.6),
+      // Les pays bien explorés grossissent légèrement et se soulèvent de la
+      // sphère (altitude), comme une épingle plantée sur une carte : la
+      // progression se voit avant même de zoomer sur la couleur.
+      style: PointStyle(
+        color: _progressColor(ratio),
+        size: 1.7 + ratio * 0.7,
+        altitude: ratio * 0.045,
+      ),
       onTap: () => _openCountry(country, centroid),
     );
+  }
+
+  double _progressRatio(String country) {
+    final countryBeers = beersForCountry(country);
+    if (countryBeers.isEmpty) return 0;
+    final tried = countryBeers
+        .where((b) => BeerCollectionService.instance.isTried(b.id))
+        .length;
+    return tried / countryBeers.length;
   }
 
   /// Gris pour un pays dont aucune bière n'a été goûtée, puis un dégradé
   /// cuivre → or à mesure que la proportion de bières essayées dans ce
   /// pays augmente : le globe raconte la progression du carnet, plutôt
   /// que de n'être qu'une carte statique.
-  Color _progressColor(String country) {
-    final countryBeers = beersForCountry(country);
-    if (countryBeers.isEmpty) return _untouchedColor;
-    final tried = countryBeers
-        .where((b) => BeerCollectionService.instance.isTried(b.id))
-        .length;
-    final ratio = tried / countryBeers.length;
+  Color _progressColor(double ratio) {
     if (ratio <= 0) return _untouchedColor;
     if (ratio < 0.5) {
       return Color.lerp(_untouchedColor, AppColors.copper, ratio / 0.5)!;
@@ -197,27 +211,71 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
         children: [
           Positioned.fill(
             child: DecoratedBox(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: RadialGradient(
                   center: Alignment.center,
                   radius: 0.95,
-                  colors: [
-                    AppColors.stoutDim,
-                    AppColors.stout,
-                  ],
+                  colors: [AppColors.stoutDim, AppColors.stout],
                 ),
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final radius = constraints.biggest.shortestSide / 2 * 0.48;
-                  return GestureDetector(
-                    onPanDown: (_) => _controller.stopRotation(),
-                    child: FlutterEarthGlobe(
-                      radius: radius,
-                      controller: _controller,
-                    ),
+                  final size = constraints.biggest;
+                  final isPhone = size.shortestSide < 600;
+                  final radius =
+                      size.shortestSide / 2 * (isPhone ? 0.60 : 0.50);
+                  final center = Offset(size.width / 2, size.height / 2);
+                  return Stack(
+                    children: [
+                      CustomPaint(
+                        size: size,
+                        painter: _GlobeAuraPainter(
+                          center: center,
+                          baseRadius: radius,
+                        ),
+                      ),
+                      GestureDetector(
+                        onPanDown: (_) => _controller.stopRotation(),
+                        child: FlutterEarthGlobe(
+                          radius: radius,
+                          controller: _controller,
+                        ),
+                      ),
+                      IgnorePointer(
+                        child: CustomPaint(
+                          size: size,
+                          painter: _PortholeFramePainter(
+                            center: center,
+                            radius: radius * 1.05,
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 },
+              ),
+            ),
+          ),
+          // Voile sombre en haut d'écran : garantit la lisibilité du bandeau
+          // (icônes/texte) quel que soit ce qu'il y a derrière (étoiles,
+          // continent clair...), sans avoir besoin d'une carte opaque.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 130,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.stout.withValues(alpha: 0.9),
+                      AppColors.stout.withValues(alpha: 0),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -235,8 +293,9 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
                   onCollection: _openCollection,
                   onAccount: _openAccount,
                 ),
-                const SizedBox(height: 10),
+                const Spacer(),
                 _ContinentChips(onContinent: _goToContinent),
+                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -244,6 +303,100 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
       ),
     );
   }
+}
+
+/// Lueur ambrée basse (comme la lumière traversant un verre plein) et
+/// quelques anneaux concentriques très ténus autour du globe, à la manière
+/// d'ondes de sonar qui repèrent les brasseries. Remplace le halo
+/// générique par quelque chose de propre au sujet — pas une décoration
+/// gratuite.
+class _GlobeAuraPainter extends CustomPainter {
+  final Offset center;
+  final double baseRadius;
+
+  const _GlobeAuraPainter({required this.center, required this.baseRadius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final glowRadius = baseRadius * 1.85;
+    final glowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          AppColors.gold.withValues(alpha: 0.14),
+          AppColors.gold.withValues(alpha: 0),
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: glowRadius))
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 36);
+    canvas.drawCircle(center, glowRadius, glowPaint);
+
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    for (var i = 1; i <= 3; i++) {
+      ringPaint.color = AppColors.copper.withValues(alpha: 0.09 / i);
+      canvas.drawCircle(center, baseRadius * (1.16 + i * 0.15), ringPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GlobeAuraPainter oldDelegate) =>
+      oldDelegate.center != center || oldDelegate.baseRadius != baseRadius;
+}
+
+/// Cerclage en laiton autour du globe, comme le hublot d'une cuve de
+/// brasserie : anneau brossé (dégradé balayant), reflet intérieur et
+/// petits rivets — le détail qui rend cet écran reconnaissable au premier
+/// coup d'œil, plutôt qu'une sphère nue flottant dans un dégradé.
+class _PortholeFramePainter extends CustomPainter {
+  final Offset center;
+  final double radius;
+
+  const _PortholeFramePainter({required this.center, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const strokeWidth = 9.0;
+    final ringRect = Rect.fromCircle(center: center, radius: radius);
+
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..shader = const SweepGradient(
+        colors: [
+          AppColors.copper,
+          AppColors.gold,
+          AppColors.brassHighlight,
+          AppColors.gold,
+          AppColors.copper,
+          AppColors.walnut,
+          AppColors.copper,
+        ],
+        transform: GradientRotation(-1.1),
+      ).createShader(ringRect);
+    canvas.drawCircle(center, radius, ringPaint);
+
+    final highlightPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = AppColors.brassHighlight.withValues(alpha: 0.5);
+    canvas.drawCircle(center, radius - strokeWidth / 2 - 2, highlightPaint);
+
+    final rivetShadow = Paint()..color = const Color(0xFF4A2F16);
+    final rivetHighlight =
+        Paint()..color = AppColors.brassHighlight.withValues(alpha: 0.85);
+    const rivetCount = 14;
+    for (var i = 0; i < rivetCount; i++) {
+      final angle = (2 * math.pi / rivetCount) * i;
+      final position =
+          center + Offset(math.cos(angle), math.sin(angle)) * radius;
+      canvas.drawCircle(position, 3.2, rivetShadow);
+      canvas.drawCircle(position + const Offset(-0.7, -0.7), 1.0, rivetHighlight);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PortholeFramePainter oldDelegate) =>
+      oldDelegate.center != center || oldDelegate.radius != radius;
 }
 
 class _TopBar extends StatelessWidget {
@@ -264,71 +417,82 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 6, 6, 0),
       child: Row(
         children: [
+          const Icon(Icons.sports_bar, color: AppColors.copper, size: 22),
+          const SizedBox(width: 10),
           Expanded(
-            child: _Pill(
-              child: Row(
-                children: [
-                  const SizedBox(width: 14),
-                  const Icon(Icons.sports_bar, color: AppColors.copper),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'BIERODEX',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            letterSpacing: 1.2,
-                          ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+            child: Text(
+              'BIERODEX',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppColors.foam,
+                    letterSpacing: 1.4,
                   ),
-                ],
-              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const SizedBox(width: 8),
-          _Pill(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  tooltip: 'Rechercher',
-                  onPressed: onSearch,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.qr_code_scanner),
-                  tooltip: 'Scanner une bière',
-                  onPressed: onScan,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.local_drink_outlined),
-                  tooltip: 'Styles',
-                  onPressed: onStyles,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.local_bar_outlined),
-                  tooltip: 'Ma collection',
-                  onPressed: onCollection,
-                ),
-                ListenableBuilder(
-                  listenable: AuthService.instance,
-                  builder: (context, _) {
-                    final signedIn = AuthService.instance.isSignedIn;
-                    return IconButton(
-                      icon:
-                          Icon(signedIn ? Icons.person : Icons.person_outline),
-                      tooltip: 'Mon compte',
-                      onPressed: onAccount,
-                    );
-                  },
-                ),
-              ],
-            ),
+          _GlobeIconButton(
+            icon: Icons.search,
+            tooltip: 'Rechercher',
+            onPressed: onSearch,
+          ),
+          _GlobeIconButton(
+            icon: Icons.qr_code_scanner,
+            tooltip: 'Scanner une bière',
+            onPressed: onScan,
+          ),
+          _GlobeIconButton(
+            icon: Icons.local_drink_outlined,
+            tooltip: 'Styles',
+            onPressed: onStyles,
+          ),
+          _GlobeIconButton(
+            icon: Icons.local_bar_outlined,
+            tooltip: 'Ma collection',
+            onPressed: onCollection,
+          ),
+          ListenableBuilder(
+            listenable: AuthService.instance,
+            builder: (context, _) {
+              final signedIn = AuthService.instance.isSignedIn;
+              return _GlobeIconButton(
+                icon: signedIn ? Icons.person : Icons.person_outline,
+                tooltip: 'Mon compte',
+                onPressed: onAccount,
+              );
+            },
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Bouton d'icône sobre posé directement sur le globe (pas de carte, pas de
+/// halo) : le voile en haut d'écran suffit à sa lisibilité. Un rivet du
+/// hublot, pas un composant standard.
+class _GlobeIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const _GlobeIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(icon, size: 20),
+      color: AppColors.foam,
+      tooltip: tooltip,
+      onPressed: onPressed,
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
     );
   }
 }
@@ -349,27 +513,15 @@ class _ContinentChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 44,
+      height: 42,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         children: [
           for (final continent in _continents) ...[
-            _Pill(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () => onContinent(continent),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  child: Text(
-                    continent,
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                ),
-              ),
+            _ContinentChip(
+              label: continent,
+              onTap: () => onContinent(continent),
             ),
             const SizedBox(width: 8),
           ],
@@ -379,19 +531,34 @@ class _ContinentChips extends StatelessWidget {
   }
 }
 
-class _Pill extends StatelessWidget {
-  final Widget child;
+/// Étiquette légère (contour cuivre, fond translucide) plutôt qu'une carte
+/// pleine : le globe reste visible derrière, la barre ne fait pas écran.
+class _ContinentChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
 
-  const _Pill({required this.child});
+  const _ContinentChip({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.96),
-      elevation: 4,
-      shadowColor: Colors.black.withValues(alpha: 0.4),
-      borderRadius: BorderRadius.circular(24),
-      child: child,
+      color: AppColors.stout.withValues(alpha: 0.55),
+      shape: StadiumBorder(
+        side: BorderSide(color: AppColors.copper.withValues(alpha: 0.6)),
+      ),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.foam,
+                ),
+          ),
+        ),
+      ),
     );
   }
 }
