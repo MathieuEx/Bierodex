@@ -7,9 +7,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/beer_user_status.dart';
 import 'auth_service.dart';
 
-/// Suivi personnel des bières (essayées / notées). Toujours persisté
-/// localement sur l'appareil ; synchronisé en plus avec Supabase quand
-/// l'utilisateur est connecté (voir [AuthService]).
+/// Suivi personnel des bières (essayées / à goûter / notées / commentées).
+/// Toujours persisté localement sur l'appareil ; synchronisé en plus avec
+/// Supabase quand l'utilisateur est connecté (voir [AuthService]).
 class BeerCollectionService extends ChangeNotifier {
   BeerCollectionService._() {
     AuthService.instance.addListener(_onAuthChanged);
@@ -58,11 +58,43 @@ class BeerCollectionService extends ChangeNotifier {
 
   bool isTried(String beerId) => statusFor(beerId).tried;
 
+  bool isWishlist(String beerId) => statusFor(beerId).wishlist;
+
   int? ratingFor(String beerId) => statusFor(beerId).rating;
 
+  DateTime? triedAtFor(String beerId) => statusFor(beerId).triedAt;
+
+  String? noteFor(String beerId) => statusFor(beerId).note;
+
+  /// Marque [beerId] comme bue ou non. La marquer comme bue l'enlève de la
+  /// liste "à goûter" et horodate la dégustation (sauf si une date était
+  /// déjà connue) ; revenir en arrière efface la date et la note.
   Future<void> setTried(String beerId, bool tried) async {
     final current = statusFor(beerId);
-    _statuses[beerId] = BeerUserStatus(tried: tried, rating: current.rating);
+    _statuses[beerId] = BeerUserStatus(
+      tried: tried,
+      wishlist: tried ? false : current.wishlist,
+      rating: tried ? current.rating : null,
+      triedAt: tried ? (current.triedAt ?? DateTime.now()) : null,
+      note: tried ? current.note : null,
+    );
+    notifyListeners();
+    await _persist();
+    await _pushRemote(beerId);
+  }
+
+  /// Ajoute ou retire [beerId] de la liste "à goûter". L'y ajouter la
+  /// retire du statut "bue" (note, date et statut effacés) : les deux
+  /// statuts sont mutuellement exclusifs, comme [setTried].
+  Future<void> setWishlist(String beerId, bool wishlist) async {
+    final current = statusFor(beerId);
+    _statuses[beerId] = BeerUserStatus(
+      tried: wishlist ? false : current.tried,
+      wishlist: wishlist,
+      rating: wishlist ? null : current.rating,
+      triedAt: wishlist ? null : current.triedAt,
+      note: wishlist ? null : current.note,
+    );
     notifyListeners();
     await _persist();
     await _pushRemote(beerId);
@@ -70,7 +102,44 @@ class BeerCollectionService extends ChangeNotifier {
 
   Future<void> setRating(String beerId, int? rating) async {
     final current = statusFor(beerId);
-    _statuses[beerId] = BeerUserStatus(tried: current.tried, rating: rating);
+    _statuses[beerId] = BeerUserStatus(
+      tried: current.tried,
+      wishlist: current.wishlist,
+      rating: rating,
+      triedAt: current.triedAt,
+      note: current.note,
+    );
+    notifyListeners();
+    await _persist();
+    await _pushRemote(beerId);
+  }
+
+  /// Corrige manuellement la date de dégustation d'une bière déjà marquée
+  /// comme bue.
+  Future<void> setTriedAt(String beerId, DateTime date) async {
+    final current = statusFor(beerId);
+    if (!current.tried) return;
+    _statuses[beerId] = BeerUserStatus(
+      tried: current.tried,
+      wishlist: current.wishlist,
+      rating: current.rating,
+      triedAt: date,
+      note: current.note,
+    );
+    notifyListeners();
+    await _persist();
+    await _pushRemote(beerId);
+  }
+
+  Future<void> setNote(String beerId, String? note) async {
+    final current = statusFor(beerId);
+    _statuses[beerId] = BeerUserStatus(
+      tried: current.tried,
+      wishlist: current.wishlist,
+      rating: current.rating,
+      triedAt: current.triedAt,
+      note: (note == null || note.trim().isEmpty) ? null : note,
+    );
     notifyListeners();
     await _persist();
     await _pushRemote(beerId);
@@ -81,7 +150,28 @@ class BeerCollectionService extends ChangeNotifier {
       .map((e) => e.key)
       .toList();
 
+  List<String> get wishlistBeerIds => _statuses.entries
+      .where((e) => e.value.wishlist)
+      .map((e) => e.key)
+      .toList();
+
   int get triedCount => triedBeerIds.length;
+
+  /// L'identifiant de la bière la plus récemment dégustée (selon
+  /// [triedAtFor]), ou `null` si aucune date n'est connue.
+  String? get mostRecentTriedId {
+    String? best;
+    DateTime? bestDate;
+    for (final entry in _statuses.entries) {
+      final date = entry.value.triedAt;
+      if (!entry.value.tried || date == null) continue;
+      if (bestDate == null || date.isAfter(bestDate)) {
+        bestDate = date;
+        best = entry.key;
+      }
+    }
+    return best;
+  }
 
   double? get averageRating {
     final ratings = _statuses.values.map((s) => s.rating).whereType<int>();
@@ -107,7 +197,10 @@ class BeerCollectionService extends ChangeNotifier {
       'user_id': user.id,
       'beer_id': beerId,
       'tried': status.tried,
+      'wishlist': status.wishlist,
       'rating': status.rating,
+      'tried_at': status.triedAt?.toIso8601String(),
+      'note': status.note,
     });
   }
 
@@ -124,9 +217,13 @@ class BeerCollectionService extends ChangeNotifier {
     for (final row in rows) {
       final beerId = row['beer_id'] as String;
       remoteIds.add(beerId);
+      final triedAtRaw = row['tried_at'] as String?;
       _statuses[beerId] = BeerUserStatus(
         tried: row['tried'] as bool? ?? false,
+        wishlist: row['wishlist'] as bool? ?? false,
         rating: row['rating'] as int?,
+        triedAt: triedAtRaw != null ? DateTime.tryParse(triedAtRaw) : null,
+        note: row['note'] as String?,
       );
     }
 
@@ -139,7 +236,10 @@ class BeerCollectionService extends ChangeNotifier {
             'user_id': user.id,
             'beer_id': entry.key,
             'tried': entry.value.tried,
+            'wishlist': entry.value.wishlist,
             'rating': entry.value.rating,
+            'tried_at': entry.value.triedAt?.toIso8601String(),
+            'note': entry.value.note,
           },
       ]);
     }

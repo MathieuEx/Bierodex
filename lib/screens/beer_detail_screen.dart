@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../data/beer_styles.dart';
@@ -180,7 +182,9 @@ class _MyOpinionCard extends StatelessWidget {
       builder: (context, _) {
         final service = BeerCollectionService.instance;
         final tried = service.isTried(beerId);
+        final wishlist = service.isWishlist(beerId);
         final rating = service.ratingFor(beerId);
+        final triedAt = service.triedAtFor(beerId);
 
         return Card(
           child: Padding(
@@ -192,18 +196,36 @@ class _MyOpinionCard extends StatelessWidget {
                   'Mon avis',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(height: 8),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('J\'ai bu cette bière'),
-                  value: tried,
-                  onChanged: (value) {
-                    service.setTried(beerId, value);
-                    if (!value) service.setRating(beerId, null);
-                  },
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilterChip(
+                      avatar: Icon(
+                        wishlist ? Icons.bookmark : Icons.bookmark_outline,
+                        size: 18,
+                      ),
+                      label: const Text('À goûter'),
+                      selected: wishlist,
+                      onSelected: (value) => service.setWishlist(beerId, value),
+                    ),
+                    FilterChip(
+                      avatar: Icon(
+                        tried ? Icons.check_circle : Icons.check_circle_outline,
+                        size: 18,
+                      ),
+                      label: const Text('J\'ai bu cette bière'),
+                      selected: tried,
+                      onSelected: (value) {
+                        service.setTried(beerId, value);
+                        if (!value) service.setRating(beerId, null);
+                      },
+                    ),
+                  ],
                 ),
                 if (tried) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       const Text('Ma note :'),
@@ -221,12 +243,108 @@ class _MyOpinionCard extends StatelessWidget {
                         ),
                     ],
                   ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.event_outlined,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          triedAt != null
+                              ? 'Dégustée le ${_formatDate(triedAt)}'
+                              : 'Date non renseignée',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: triedAt ?? DateTime.now(),
+                            firstDate: DateTime(1990),
+                            lastDate: DateTime.now(),
+                          );
+                          if (picked != null) {
+                            await service.setTriedAt(beerId, picked);
+                          }
+                        },
+                        child: const Text('Modifier'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _NoteField(beerId: beerId),
                 ],
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+String _formatDate(DateTime date) {
+  final day = date.day.toString().padLeft(2, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  return '$day/$month/${date.year}';
+}
+
+/// Champ de note libre, géré indépendamment du [ListenableBuilder] parent
+/// pour ne pas perdre le focus ni la position du curseur à chaque
+/// notification du service (le texte tapé est source de vérité tant que
+/// l'utilisateur édite ; il n'est renvoyé au service qu'après une courte
+/// pause de frappe).
+class _NoteField extends StatefulWidget {
+  final String beerId;
+
+  const _NoteField({required this.beerId});
+
+  @override
+  State<_NoteField> createState() => _NoteFieldState();
+}
+
+class _NoteFieldState extends State<_NoteField> {
+  late final TextEditingController _controller;
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: BeerCollectionService.instance.noteFor(widget.beerId) ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      BeerCollectionService.instance.setNote(widget.beerId, value);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _controller,
+      minLines: 2,
+      maxLines: 5,
+      decoration: const InputDecoration(
+        labelText: 'Notes de dégustation',
+        hintText: 'Arômes, contexte, avec qui...',
+      ),
+      onChanged: _onChanged,
     );
   }
 }

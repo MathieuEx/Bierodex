@@ -23,6 +23,7 @@ class BeerTile extends StatelessWidget {
       listenable: BeerCollectionService.instance,
       builder: (context, _) {
         final tried = BeerCollectionService.instance.isTried(beer.id);
+        final wishlist = BeerCollectionService.instance.isWishlist(beer.id);
         final rating = BeerCollectionService.instance.ratingFor(beer.id);
 
         return Padding(
@@ -62,7 +63,7 @@ class BeerTile extends StatelessWidget {
                               ? const Icon(Icons.sports_bar_outlined)
                               : null,
                         ),
-                        if (tried)
+                        if (tried || wishlist)
                           Positioned(
                             right: -2,
                             bottom: -2,
@@ -72,10 +73,12 @@ class BeerTile extends StatelessWidget {
                                 color: Theme.of(context).colorScheme.surface,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
-                                Icons.check_circle,
+                              child: Icon(
+                                tried ? Icons.check_circle : Icons.bookmark,
                                 size: 16,
-                                color: AppColors.success,
+                                color: tried
+                                    ? AppColors.success
+                                    : AppColors.gold,
                               ),
                             ),
                           ),

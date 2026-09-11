@@ -4,8 +4,10 @@ import 'package:flutter_earth_globe/flutter_earth_globe_controller.dart';
 import 'package:flutter_earth_globe/globe_coordinates.dart';
 import 'package:flutter_earth_globe/point.dart';
 
+import '../data/beers.dart';
 import '../data/brewery_locations.dart';
 import '../services/auth_service.dart';
+import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
 import 'account_screen.dart';
 import 'country_map_screen.dart';
@@ -36,9 +38,16 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
     'Océanie': GlobeCoordinates(-25, 140),
   };
 
+  /// Couleur d'un pays sans aucune bière essayée (gris neutre, distinct du
+  /// cuivre/or utilisés pour la progression).
+  static const _untouchedColor = Color(0xFF8A8272);
+
+  bool _pointsReady = false;
+
   @override
   void initState() {
     super.initState();
+    BeerCollectionService.instance.addListener(_recolorCountryPoints);
     _controller = FlutterEarthGlobeController(
       rotationSpeed: 0.04,
       isRotating: true,
@@ -55,19 +64,56 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
     )..onLoaded = _addCountryPoints;
   }
 
+  @override
+  void dispose() {
+    BeerCollectionService.instance.removeListener(_recolorCountryPoints);
+    super.dispose();
+  }
+
   void _addCountryPoints() {
     for (final entry in countryMarkers.entries) {
-      final country = entry.key;
-      final centroid = entry.value;
-      _controller.addPoint(
-        Point(
-          id: country,
-          coordinates: GlobeCoordinates(centroid.lat, centroid.lng),
-          style: const PointStyle(color: AppColors.copper, size: 1.6),
-          onTap: () => _openCountry(country, centroid),
-        ),
-      );
+      _controller.addPoint(_buildCountryPoint(entry.key, entry.value));
     }
+    _pointsReady = true;
+  }
+
+  /// Recolore chaque marqueur pays selon la progression courante. Le
+  /// contrôleur n'expose pas de mise à jour de style fiable (son
+  /// `updatePoint` ne réapplique pas le style) : on retire et rajoute
+  /// chaque point, ce qui reste bon marché vu leur nombre.
+  void _recolorCountryPoints() {
+    if (!_pointsReady) return;
+    for (final entry in countryMarkers.entries) {
+      _controller.removePoint(entry.key);
+      _controller.addPoint(_buildCountryPoint(entry.key, entry.value));
+    }
+  }
+
+  Point _buildCountryPoint(String country, ({double lat, double lng}) centroid) {
+    return Point(
+      id: country,
+      coordinates: GlobeCoordinates(centroid.lat, centroid.lng),
+      style: PointStyle(color: _progressColor(country), size: 1.6),
+      onTap: () => _openCountry(country, centroid),
+    );
+  }
+
+  /// Gris pour un pays dont aucune bière n'a été goûtée, puis un dégradé
+  /// cuivre → or à mesure que la proportion de bières essayées dans ce
+  /// pays augmente : le globe raconte la progression du carnet, plutôt
+  /// que de n'être qu'une carte statique.
+  Color _progressColor(String country) {
+    final countryBeers = beersForCountry(country);
+    if (countryBeers.isEmpty) return _untouchedColor;
+    final tried = countryBeers
+        .where((b) => BeerCollectionService.instance.isTried(b.id))
+        .length;
+    final ratio = tried / countryBeers.length;
+    if (ratio <= 0) return _untouchedColor;
+    if (ratio < 0.5) {
+      return Color.lerp(_untouchedColor, AppColors.copper, ratio / 0.5)!;
+    }
+    return Color.lerp(AppColors.copper, AppColors.gold, (ratio - 0.5) / 0.5)!;
   }
 
   void _openCountry(String country, ({double lat, double lng}) centroid) {
