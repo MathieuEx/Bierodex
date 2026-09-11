@@ -4,13 +4,11 @@ import 'package:flutter_earth_globe/flutter_earth_globe_controller.dart';
 import 'package:flutter_earth_globe/globe_coordinates.dart';
 import 'package:flutter_earth_globe/point.dart';
 
-import '../data/beers.dart';
 import '../data/brewery_locations.dart';
-import '../models/brewery_location.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/beer_tile.dart';
 import 'account_screen.dart';
+import 'country_map_screen.dart';
 import 'my_collection_tab.dart';
 import 'search_screen.dart';
 import 'styles_tab.dart';
@@ -54,22 +52,47 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
       showAtmosphere: true,
       atmosphereColor: AppColors.gold,
       atmosphereOpacity: 0.35,
-    )..onLoaded = _addBreweryPoints;
+    )..onLoaded = _addCountryPoints;
   }
 
-  void _addBreweryPoints() {
-    for (final entry in breweryLocations.entries) {
-      final brewery = entry.key;
-      final location = entry.value;
+  void _addCountryPoints() {
+    for (final entry in countryMarkers.entries) {
+      final country = entry.key;
+      final centroid = entry.value;
       _controller.addPoint(
         Point(
-          id: brewery,
-          coordinates: GlobeCoordinates(location.lat, location.lng),
-          style: const PointStyle(color: AppColors.copper, size: 1),
-          onTap: () => _showBreweryBeers(brewery, location),
+          id: country,
+          coordinates: GlobeCoordinates(centroid.lat, centroid.lng),
+          style: const PointStyle(color: AppColors.copper, size: 1.6),
+          onTap: () => _openCountry(country, centroid),
         ),
       );
     }
+  }
+
+  void _openCountry(String country, ({double lat, double lng}) centroid) {
+    _controller.stopRotation();
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 260),
+        reverseTransitionDuration: const Duration(milliseconds: 220),
+        pageBuilder: (_, __, ___) => CountryMapScreen(country: country),
+        transitionsBuilder: (_, animation, __, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOut,
+            reverseCurve: Curves.easeIn,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: ScaleTransition(
+              scale: Tween(begin: 0.97, end: 1.0).animate(curved),
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void _goToContinent(String continent) {
@@ -83,88 +106,6 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
       curve: Curves.easeInOutCubic,
     );
     _controller.setZoom(1.6);
-  }
-
-  void _showBreweryBeers(String brewery, BreweryLocation location) {
-    final breweryBeers = beersForBrewery(brewery);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.5,
-          minChildSize: 0.3,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on,
-                          color: AppColors.copper,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                brewery,
-                                style: Theme.of(context).textTheme.headlineSmall,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                location.address.isNotEmpty
-                                    ? location.address
-                                    : location.city,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  Expanded(
-                    child: ListView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.only(bottom: 24),
-                      children:
-                          breweryBeers.map((b) => BeerTile(beer: b)).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   void _openStyles() {
@@ -215,7 +156,7 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final radius = constraints.biggest.shortestSide / 2 * 0.62;
+                  final radius = constraints.biggest.shortestSide / 2 * 0.48;
                   return GestureDetector(
                     onPanDown: (_) => _controller.stopRotation(),
                     child: FlutterEarthGlobe(

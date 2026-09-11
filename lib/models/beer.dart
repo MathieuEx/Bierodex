@@ -8,9 +8,14 @@ class Beer {
   final double abv;
   final String description;
 
-  /// Photo du produit (Open Food Facts, licence CC BY-SA), ou `null` si
-  /// aucune correspondance fiable n'a été trouvée pour cette bière.
+  /// Photo du produit (Open Food Facts ou Wikimedia Commons, licences
+  /// libres), ou `null` si aucune correspondance fiable n'a été trouvée
+  /// pour cette bière.
   final String? imageUrl;
+
+  /// Crédit à afficher sous la photo (auteur + licence), requis dès que
+  /// [imageUrl] est non nul.
+  final String? imageCredit;
 
   const Beer({
     required this.id,
@@ -21,6 +26,7 @@ class Beer {
     required this.abv,
     required this.description,
     this.imageUrl,
+    this.imageCredit,
   });
 
   factory Beer.fromJson(Map<String, dynamic> row) => Beer(
@@ -32,5 +38,6 @@ class Beer {
         abv: (row['abv'] as num).toDouble(),
         description: row['description'] as String,
         imageUrl: row['image_url'] as String?,
+        imageCredit: row['image_credit'] as String?,
       );
 }

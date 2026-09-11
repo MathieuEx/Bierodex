@@ -27,7 +27,11 @@ class BeerDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           if (beer.imageUrl != null)
-            _BeerPhoto(imageUrl: beer.imageUrl!, color: color)
+            _BeerPhoto(
+              imageUrl: beer.imageUrl!,
+              credit: beer.imageCredit,
+              color: color,
+            )
           else
             Container(
               padding: const EdgeInsets.all(16),
@@ -115,9 +119,14 @@ class BeerDetailScreen extends StatelessWidget {
 
 class _BeerPhoto extends StatelessWidget {
   final String imageUrl;
+  final String? credit;
   final Color color;
 
-  const _BeerPhoto({required this.imageUrl, required this.color});
+  const _BeerPhoto({
+    required this.imageUrl,
+    required this.credit,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +160,7 @@ class _BeerPhoto extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Photo : Open Food Facts (CC BY-SA)',
+          'Photo : ${credit ?? "licence libre"}',
           style: Theme.of(context).textTheme.labelSmall,
         ),
       ],
