@@ -12,6 +12,15 @@ Beer? findBeerById(String id) {
   return null;
 }
 
+/// Retrouve une bière par son code-barres EAN/UPC (catalogue partagé ou
+/// ajout personnel, les deux vivent dans [beers] — voir [UserBeerService]).
+Beer? findBeerByBarcode(String barcode) {
+  for (final beer in beers) {
+    if (beer.barcode == barcode) return beer;
+  }
+  return null;
+}
+
 List<Beer> beersForStyle(String styleId) =>
     beers.where((b) => b.styleId == styleId).toList();
 

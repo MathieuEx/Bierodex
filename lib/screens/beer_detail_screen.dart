@@ -6,6 +6,7 @@ import '../data/beer_styles.dart';
 import '../data/beers.dart';
 import '../screens/style_detail_screen.dart';
 import '../services/beer_collection_service.dart';
+import '../services/user_beer_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/star_rating.dart';
 
@@ -13,6 +14,32 @@ class BeerDetailScreen extends StatelessWidget {
   final String beerId;
 
   const BeerDetailScreen({super.key, required this.beerId});
+
+  Future<void> _confirmDelete(BuildContext context, String name) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer cette bière ?'),
+        content: Text(
+          '"$name" sera retirée de ton carnet personnel. Cette action est '
+          'définitive.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await UserBeerService.instance.removeBeer(beerId);
+    if (context.mounted) Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +51,17 @@ class BeerDetailScreen extends StatelessWidget {
     final color = style?.family.color ?? AppColors.walnut;
 
     return Scaffold(
-      appBar: AppBar(title: Text(beer.name)),
+      appBar: AppBar(
+        title: Text(beer.name),
+        actions: [
+          if (beer.isCustom)
+            IconButton(
+              tooltip: 'Supprimer de mon carnet',
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () => _confirmDelete(context, beer.name),
+            ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -89,6 +126,11 @@ class BeerDetailScreen extends StatelessWidget {
                   backgroundColor: color.withValues(alpha: 0.16),
                   labelStyle: TextStyle(color: color),
                   side: BorderSide(color: color.withValues(alpha: 0.4)),
+                ),
+              if (beer.isCustom)
+                Chip(
+                  avatar: const Icon(Icons.person_outline, size: 16),
+                  label: const Text('Ajoutée par toi'),
                 ),
             ],
           ),

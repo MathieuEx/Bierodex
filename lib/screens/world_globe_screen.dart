@@ -10,6 +10,7 @@ import '../services/auth_service.dart';
 import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
 import 'account_screen.dart';
+import 'barcode_scanner_screen.dart';
 import 'country_map_screen.dart';
 import 'my_collection_tab.dart';
 import 'search_screen.dart';
@@ -165,6 +166,12 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
     );
   }
 
+  void _openScanner() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+  }
+
   void _openCollection() {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -223,6 +230,7 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
                     context: context,
                     delegate: BeerSearchDelegate(),
                   ),
+                  onScan: _openScanner,
                   onStyles: _openStyles,
                   onCollection: _openCollection,
                   onAccount: _openAccount,
@@ -240,12 +248,14 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
 
 class _TopBar extends StatelessWidget {
   final VoidCallback onSearch;
+  final VoidCallback onScan;
   final VoidCallback onStyles;
   final VoidCallback onCollection;
   final VoidCallback onAccount;
 
   const _TopBar({
     required this.onSearch,
+    required this.onScan,
     required this.onStyles,
     required this.onCollection,
     required this.onAccount,
@@ -286,6 +296,11 @@ class _TopBar extends StatelessWidget {
                   icon: const Icon(Icons.search),
                   tooltip: 'Rechercher',
                   onPressed: onSearch,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.qr_code_scanner),
+                  tooltip: 'Scanner une bière',
+                  onPressed: onScan,
                 ),
                 IconButton(
                   icon: const Icon(Icons.local_drink_outlined),

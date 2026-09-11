@@ -5,6 +5,7 @@ import 'config/supabase_config.dart';
 import 'screens/world_globe_screen.dart';
 import 'services/beer_collection_service.dart';
 import 'services/catalog_service.dart';
+import 'services/user_beer_service.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -38,12 +39,20 @@ class _BierodexAppState extends State<BierodexApp> {
   @override
   void initState() {
     super.initState();
-    _catalogFuture = widget.catalogFuture ?? CatalogService.instance.load();
+    _catalogFuture = widget.catalogFuture ?? _loadCatalogAndUserBeers();
+  }
+
+  /// Charge le catalogue partagé puis y fusionne les bières ajoutées par
+  /// l'utilisateur (voir [UserBeerService]) : dans cet ordre, sans quoi le
+  /// catalogue écraserait les ajouts personnels déjà fusionnés.
+  Future<void> _loadCatalogAndUserBeers() async {
+    await CatalogService.instance.load();
+    await UserBeerService.instance.load();
   }
 
   void _retry() {
     setState(() {
-      _catalogFuture = CatalogService.instance.load();
+      _catalogFuture = _loadCatalogAndUserBeers();
     });
   }
 

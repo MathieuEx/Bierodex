@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Bierodex utilise l'appareil photo pour scanner le code-barres d'une bière et la retrouver dans le catalogue.</string>
 </dict>
 </plist>
