@@ -95,17 +95,24 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
 
   Point _buildCountryPoint(String country, ({double lat, double lng}) centroid) {
     final ratio = _progressRatio(country);
+    final color = _progressColor(ratio);
     return Point(
       id: country,
       coordinates: GlobeCoordinates(centroid.lat, centroid.lng),
-      // Les pays bien explorés grossissent légèrement et se soulèvent de la
-      // sphère (altitude), comme une épingle plantée sur une carte : la
-      // progression se voit avant même de zoomer sur la couleur.
+      // La sphère elle-même ne sait dessiner qu'un disque plat : on le
+      // laisse transparent (taille conservée pour la zone de tap) et on
+      // pose un vrai repère "épingle" par-dessus via labelBuilder. Les pays
+      // bien explorés se soulèvent aussi de la sphère (altitude), comme une
+      // épingle plantée sur une carte.
       style: PointStyle(
-        color: _progressColor(ratio),
+        color: color.withValues(alpha: 0),
         size: 1.7 + ratio * 0.7,
         altitude: ratio * 0.045,
       ),
+      label: country,
+      isLabelVisible: true,
+      labelBuilder: (context, point, isHovering, isVisible) =>
+          _CountryMarker(color: color),
       onTap: () => _openCountry(country, centroid),
     );
   }
@@ -297,6 +304,75 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
                 _ContinentChips(onContinent: _goToContinent),
                 const SizedBox(height: 10),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Repère "épingle" d'un pays sur le globe : un badge circulaire cuivré/or
+/// (selon la progression) surmonté d'une chope, avec une pointe basse
+/// ancrée aux coordonnées géographiques — remplace le simple point de
+/// couleur plat que dessine nativement la sphère.
+class _CountryMarker extends StatelessWidget {
+  static const double width = 26;
+  static const double height = 34;
+
+  final Color color;
+
+  const _CountryMarker({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            top: 18,
+            child: Transform.rotate(
+              angle: 0.785398, // 45°
+              child: Container(
+                width: 11,
+                height: 11,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(2.5),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black45,
+                      blurRadius: 3,
+                      offset: Offset(1, 1),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.foam, width: 2),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black45,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.sports_bar,
+              size: 13,
+              color: AppColors.foam,
             ),
           ),
         ],
