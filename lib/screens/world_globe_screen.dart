@@ -112,7 +112,7 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
       label: country,
       isLabelVisible: true,
       labelBuilder: (context, point, isHovering, isVisible) =>
-          _CountryMarker(color: color),
+          _CountryMarker(color: color, size: 22 + ratio * 8),
       onTap: () => _openCountry(country, centroid),
     );
   }
@@ -312,69 +312,30 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
   }
 }
 
-/// Repère "épingle" d'un pays sur le globe : un badge circulaire cuivré/or
-/// (selon la progression) surmonté d'une chope, avec une pointe basse
-/// ancrée aux coordonnées géographiques — remplace le simple point de
-/// couleur plat que dessine nativement la sphère.
+/// Repère "épingle" d'un pays sur le globe, coloré selon la progression
+/// (gris → cuivre → or) — remplace le simple point de couleur plat que
+/// dessine nativement la sphère. `Icons.location_pin` du web (Material
+/// Symbols) n'existe pas dans la police Material Icons embarquée par
+/// Flutter : `location_on` en est l'équivalent standard.
 class _CountryMarker extends StatelessWidget {
-  static const double width = 26;
-  static const double height = 34;
-
   final Color color;
+  final double size;
 
-  const _CountryMarker({required this.color});
+  const _CountryMarker({required this.color, required this.size});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width,
-      height: height,
+      width: size + 4,
+      height: size + 6,
       child: Stack(
-        alignment: Alignment.topCenter,
-        clipBehavior: Clip.none,
+        alignment: Alignment.bottomCenter,
         children: [
-          Positioned(
-            top: 18,
-            child: Transform.rotate(
-              angle: 0.785398, // 45°
-              child: Container(
-                width: 11,
-                height: 11,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(2.5),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black45,
-                      blurRadius: 3,
-                      offset: Offset(1, 1),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          Transform.translate(
+            offset: const Offset(1, 2),
+            child: Icon(Icons.location_on, size: size, color: Colors.black45),
           ),
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.foam, width: 2),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black45,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.sports_bar,
-              size: 13,
-              color: AppColors.foam,
-            ),
-          ),
+          Icon(Icons.location_on, size: size, color: color),
         ],
       ),
     );
