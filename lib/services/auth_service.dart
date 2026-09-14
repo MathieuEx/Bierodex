@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Authentification par code à usage unique envoyé par e-mail (OTP), via
-/// Supabase Auth. Pas de mot de passe (rien à voler ni à réutiliser), pas
-/// de lien magique (donc aucune configuration de redirection/deep link).
+/// Authentification via Supabase Auth : soit par code à usage unique envoyé
+/// par e-mail (OTP, pas de mot de passe à voler ni à réutiliser), soit par
+/// compte Google (OAuth, voir [signInWithGoogle] et [oauthRedirectUrl]).
 ///
 /// La connexion est obligatoire pour utiliser l'app (voir `BierodexApp` dans
 /// `lib/main.dart`) mais n'est demandée qu'une fois : Supabase persiste la
@@ -29,6 +29,12 @@ class AuthService extends ChangeNotifier {
   static const maxEmailLength = 254;
   static const maxVerifyAttempts = 5;
   static const resendCooldown = Duration(seconds: 60);
+
+  /// Schéma d'URL vers lequel Supabase redirige une fois la connexion
+  /// Google terminée côté navigateur, pour revenir dans l'app mobile.
+  /// Doit être déclaré côté OS (voir AndroidManifest.xml / Info.plist) et
+  /// dans la liste des "Redirect URLs" du dashboard Supabase.
+  static const oauthRedirectUrl = 'io.supabase.bierodex://login-callback/';
 
   GoTrueClient get _auth => Supabase.instance.client.auth;
 
@@ -121,6 +127,27 @@ class AuthService extends ChangeNotifier {
     }
     _failedAttempts = 0;
     _lastCodeSentAt = null;
+  }
+
+  /// Lance la connexion via un compte Google (OAuth), en ouvrant le
+  /// navigateur du système. Sur mobile, Supabase redirige ensuite vers
+  /// [oauthRedirectUrl] pour revenir dans l'app ; sur le web, il redirige
+  /// vers l'URL courante. Le retour effectif (succès ou échec) arrive de
+  /// façon asynchrone via `onAuthStateChange`, pas via cette méthode.
+  Future<void> signInWithGoogle() async {
+    try {
+      await _auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb ? null : oauthRedirectUrl,
+      );
+    } on AuthException catch (e) {
+      throw AuthFailure.fromAuthException(e);
+    } catch (_) {
+      throw const AuthFailure(
+        'Impossible d\'ouvrir la connexion Google. Vérifie ta connexion '
+        'internet.',
+      );
+    }
   }
 
   /// Déconnecte cet appareil. Avec [everywhere], révoque aussi les
