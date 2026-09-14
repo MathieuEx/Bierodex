@@ -33,39 +33,60 @@ class UserBeerService extends ChangeNotifier {
 
   final Map<String, Beer> _beers = {};
   bool _loaded = false;
-  bool _wasSignedIn = false;
+
+  /// Compte dont [_beers] contient les ajouts (`null` : personne).
+  String? _userId;
 
   bool get isLoaded => _loaded;
+
+  /// Un cache local par compte, pour la même raison que
+  /// `BeerCollectionService` : ne jamais mélanger les données de deux
+  /// comptes qui se succèdent sur le même appareil.
+  static String _keyFor(String? userId) =>
+      userId == null ? _prefsKey : '$_prefsKey.$userId';
 
   Future<void> load() async {
     if (_loaded) {
       _mergeIntoCatalog();
       return;
     }
+    await _loadFor(AuthService.instance.currentUser?.id);
+    _loaded = true;
+    _mergeIntoCatalog();
+    notifyListeners();
+    if (_userId != null) {
+      await syncWithRemote();
+    }
+  }
+
+  Future<void> _loadFor(String? userId) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefsKey);
+    _userId = userId;
+    _beers.clear();
+    var raw = prefs.getString(_keyFor(userId));
+    // Ajouts faits avant la connexion obligatoire : rattachés une seule
+    // fois au premier compte qui se connecte sur cet appareil.
+    if (raw == null && userId != null) {
+      raw = prefs.getString(_prefsKey);
+      await prefs.remove(_prefsKey);
+    }
     if (raw != null) {
       final decoded = jsonDecode(raw) as List<dynamic>;
       for (final row in decoded) {
         final beer = Beer.fromJson(row as Map<String, dynamic>, isCustom: true);
         _beers[beer.id] = beer;
       }
-    }
-    _loaded = true;
-    _wasSignedIn = AuthService.instance.isSignedIn;
-    _mergeIntoCatalog();
-    notifyListeners();
-    if (_wasSignedIn) {
-      await syncWithRemote();
+      if (userId != null) await _persist();
     }
   }
 
-  void _onAuthChanged() {
-    final signedIn = AuthService.instance.isSignedIn;
-    if (signedIn && !_wasSignedIn) {
-      syncWithRemote();
-    }
-    _wasSignedIn = signedIn;
+  Future<void> _onAuthChanged() async {
+    final userId = AuthService.instance.currentUser?.id;
+    if (!_loaded || userId == _userId) return;
+    await _loadFor(userId);
+    _mergeIntoCatalog();
+    notifyListeners();
+    if (userId != null) await syncWithRemote();
   }
 
   /// Ajoute une bière au carnet personnel de l'utilisateur et la fusionne
@@ -108,7 +129,7 @@ class UserBeerService extends ChangeNotifier {
     notifyListeners();
     await _persist();
     final user = AuthService.instance.currentUser;
-    if (user == null) return;
+    if (user == null || user.id != _userId) return;
     await Supabase.instance.client
         .from(_table)
         .delete()
@@ -129,14 +150,14 @@ class UserBeerService extends ChangeNotifier {
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-      _prefsKey,
+      _keyFor(_userId),
       jsonEncode([for (final beer in _beers.values) beer.toJson()]),
     );
   }
 
   Future<void> _pushRemote(Beer beer) async {
     final user = AuthService.instance.currentUser;
-    if (user == null) return;
+    if (user == null || user.id != _userId) return;
     await Supabase.instance.client.from(_table).upsert({
       'id': beer.id,
       'user_id': user.id,
@@ -157,7 +178,7 @@ class UserBeerService extends ChangeNotifier {
   /// encore (ajoutées hors-ligne ou avant la première connexion).
   Future<void> syncWithRemote() async {
     final user = AuthService.instance.currentUser;
-    if (user == null) return;
+    if (user == null || user.id != _userId) return;
 
     final rows = await Supabase.instance.client
         .from(_table)
@@ -170,8 +191,9 @@ class UserBeerService extends ChangeNotifier {
       _beers[beer.id] = beer;
     }
 
-    final toPush =
-        _beers.values.where((beer) => !remoteIds.contains(beer.id)).toList();
+    final toPush = _beers.values
+        .where((beer) => !remoteIds.contains(beer.id))
+        .toList();
     for (final beer in toPush) {
       await _pushRemote(beer);
     }

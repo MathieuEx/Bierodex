@@ -22,35 +22,57 @@ class BeerCollectionService extends ChangeNotifier {
 
   final Map<String, BeerUserStatus> _statuses = {};
   bool _loaded = false;
-  bool _wasSignedIn = false;
+
+  /// Compte dont [_statuses] contient les données (`null` : personne).
+  String? _userId;
 
   bool get isLoaded => _loaded;
 
+  /// Chaque compte a son propre cache local : sans cela, se déconnecter
+  /// puis se connecter avec un autre compte sur le même appareil enverrait
+  /// la collection du premier sur le compte du second.
+  static String _keyFor(String? userId) =>
+      userId == null ? _prefsKey : '$_prefsKey.$userId';
+
   Future<void> load() async {
     if (_loaded) return;
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefsKey);
-    if (raw != null) {
-      final decoded = jsonDecode(raw) as Map<String, dynamic>;
-      for (final entry in decoded.entries) {
-        _statuses[entry.key] =
-            BeerUserStatus.fromJson(entry.value as Map<String, dynamic>);
-      }
-    }
+    await _loadFor(AuthService.instance.currentUser?.id);
     _loaded = true;
-    _wasSignedIn = AuthService.instance.isSignedIn;
     notifyListeners();
-    if (_wasSignedIn) {
+    if (_userId != null) {
       await syncWithRemote();
     }
   }
 
-  void _onAuthChanged() {
-    final signedIn = AuthService.instance.isSignedIn;
-    if (signedIn && !_wasSignedIn) {
-      syncWithRemote();
+  Future<void> _loadFor(String? userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    _userId = userId;
+    _statuses.clear();
+    var raw = prefs.getString(_keyFor(userId));
+    // Avant la connexion obligatoire, la collection était rangée sans
+    // compte associé : elle revient une seule fois au premier compte qui
+    // se connecte sur cet appareil.
+    if (raw == null && userId != null) {
+      raw = prefs.getString(_prefsKey);
+      await prefs.remove(_prefsKey);
     }
-    _wasSignedIn = signedIn;
+    if (raw != null) {
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      for (final entry in decoded.entries) {
+        _statuses[entry.key] = BeerUserStatus.fromJson(
+          entry.value as Map<String, dynamic>,
+        );
+      }
+      if (userId != null) await _persist();
+    }
+  }
+
+  Future<void> _onAuthChanged() async {
+    final userId = AuthService.instance.currentUser?.id;
+    if (!_loaded || userId == _userId) return;
+    await _loadFor(userId);
+    notifyListeners();
+    if (userId != null) await syncWithRemote();
   }
 
   BeerUserStatus statusFor(String beerId) =>
@@ -145,10 +167,8 @@ class BeerCollectionService extends ChangeNotifier {
     await _pushRemote(beerId);
   }
 
-  List<String> get triedBeerIds => _statuses.entries
-      .where((e) => e.value.tried)
-      .map((e) => e.key)
-      .toList();
+  List<String> get triedBeerIds =>
+      _statuses.entries.where((e) => e.value.tried).map((e) => e.key).toList();
 
   List<String> get wishlistBeerIds => _statuses.entries
       .where((e) => e.value.wishlist)
@@ -184,13 +204,13 @@ class BeerCollectionService extends ChangeNotifier {
     final map = {
       for (final entry in _statuses.entries) entry.key: entry.value.toJson(),
     };
-    await prefs.setString(_prefsKey, jsonEncode(map));
+    await prefs.setString(_keyFor(_userId), jsonEncode(map));
   }
 
   /// Envoie une entrée vers Supabase si l'utilisateur est connecté.
   Future<void> _pushRemote(String beerId) async {
     final user = AuthService.instance.currentUser;
-    if (user == null) return;
+    if (user == null || user.id != _userId) return;
     final status = _statuses[beerId];
     if (status == null) return;
     await Supabase.instance.client.from(_table).upsert({
@@ -210,9 +230,14 @@ class BeerCollectionService extends ChangeNotifier {
   /// ou avant la première connexion).
   Future<void> syncWithRemote() async {
     final user = AuthService.instance.currentUser;
-    if (user == null) return;
+    if (user == null || user.id != _userId) return;
 
-    final rows = await Supabase.instance.client.from(_table).select();
+    // Le filtre double la policy RLS : même mal configurée côté serveur,
+    // l'app n'importera jamais les données d'un autre compte.
+    final rows = await Supabase.instance.client
+        .from(_table)
+        .select()
+        .eq('user_id', user.id);
     final remoteIds = <String>{};
     for (final row in rows) {
       final beerId = row['beer_id'] as String;
@@ -227,8 +252,9 @@ class BeerCollectionService extends ChangeNotifier {
       );
     }
 
-    final toPush =
-        _statuses.entries.where((e) => !remoteIds.contains(e.key)).toList();
+    final toPush = _statuses.entries
+        .where((e) => !remoteIds.contains(e.key))
+        .toList();
     if (toPush.isNotEmpty) {
       await Supabase.instance.client.from(_table).upsert([
         for (final entry in toPush)

@@ -22,6 +22,9 @@ class OpenFoodFactsService {
   /// Retourne `null` si le produit est inconnu ou en cas d'erreur réseau —
   /// l'ajout manuel reste toujours possible dans ce cas.
   Future<OpenFoodFactsProduct?> lookup(String barcode) async {
+    // Le code est inséré dans le chemin de l'URL : chiffres uniquement,
+    // pour qu'une valeur forgée ne puisse pas viser une autre ressource.
+    if (!RegExp(r'^[0-9]{6,14}$').hasMatch(barcode)) return null;
     final uri = Uri.https(
       'world.openfoodfacts.org',
       '/api/v2/product/$barcode.json',
@@ -49,7 +52,10 @@ class OpenFoodFactsService {
       return OpenFoodFactsProduct(
         name: (name != null && name.isNotEmpty) ? name : null,
         brand: (brand != null && brand.isNotEmpty) ? brand : null,
-        imageUrl: (imageUrl != null && imageUrl.isNotEmpty) ? imageUrl : null,
+        // HTTPS uniquement (voir la contrainte `user_beers_input_bounds`).
+        imageUrl: (imageUrl != null && imageUrl.startsWith('https://'))
+            ? imageUrl
+            : null,
       );
     } catch (_) {
       return null;

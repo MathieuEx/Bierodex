@@ -69,11 +69,12 @@ void main() {
   });
 
   Future<void> pumpApp(WidgetTester tester) => tester.pumpWidget(
-        BierodexApp(catalogFuture: Future<void>.value()),
-      );
+    BierodexApp(catalogFuture: Future<void>.value(), requireSignIn: false),
+  );
 
-  testWidgets('Bierodex affiche le globe au démarrage',
-      (WidgetTester tester) async {
+  testWidgets('Bierodex affiche le globe au démarrage', (
+    WidgetTester tester,
+  ) async {
     await pumpApp(tester);
     await settle(tester);
 
@@ -81,8 +82,9 @@ void main() {
     expect(find.text('Europe'), findsOneWidget);
   });
 
-  testWidgets('Ouvrir les styles depuis le globe affiche la liste des styles',
-      (WidgetTester tester) async {
+  testWidgets('Ouvrir les styles depuis le globe affiche la liste des styles', (
+    WidgetTester tester,
+  ) async {
     await pumpApp(tester);
     await settle(tester);
 
@@ -93,8 +95,9 @@ void main() {
     expect(find.text('Pale Ale'), findsOneWidget);
   });
 
-  testWidgets('Naviguer vers un style affiche ses bières',
-      (WidgetTester tester) async {
+  testWidgets('Naviguer vers un style affiche ses bières', (
+    WidgetTester tester,
+  ) async {
     await pumpApp(tester);
     await settle(tester);
 
@@ -149,8 +152,9 @@ void main() {
     expect(find.textContaining('1 / '), findsOneWidget);
   });
 
-  testWidgets('Le globe réagit aux boutons de continent sans planter',
-      (WidgetTester tester) async {
+  testWidgets('Le globe réagit aux boutons de continent sans planter', (
+    WidgetTester tester,
+  ) async {
     await pumpApp(tester);
     await settle(tester);
 
