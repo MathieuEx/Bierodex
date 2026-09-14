@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' show pi;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,6 +63,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => _loading = false);
     }
   }
+
+  Future<void> _signInWithGoogle() => _run(() => _auth.signInWithGoogle());
 
   Future<void> _sendCode() => _run(() async {
     final email = AuthService.normalizeEmail(_emailController.text);
@@ -192,6 +195,36 @@ class _LoginScreenState extends State<LoginScreen> {
           loading: _loading,
           onPressed: _sendCode,
         ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            const Expanded(child: Divider(color: AppColors.outlineDark)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                'ou',
+                style: TextStyle(
+                  color: AppColors.foamSoft.withValues(alpha: 0.7),
+                ),
+              ),
+            ),
+            const Expanded(child: Divider(color: AppColors.outlineDark)),
+          ],
+        ),
+        const SizedBox(height: 20),
+        OutlinedButton.icon(
+          onPressed: _loading ? null : _signInWithGoogle,
+          icon: const _GoogleLogo(),
+          label: const Text('Continuer avec Google'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.foam,
+            side: const BorderSide(color: AppColors.outlineDark),
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -273,6 +306,53 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+}
+
+/// Approximation non contractuelle du logo Google (anneau aux 4 couleurs de
+/// la marque) : évite de dépendre d'un asset image tout en restant
+/// reconnaissable à côté du libellé "Continuer avec Google".
+class _GoogleLogo extends StatelessWidget {
+  const _GoogleLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 18,
+      height: 18,
+      child: CustomPaint(painter: _GoogleLogoPainter()),
+    );
+  }
+}
+
+class _GoogleLogoPainter extends CustomPainter {
+  static const _colors = [
+    Color(0xFF4285F4),
+    Color(0xFF34A853),
+    Color(0xFFFBBC05),
+    Color(0xFFEA4335),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final strokeWidth = size.width * 0.22;
+    final arcRect = (Offset.zero & size).deflate(strokeWidth / 2);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    for (var i = 0; i < _colors.length; i++) {
+      paint.color = _colors[i];
+      canvas.drawArc(
+        arcRect,
+        -pi / 2 + i * pi / 2,
+        pi / 2 - 0.12,
+        false,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GoogleLogoPainter oldDelegate) => false;
 }
 
 class _PrimaryButton extends StatelessWidget {

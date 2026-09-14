@@ -29,8 +29,8 @@ jeu de données (`lib/data/`) est fait pour être complété facilement.
 
 La collection personnelle (bières bues / notées) est toujours
 disponible hors connexion (stockage local). En se connectant (code
-reçu par e-mail, via Supabase Auth), elle se synchronise en plus entre
-appareils.
+reçu par e-mail, ou compte Google, via Supabase Auth), elle se
+synchronise en plus entre appareils.
 
 ## Structure du code
 
@@ -56,6 +56,31 @@ commités (le repo est public) : ils sont fournis au build via
    "service_role").
 
 `env.json` est ignoré par git.
+
+### Activer la connexion Google
+
+Le code est déjà en place (`AuthService.signInWithGoogle`), mais Google
+OAuth demande une config côté Google Cloud et côté dashboard Supabase
+qui ne peut pas être commise dans le repo :
+
+1. **Google Cloud Console** → APIs & Services → Credentials → *Create
+   credentials* → *OAuth client ID*.
+   - Un client **Web application** est nécessaire dans tous les cas
+     (Supabase gère le flux OAuth côté serveur) : renseigner comme
+     "Authorized redirect URI" `https://<project-ref>.supabase.co/auth/v1/callback`.
+   - Pour l'app mobile/desktop, ajoute aussi un client **Android**
+     (avec le SHA-1 de signature) et/ou **iOS** si tu publies sur ces
+     stores — sinon le client Web seul suffit pour tester.
+2. **Dashboard Supabase** → Authentication → Providers → *Google* :
+   active-le et colle le **Client ID** et **Client Secret** du client
+   Web créé ci-dessus.
+3. **Dashboard Supabase** → Authentication → URL Configuration → dans
+   *Redirect URLs*, ajoute `io.supabase.bierodex://login-callback/`
+   (retour mobile — voir `AuthService.oauthRedirectUrl`) ainsi que
+   l'URL du site web déployé (le retour web utilise l'URL courante).
+
+Sans cette configuration, le bouton "Continuer avec Google" affichera
+une erreur de connexion (le provider n'est pas activé côté Supabase).
 
 ## Lancer le projet
 

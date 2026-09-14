@@ -47,5 +47,22 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Bierodex utilise l'appareil photo pour scanner le code-barres d'une bière et la retrouver dans le catalogue.</string>
+	<!-- Retour de la connexion Google (OAuth) : Supabase redirige le
+	     navigateur vers ce schéma pour revenir dans l'app. Doit correspondre
+	     à AuthService.oauthRedirectUrl et être déclaré dans les "Redirect
+	     URLs" du dashboard Supabase. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>io.supabase.bierodex</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>io.supabase.bierodex</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
