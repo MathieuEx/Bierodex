@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
 import 'screens/login_screen.dart';
-import 'screens/world_globe_screen.dart';
+import 'screens/world_map_screen.dart';
 import 'services/auth_service.dart';
 import 'services/beer_collection_service.dart';
 import 'services/catalog_service.dart';
@@ -116,7 +116,7 @@ class _BierodexAppState extends State<BierodexApp> {
                 onRetry: _retry,
               );
             }
-            return const WorldGlobeScreen();
+            return const WorldMapScreen();
           },
         ),
       ),

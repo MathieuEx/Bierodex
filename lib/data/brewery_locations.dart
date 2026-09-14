@@ -9,8 +9,8 @@ import 'beers.dart';
 Map<String, BreweryLocation> breweryLocations = {};
 
 /// Position moyenne (centroïde) des brasseries connues d'un pays, utilisée
-/// comme point d'ancrage du marqueur pays sur le globe. `null` si aucune
-/// brasserie localisée n'est connue pour ce pays.
+/// comme point d'ancrage du marqueur pays sur la carte du monde. `null` si
+/// aucune brasserie localisée n'est connue pour ce pays.
 ({double lat, double lng})? countryCentroid(String country) {
   final points = [
     for (final brewery in breweriesForCountry(country))

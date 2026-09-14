@@ -10,10 +10,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bierodex/main.dart';
 
-/// Le globe tourne en continu par défaut (`isRotating: true`), donc
-/// `hasScheduledFrame` ne redevient jamais `false` : `pumpAndSettle()`
-/// attendrait indéfiniment. On avance simplement l'horloge simulée d'une
-/// durée fixe, largement suffisante pour nos transitions (< 1 s).
+/// Avance l'horloge simulée d'une durée fixe, largement suffisante pour nos
+/// transitions (< 1 s), plutôt que `pumpAndSettle()`.
 Future<void> settle(WidgetTester tester, {int pumps = 6}) async {
   for (var i = 0; i < pumps; i++) {
     await tester.pump(const Duration(milliseconds: 250));
@@ -72,7 +70,7 @@ void main() {
     BierodexApp(catalogFuture: Future<void>.value(), requireSignIn: false),
   );
 
-  testWidgets('Bierodex affiche le globe au démarrage', (
+  testWidgets('Bierodex affiche la carte au démarrage', (
     WidgetTester tester,
   ) async {
     await pumpApp(tester);
@@ -82,7 +80,7 @@ void main() {
     expect(find.text('Europe'), findsOneWidget);
   });
 
-  testWidgets('Ouvrir les styles depuis le globe affiche la liste des styles', (
+  testWidgets('Ouvrir les styles depuis la carte affiche la liste des styles', (
     WidgetTester tester,
   ) async {
     await pumpApp(tester);
@@ -136,7 +134,7 @@ void main() {
     await tester.tap(starFinder);
     await settle(tester);
 
-    // Retour au globe (deux pages empilées : style puis bière, en plus de
+    // Retour à la carte (deux pages empilées : style puis bière, en plus de
     // l'écran styles lui-même).
     await tester.pageBack();
     await settle(tester);
@@ -152,7 +150,7 @@ void main() {
     expect(find.textContaining('1 / '), findsOneWidget);
   });
 
-  testWidgets('Le globe réagit aux boutons de continent sans planter', (
+  testWidgets('La carte réagit aux boutons de continent sans planter', (
     WidgetTester tester,
   ) async {
     await pumpApp(tester);
