@@ -1,8 +1,8 @@
 # Bierodex
 
 Application mobile Flutter qui classifie les grands styles de bières,
-un peu comme un "Pokédex" des bières — avec un globe 3D pour repérer
-les brasseries à leur adresse réelle.
+un peu comme un "Pokédex" des bières — avec une carte du monde pour
+repérer les brasseries à leur adresse réelle.
 
 ## Fonctionnement de la classification
 
@@ -17,8 +17,8 @@ La classification se fait sur deux niveaux :
 Chaque style est illustré par des exemples réels de bières (brasserie,
 pays, ABV). Chaque brasserie est en plus géolocalisée à son adresse
 réelle (données OpenStreetMap/Nominatim) et affichée comme repère sur
-le globe 3D de l'écran d'accueil : toucher un repère ouvre la liste
-des bières de cette brasserie.
+la carte du monde de l'écran d'accueil : toucher un repère ouvre la
+liste des bières de cette brasserie.
 
 Ce n'est pas une base exhaustive de "toutes les bières qui existent"
 (il en existe des centaines de milliers) : c'est une taxonomie des
@@ -38,7 +38,7 @@ synchronise en plus entre appareils.
 lib/
   models/        # Beer, BeerStyle, BeerFamily, BreweryLocation
   data/          # Taxonomie des styles, bières, localisation des brasseries
-  screens/       # Globe 3D, styles, collection, compte, recherche, détails
+  screens/       # Carte du monde, styles, collection, compte, recherche, détails
   services/      # Auth (Supabase) et suivi de collection (local + sync)
   widgets/       # Composants réutilisables (tuiles de liste, étoiles...)
 ```
@@ -89,9 +89,8 @@ flutter pub get
 flutter run --dart-define-from-file=env.json
 ```
 
-Pour le web, un build WASM est nécessaire (rendu par shaders du globe
-3D) :
+Pour le web :
 
 ```bash
-flutter build web --wasm --dart-define-from-file=env.json
+flutter build web --dart-define-from-file=env.json
 ```

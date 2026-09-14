@@ -6,7 +6,8 @@ import '../theme/app_theme.dart';
 import 'beer_tile.dart';
 
 /// Fiche "brasserie" : nom, adresse et liste des bières référencées.
-/// Utilisée à la fois depuis le globe et depuis la carte détaillée d'un pays.
+/// Utilisée à la fois depuis la carte du monde et depuis la carte détaillée
+/// d'un pays.
 void showBreweryBeersSheet(
   BuildContext context,
   String brewery,

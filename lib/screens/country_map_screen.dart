@@ -8,8 +8,9 @@ import '../widgets/brewery_beers_sheet.dart';
 import '../widgets/brewery_pin.dart';
 
 /// Carte détaillée (tuiles OpenStreetMap) centrée sur un pays, avec un
-/// repère précis par brasserie connue. Ouverte depuis le marqueur pays du
-/// globe pour voir "de plus près" les brasseries qu'il regroupe.
+/// repère précis par brasserie connue. Ouverte depuis le marqueur pays de
+/// la carte du monde pour voir "de plus près" les brasseries qu'il
+/// regroupe.
 class CountryMapScreen extends StatefulWidget {
   final String country;
 
