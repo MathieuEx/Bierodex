@@ -42,9 +42,17 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
     'Océanie': GlobeCoordinates(-25, 140),
   };
 
-  /// Couleur d'un pays sans aucune bière essayée (gris neutre, distinct du
-  /// cuivre/or utilisés pour la progression).
-  static const _untouchedColor = Color(0xFF8A8272);
+  /// Couleur d'un pays sans aucune bière essayée : un ivoire chaud, lisible
+  /// aussi bien sur l'océan que sur le désert, mais volontairement peu
+  /// saturé — c'est le contraste avec le cuivre/or des pays explorés qui
+  /// porte l'information.
+  static const _untouchedColor = Color(0xFFEADFC8);
+
+  /// Zoom initial du globe. Attention : le package rend la sphère à
+  /// `radius * 2^zoom` (voir `RotatingGlobe.convertedRadius`), donc tout
+  /// calcul de taille à l'écran doit passer par cette constante — sinon le
+  /// cadre et la sphère ne coïncident pas.
+  static const _initialZoom = 1.0;
 
   bool _pointsReady = false;
 
@@ -55,7 +63,7 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
     _controller = FlutterEarthGlobeController(
       rotationSpeed: 0.04,
       isRotating: true,
-      zoom: 1,
+      zoom: _initialZoom,
       minZoom: 0.5,
       maxZoom: 4,
       zoomSensitivity: 0.35,
@@ -93,18 +101,23 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
     }
   }
 
-  Point _buildCountryPoint(String country, ({double lat, double lng}) centroid) {
+  Point _buildCountryPoint(
+    String country,
+    ({double lat, double lng}) centroid,
+  ) {
     final ratio = _progressRatio(country);
     return Point(
       id: country,
       coordinates: GlobeCoordinates(centroid.lat, centroid.lng),
-      // Les pays bien explorés grossissent légèrement et se soulèvent de la
-      // sphère (altitude), comme une épingle plantée sur une carte : la
-      // progression se voit avant même de zoomer sur la couleur.
+      // `size` est une unité relative : le diamètre dessiné vaut
+      // `size / 150` du diamètre du globe (voir `_drawPoint` du package).
+      // À 1.7 les repères faisaient 1 % du globe — invisibles. Ici ~3 %
+      // pour un pays vierge, ~4,7 % pour un pays entièrement exploré, qui
+      // se soulève en plus de la sphère comme une épingle plantée.
       style: PointStyle(
         color: _progressColor(ratio),
-        size: 1.7 + ratio * 0.7,
-        altitude: ratio * 0.045,
+        size: 4.5 + ratio * 2.5,
+        altitude: ratio * 0.05,
       ),
       onTap: () => _openCountry(country, centroid),
     );
@@ -181,9 +194,9 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
   }
 
   void _openScanner() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()));
   }
 
   void _openCollection() {
@@ -198,9 +211,9 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
   }
 
   void _openAccount() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AccountScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const AccountScreen()));
   }
 
   @override
@@ -210,50 +223,61 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.center,
-                  radius: 0.95,
-                  colors: [AppColors.stoutDim, AppColors.stout],
-                ),
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final size = constraints.biggest;
-                  final isPhone = size.shortestSide < 600;
-                  final radius =
-                      size.shortestSide / 2 * (isPhone ? 0.60 : 0.50);
-                  final center = Offset(size.width / 2, size.height / 2);
-                  return Stack(
-                    children: [
-                      CustomPaint(
-                        size: size,
-                        painter: _GlobeAuraPainter(
-                          center: center,
-                          baseRadius: radius,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final size = constraints.biggest;
+                // Le hublot est un cadre fixe à l'écran : la sphère vit
+                // derrière et est détourée par lui. Elle peut donc zoomer
+                // sans que le cadre ne bouge — contrairement à un anneau
+                // collé au bord de la sphère, qui se décale dès qu'on zoome.
+                final glassRadius = size.shortestSide / 2 - 12;
+                final glassSize = Size.square(glassRadius * 2);
+                // La sphère occupe 94 % du verre, pour qu'il reste un liseré
+                // d'espace (et d'étoiles) entre son limbe et le laiton.
+                final globeRadius =
+                    glassRadius * 0.94 / math.pow(2, _initialZoom);
+
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CustomPaint(
+                      size: size,
+                      painter: _PanelBackdropPainter(
+                        center: Offset(size.width / 2, size.height / 2),
+                        glassRadius: glassRadius,
+                      ),
+                    ),
+                    SizedBox.fromSize(
+                      size: glassSize,
+                      child: ClipOval(
+                        child: Stack(
+                          children: [
+                            GestureDetector(
+                              onPanDown: (_) => _controller.stopRotation(),
+                              child: FlutterEarthGlobe(
+                                radius: globeRadius,
+                                controller: _controller,
+                              ),
+                            ),
+                            IgnorePointer(
+                              child: CustomPaint(
+                                size: glassSize,
+                                painter: const _GlassPainter(),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      GestureDetector(
-                        onPanDown: (_) => _controller.stopRotation(),
-                        child: FlutterEarthGlobe(
-                          radius: radius,
-                          controller: _controller,
-                        ),
+                    ),
+                    IgnorePointer(
+                      child: SizedBox.fromSize(
+                        size: glassSize,
+                        child: const CustomPaint(painter: _BezelPainter()),
                       ),
-                      IgnorePointer(
-                        child: CustomPaint(
-                          size: size,
-                          painter: _PortholeFramePainter(
-                            center: center,
-                            radius: radius * 1.05,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           // Voile sombre en haut d'écran : garantit la lisibilité du bandeau
@@ -305,98 +329,167 @@ class _WorldGlobeScreenState extends State<WorldGlobeScreen> {
   }
 }
 
-/// Lueur ambrée basse (comme la lumière traversant un verre plein) et
-/// quelques anneaux concentriques très ténus autour du globe, à la manière
-/// d'ondes de sonar qui repèrent les brasseries. Remplace le halo
-/// générique par quelque chose de propre au sujet — pas une décoration
-/// gratuite.
-class _GlobeAuraPainter extends CustomPainter {
+/// Le panneau sombre dans lequel le hublot est serti : dégradé vertical
+/// sobre, plus une lueur ambrée qui déborde derrière le verre, comme la
+/// lumière chaude d'une salle de brassage passant autour de l'instrument.
+class _PanelBackdropPainter extends CustomPainter {
   final Offset center;
-  final double baseRadius;
+  final double glassRadius;
 
-  const _GlobeAuraPainter({required this.center, required this.baseRadius});
+  const _PanelBackdropPainter({
+    required this.center,
+    required this.glassRadius,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final glowRadius = baseRadius * 1.85;
-    final glowPaint = Paint()
+    final panelPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [AppColors.stoutDim, AppColors.stout],
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, panelPaint);
+
+    final bloomRadius = glassRadius * 1.32;
+    final bloomPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          AppColors.gold.withValues(alpha: 0.14),
+          AppColors.gold.withValues(alpha: 0.20),
+          AppColors.copper.withValues(alpha: 0.07),
           AppColors.gold.withValues(alpha: 0),
         ],
-      ).createShader(Rect.fromCircle(center: center, radius: glowRadius))
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 36);
-    canvas.drawCircle(center, glowRadius, glowPaint);
-
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    for (var i = 1; i <= 3; i++) {
-      ringPaint.color = AppColors.copper.withValues(alpha: 0.09 / i);
-      canvas.drawCircle(center, baseRadius * (1.16 + i * 0.15), ringPaint);
-    }
+        stops: const [0.62, 0.82, 1],
+      ).createShader(Rect.fromCircle(center: center, radius: bloomRadius))
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24);
+    canvas.drawCircle(center, bloomRadius, bloomPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _GlobeAuraPainter oldDelegate) =>
-      oldDelegate.center != center || oldDelegate.baseRadius != baseRadius;
+  bool shouldRepaint(covariant _PanelBackdropPainter oldDelegate) =>
+      oldDelegate.center != center || oldDelegate.glassRadius != glassRadius;
 }
 
-/// Cerclage en laiton autour du globe, comme le hublot d'une cuve de
-/// brasserie : anneau brossé (dégradé balayant), reflet intérieur et
-/// petits rivets — le détail qui rend cet écran reconnaissable au premier
-/// coup d'œil, plutôt qu'une sphère nue flottant dans un dégradé.
-class _PortholeFramePainter extends CustomPainter {
-  final Offset center;
-  final double radius;
-
-  const _PortholeFramePainter({required this.center, required this.radius});
+/// Ce qui se passe *sous* le verre : l'ombre portée du cerclage sur le
+/// bord intérieur, et un reflet diffus en haut à gauche. C'est ce qui
+/// donne l'impression de regarder à travers quelque chose plutôt que de
+/// voir une image ronde collée à l'écran.
+class _GlassPainter extends CustomPainter {
+  const _GlassPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
-    const strokeWidth = 9.0;
-    final ringRect = Rect.fromCircle(center: center, radius: radius);
+    final radius = size.shortestSide / 2;
+    final center = Offset(size.width / 2, size.height / 2);
 
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..shader = const SweepGradient(
+    final innerShadow = Paint()
+      ..shader = RadialGradient(
         colors: [
-          AppColors.copper,
-          AppColors.gold,
+          Colors.transparent,
+          Colors.black.withValues(alpha: 0.30),
+          Colors.black.withValues(alpha: 0.62),
+        ],
+        stops: const [0.74, 0.93, 1],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawCircle(center, radius, innerShadow);
+
+    final sheenCenter = center + Offset(-radius * 0.34, -radius * 0.42);
+    final sheenRect = Rect.fromCenter(
+      center: sheenCenter,
+      width: radius * 1.25,
+      height: radius * 0.78,
+    );
+    final sheenPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          Colors.white.withValues(alpha: 0.10),
+          Colors.white.withValues(alpha: 0),
+        ],
+      ).createShader(sheenRect)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
+    canvas.drawOval(sheenRect, sheenPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GlassPainter oldDelegate) => false;
+}
+
+/// Le cerclage en laiton du hublot. Le métal se lit à son dégradé
+/// perpendiculaire à la lumière (claire en haut à gauche, sombre en bas à
+/// droite) et à son unique reflet spéculaire — pas à un arc-en-ciel de
+/// couleurs. Une gorge fine gravée à l'intérieur remplace les rivets, qui
+/// se lisaient comme des poussières.
+class _BezelPainter extends CustomPainter {
+  const _BezelPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final outerRadius = size.shortestSide / 2;
+    final center = Offset(size.width / 2, size.height / 2);
+    final band = (outerRadius * 0.075).clamp(13.0, 26.0);
+    final midRadius = outerRadius - band / 2;
+    final bounds = Rect.fromCircle(center: center, radius: outerRadius);
+
+    // Ombre portée : assoit l'instrument sur le panneau.
+    final dropShadow = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = band * 0.9
+      ..color = Colors.black.withValues(alpha: 0.45)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.drawCircle(center, midRadius + band * 0.35, dropShadow);
+
+    // Le laiton lui-même, éclairé du haut-gauche.
+    final brass = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = band
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
           AppColors.brassHighlight,
           AppColors.gold,
           AppColors.copper,
-          AppColors.walnut,
-          AppColors.copper,
+          Color(0xFF7A4A20),
+          Color(0xFF4A2E14),
         ],
-        transform: GradientRotation(-1.1),
-      ).createShader(ringRect);
-    canvas.drawCircle(center, radius, ringPaint);
+        stops: [0, 0.28, 0.55, 0.8, 1],
+      ).createShader(bounds);
+    canvas.drawCircle(center, midRadius, brass);
 
-    final highlightPaint = Paint()
+    // Reflet spéculaire : un seul arc vif, en haut à gauche.
+    final specular = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..color = AppColors.brassHighlight.withValues(alpha: 0.5);
-    canvas.drawCircle(center, radius - strokeWidth / 2 - 2, highlightPaint);
+      ..strokeWidth = band * 0.3
+      ..shader = SweepGradient(
+        colors: [
+          AppColors.brassHighlight.withValues(alpha: 0),
+          AppColors.brassHighlight.withValues(alpha: 0.85),
+          AppColors.brassHighlight.withValues(alpha: 0),
+          AppColors.brassHighlight.withValues(alpha: 0),
+          AppColors.brassHighlight.withValues(alpha: 0.18),
+          AppColors.brassHighlight.withValues(alpha: 0),
+        ],
+        stops: const [0.0, 0.09, 0.2, 0.55, 0.66, 0.78],
+        transform: const GradientRotation(math.pi * 1.08),
+      ).createShader(bounds);
+    canvas.drawCircle(center, midRadius - band * 0.26, specular);
 
-    final rivetShadow = Paint()..color = const Color(0xFF4A2F16);
-    final rivetHighlight =
-        Paint()..color = AppColors.brassHighlight.withValues(alpha: 0.85);
-    const rivetCount = 14;
-    for (var i = 0; i < rivetCount; i++) {
-      final angle = (2 * math.pi / rivetCount) * i;
-      final position =
-          center + Offset(math.cos(angle), math.sin(angle)) * radius;
-      canvas.drawCircle(position, 3.2, rivetShadow);
-      canvas.drawCircle(position + const Offset(-0.7, -0.7), 1.0, rivetHighlight);
-    }
+    // Arêtes : une gorge sombre côté verre, un filet clair côté panneau.
+    final innerGroove = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..color = const Color(0xFF3A2410).withValues(alpha: 0.9);
+    canvas.drawCircle(center, outerRadius - band + 1, innerGroove);
+
+    final outerEdge = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = AppColors.brassHighlight.withValues(alpha: 0.35);
+    canvas.drawCircle(center, outerRadius - 0.5, outerEdge);
   }
 
   @override
-  bool shouldRepaint(covariant _PortholeFramePainter oldDelegate) =>
-      oldDelegate.center != center || oldDelegate.radius != radius;
+  bool shouldRepaint(covariant _BezelPainter oldDelegate) => false;
 }
 
 class _TopBar extends StatelessWidget {
@@ -426,9 +519,9 @@ class _TopBar extends StatelessWidget {
             child: Text(
               'BIERODEX',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.foam,
-                    letterSpacing: 1.4,
-                  ),
+                color: AppColors.foam,
+                letterSpacing: 1.4,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -553,9 +646,9 @@ class _ContinentChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
           child: Text(
             label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.foam,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: AppColors.foam),
           ),
         ),
       ),
