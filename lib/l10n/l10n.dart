@@ -12,8 +12,8 @@ export 'app_localizations.dart';
 /// partout ailleurs.
 Locale resolveAppLocale(Locale? deviceLocale) =>
     deviceLocale?.languageCode == 'fr'
-        ? const Locale('fr')
-        : const Locale('en');
+    ? const Locale('fr')
+    : const Locale('en');
 
 extension AppLocalizationsContext on BuildContext {
   /// Textes traduits, dans les widgets : `context.l10n.maCle`.

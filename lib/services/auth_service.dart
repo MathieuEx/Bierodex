@@ -105,8 +105,8 @@ class AuthService extends ChangeNotifier {
       onAuthException: (e) => switch (e.code) {
         'email_not_confirmed' => EmailNotConfirmed(),
         'invalid_credentials' => AuthFailure(
-            L10n.current.authInvalidCredentials,
-          ),
+          L10n.current.authInvalidCredentials,
+        ),
         _ => AuthFailure.fromAuthException(e),
       },
     );
@@ -126,11 +126,11 @@ class AuthService extends ChangeNotifier {
       () => _auth.signUp(email: normalized, password: password),
       onAuthException: (e) => switch (e) {
         AuthWeakPasswordException() => AuthFailure(
-            L10n.current.authWeakPasswordChooseAnother,
-          ),
+          L10n.current.authWeakPasswordChooseAnother,
+        ),
         _ when e.code == 'user_already_exists' => AuthFailure(
-            L10n.current.authUserAlreadyExists,
-          ),
+          L10n.current.authUserAlreadyExists,
+        ),
         _ => AuthFailure.fromAuthException(e),
       },
     );
@@ -174,11 +174,11 @@ class AuthService extends ChangeNotifier {
       () => _auth.updateUser(UserAttributes(password: newPassword)),
       onAuthException: (e) => switch (e) {
         AuthWeakPasswordException() => AuthFailure(
-            L10n.current.authWeakPassword,
-          ),
+          L10n.current.authWeakPassword,
+        ),
         _ when e.code == 'same_password' => AuthFailure(
-            L10n.current.authSamePassword,
-          ),
+          L10n.current.authSamePassword,
+        ),
         _ => AuthFailure.fromAuthException(e),
       },
     );

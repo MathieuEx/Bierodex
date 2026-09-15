@@ -33,7 +33,7 @@ class BreweryPin extends StatelessWidget {
                 width: 14,
                 height: 14,
                 decoration: BoxDecoration(
-                  color: AppColors.copper,
+                  color: AppColors.amber,
                   borderRadius: BorderRadius.circular(3),
                   boxShadow: const [
                     BoxShadow(
@@ -50,9 +50,9 @@ class BreweryPin extends StatelessWidget {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color: logoUrl != null ? AppColors.parchment : AppColors.copper,
+              color: logoUrl != null ? AppColors.mist : AppColors.amber,
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.parchment, width: 2.5),
+              border: Border.all(color: AppColors.mist, width: 2.5),
               boxShadow: const [
                 BoxShadow(
                   color: Colors.black38,
@@ -68,9 +68,8 @@ class BreweryPin extends StatelessWidget {
                       child: Image.network(
                         logoUrl!,
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stack) => _Monogram(
-                          breweryName: breweryName,
-                        ),
+                        errorBuilder: (context, error, stack) =>
+                            _Monogram(breweryName: breweryName),
                       ),
                     )
                   : _Monogram(breweryName: breweryName),
@@ -96,10 +95,11 @@ class _Monogram extends StatelessWidget {
       child: Text(
         letter,
         style: const TextStyle(
-          fontFamily: 'BigShouldersDisplay',
+          fontFamily: AppTheme.displayFont,
+          fontStyle: FontStyle.italic,
           fontWeight: FontWeight.w800,
           fontSize: 16,
-          color: AppColors.parchment,
+          color: AppColors.mist,
           height: 1,
         ),
       ),

@@ -108,18 +108,24 @@ class NotificationService extends ChangeNotifier {
   }
 
   Future<bool> _requestPermission() async {
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (android != null) {
       return await android.requestNotificationsPermission() ?? false;
     }
-    final ios = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final ios = _plugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
     if (ios != null) {
       return await ios.requestPermissions(alert: true, sound: true) ?? false;
     }
-    final macos = _plugin.resolvePlatformSpecificImplementation<
-        MacOSFlutterLocalNotificationsPlugin>();
+    final macos = _plugin
+        .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin
+        >();
     return await macos?.requestPermissions(alert: true, sound: true) ?? false;
   }
 
@@ -138,8 +144,9 @@ class NotificationService extends ChangeNotifier {
     final l10n = L10n.current;
 
     await _plugin.cancel(id: _inactivityId);
-    final inactivity =
-        _inactivityEnabled ? ReminderPlanner.inactivity(statuses, now) : null;
+    final inactivity = _inactivityEnabled
+        ? ReminderPlanner.inactivity(statuses, now)
+        : null;
     if (inactivity != null) {
       await _schedule(
         _inactivityId,
@@ -158,8 +165,9 @@ class NotificationService extends ChangeNotifier {
             nextAt: savedNext == null ? null : DateTime.tryParse(savedNext),
           )
         : null;
-    final beer =
-        wishlist == null ? null : beers_data.findBeerById(wishlist.beerId!);
+    final beer = wishlist == null
+        ? null
+        : beers_data.findBeerById(wishlist.beerId!);
     if (wishlist != null && beer != null) {
       await prefs.setString(_nextWishlistKey, wishlist.at.toIso8601String());
       await _schedule(

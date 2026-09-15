@@ -20,7 +20,7 @@ class CompareBeersScreen extends StatefulWidget {
 }
 
 class _CompareBeersScreenState extends State<CompareBeersScreen> {
-  static const _secondColor = Color(0xFF3F6E8C);
+  static const _secondColor = AppColors.sky;
 
   String? _secondId;
 
@@ -56,7 +56,7 @@ class _CompareBeersScreenState extends State<CompareBeersScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _Legend(color: AppColors.copper, label: first.name),
+          _Legend(color: AppColors.amber, label: first.name),
           const SizedBox(height: 8),
           if (candidates.isEmpty)
             Text(context.l10n.compareEmpty, style: textTheme.bodyMedium)
@@ -82,7 +82,7 @@ class _CompareBeersScreenState extends State<CompareBeersScreen> {
               series: [
                 RadarSeries(
                   label: first.name,
-                  color: AppColors.copper,
+                  color: AppColors.amber,
                   values: tastingValues(firstStatus),
                 ),
                 if (second != null && secondStatus != null)

@@ -27,11 +27,11 @@ class BreweryLocation {
   });
 
   factory BreweryLocation.fromJson(Map<String, dynamic> row) => BreweryLocation(
-        lat: (row['lat'] as num).toDouble(),
-        lng: (row['lng'] as num).toDouble(),
-        city: row['city'] as String? ?? '',
-        address: row['address'] as String? ?? '',
-        logoUrl: row['logo_url'] as String?,
-        logoCredit: row['logo_credit'] as String?,
-      );
+    lat: (row['lat'] as num).toDouble(),
+    lng: (row['lng'] as num).toDouble(),
+    city: row['city'] as String? ?? '',
+    address: row['address'] as String? ?? '',
+    logoUrl: row['logo_url'] as String?,
+    logoCredit: row['logo_credit'] as String?,
+  );
 }

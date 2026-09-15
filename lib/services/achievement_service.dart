@@ -85,8 +85,8 @@ class AchievementService {
   }
 
   List<Achievement> _currentAchievements() => CollectionInsights(
-        catalog: beers,
-        statuses: BeerCollectionService.instance.statuses,
-        styleOf: findStyleById,
-      ).achievements;
+    catalog: beers,
+    statuses: BeerCollectionService.instance.statuses,
+    styleOf: findStyleById,
+  ).achievements;
 }

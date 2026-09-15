@@ -17,11 +17,11 @@ enum _SortOption {
   abvDesc;
 
   String get label => switch (this) {
-        relevance => L10n.current.sortRelevance,
-        nameAsc => L10n.current.sortNameAsc,
-        abvAsc => L10n.current.sortAbvAsc,
-        abvDesc => L10n.current.sortAbvDesc,
-      };
+    relevance => L10n.current.sortRelevance,
+    nameAsc => L10n.current.sortNameAsc,
+    abvAsc => L10n.current.sortAbvAsc,
+    abvDesc => L10n.current.sortAbvDesc,
+  };
 }
 
 /// État des filtres et du tri de la recherche. Un [ChangeNotifier] partagé
@@ -80,27 +80,26 @@ class BeerSearchDelegate extends SearchDelegate<void> {
 
   @override
   List<Widget>? buildActions(BuildContext context) => [
-        AnimatedBuilder(
-          animation: _filters,
-          builder: (context, _) => IconButton(
-            icon: Icon(
-              _filters.isActive ? Icons.filter_alt : Icons.filter_alt_outlined,
-              color: _filters.isActive ? AppColors.copper : null,
-            ),
-            tooltip: context.l10n.filterAndSort,
-            onPressed: () => _openFilters(context),
-          ),
+    AnimatedBuilder(
+      animation: _filters,
+      builder: (context, _) => IconButton(
+        icon: Icon(
+          _filters.isActive ? Icons.filter_alt : Icons.filter_alt_outlined,
+          color: _filters.isActive ? AppColors.amber : null,
         ),
-        if (query.isNotEmpty)
-          IconButton(
-              icon: const Icon(Icons.clear), onPressed: () => query = ''),
-      ];
+        tooltip: context.l10n.filterAndSort,
+        onPressed: () => _openFilters(context),
+      ),
+    ),
+    if (query.isNotEmpty)
+      IconButton(icon: const Icon(Icons.clear), onPressed: () => query = ''),
+  ];
 
   @override
   Widget? buildLeading(BuildContext context) => IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => close(context, null),
-      );
+    icon: const Icon(Icons.arrow_back),
+    onPressed: () => close(context, null),
+  );
 
   @override
   Widget buildResults(BuildContext context) => _buildBody();
@@ -136,7 +135,8 @@ class _SearchResults extends StatelessWidget {
     final results = beers.where((Beer b) {
       final style = findStyleById(b.styleId);
       if (q.isNotEmpty) {
-        final matches = normalizeForSearch(b.name).contains(q) ||
+        final matches =
+            normalizeForSearch(b.name).contains(q) ||
             normalizeForSearch(b.brewery).contains(q) ||
             normalizeForSearch(b.country).contains(q) ||
             normalizeForSearch(countryName(b.country)).contains(q) ||
@@ -225,8 +225,9 @@ class _FiltersSheetState extends State<_FiltersSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final stylesInFamily =
-        _family == null ? beerStyles : stylesForFamily(_family!);
+    final stylesInFamily = _family == null
+        ? beerStyles
+        : stylesForFamily(_family!);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.75,

@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bierodex/main.dart';
+import 'package:bierodex/theme/brand.dart';
 
 /// Avance l'horloge simulée d'une durée fixe, largement suffisante pour nos
 /// transitions (< 1 s), plutôt que `pumpAndSettle()`.
@@ -80,7 +81,7 @@ void main() {
     await pumpApp(tester);
     await settle(tester);
 
-    expect(find.text('BIERODEX'), findsOneWidget);
+    expect(find.byType(BrandWordmark), findsOneWidget);
     expect(find.text('Europe'), findsOneWidget);
   });
 

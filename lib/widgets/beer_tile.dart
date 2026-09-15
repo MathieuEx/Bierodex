@@ -5,12 +5,13 @@ import '../models/beer.dart';
 import '../screens/beer_detail_screen.dart';
 import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/brand.dart';
 import 'star_rating.dart';
 import '../l10n/l10n.dart';
 import '../data/countries.dart';
 
-/// Une bière, présentée comme une fiche de carnet : liseré coloré par
-/// famille sur le bord gauche, photo si disponible, sinon initiale stylisée.
+/// Une bière, présentée comme une carte du Bierodex : vignette encadrée
+/// aux couleurs de sa famille, photo si disponible, degré en pastille.
 class BeerTile extends StatelessWidget {
   final Beer beer;
 
@@ -30,10 +31,7 @@ class BeerTile extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          child: Material(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            clipBehavior: Clip.antiAlias,
+          child: BrandTileSurface(
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(
@@ -42,28 +40,17 @@ class BeerTile extends StatelessWidget {
                   ),
                 );
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    left: BorderSide(color: familyColor, width: 4),
-                  ),
-                ),
-                padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
                 child: Row(
                   children: [
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: familyColor.withValues(alpha: 0.16),
-                          foregroundColor: familyColor,
-                          backgroundImage: beer.imageUrl != null
-                              ? NetworkImage(beer.imageUrl!)
-                              : null,
-                          child: beer.imageUrl == null
-                              ? const Icon(Icons.sports_bar_outlined)
-                              : null,
+                        FamilyThumbnail(
+                          color: familyColor,
+                          imageUrl: beer.imageUrl,
+                          icon: Icons.sports_bar_outlined,
                         ),
                         if (tried || wishlist)
                           Positioned(
@@ -112,11 +99,9 @@ class BeerTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      '${formatDecimal(beer.abv)}%',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.labelLarge?.copyWith(color: familyColor),
+                    ValuePill(
+                      label: '${formatDecimal(beer.abv)}%',
+                      color: familyColor,
                     ),
                   ],
                 ),

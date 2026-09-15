@@ -152,7 +152,7 @@ class TastingProfileCard extends StatelessWidget {
                       series: [
                         RadarSeries(
                           label: findBeerById(beerId)?.name ?? '',
-                          color: AppColors.copper,
+                          color: AppColors.amber,
                           values: tastingValues(status),
                         ),
                       ],
@@ -232,11 +232,11 @@ class _LevelPicker extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: value != null && level <= value!
-                                  ? AppColors.copper
+                                  ? AppColors.amber
                                   : Colors.transparent,
                               border: Border.all(
                                 color: value != null && level <= value!
-                                    ? AppColors.copper
+                                    ? AppColors.amber
                                     : outline,
                                 width: 2,
                               ),
@@ -303,7 +303,7 @@ class _ColorPicker extends StatelessWidget {
                       color: beerColorSwatches[level - 1],
                       border: Border.all(
                         color: value == level
-                            ? AppColors.copper
+                            ? AppColors.amber
                             : Theme.of(context).colorScheme.outline,
                         width: value == level ? 3.5 : 1.5,
                       ),

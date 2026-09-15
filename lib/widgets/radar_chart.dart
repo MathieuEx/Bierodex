@@ -21,12 +21,12 @@ List<String> get tastingAxes {
 /// Valeurs (1 à 5, ou `null` si non renseignées) d'un statut sur
 /// [tastingAxes].
 List<int?> tastingValues(BeerUserStatus status) => [
-      status.color,
-      status.bitterness,
-      status.sweetness,
-      status.body,
-      status.rating,
-    ];
+  status.color,
+  status.bitterness,
+  status.sweetness,
+  status.body,
+  status.rating,
+];
 
 class RadarSeries {
   final String label;
@@ -61,10 +61,7 @@ class RadarChart extends StatelessWidget {
     return Semantics(
       label: [
         for (final s in series)
-          '${s.label} : ${[
-            for (var i = 0; i < axes.length; i++)
-              '${axes[i]} ${s.values[i] ?? L10n.current.notSet}'
-          ].join(', ')}',
+          '${s.label} : ${[for (var i = 0; i < axes.length; i++) '${axes[i]} ${s.values[i] ?? L10n.current.notSet}'].join(', ')}',
       ].join('. '),
       child: SizedBox(
         width: size,

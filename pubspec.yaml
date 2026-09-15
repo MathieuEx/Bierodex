@@ -65,6 +65,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -80,21 +82,46 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Logo complet (logo.png) et icône seule détourée (logo_icon.png).
+  assets:
+    - assets/logo.png
+    - assets/logo_icon.png
+
   # Polices variables (OFL) : chaque poids pointe vers le même fichier,
   # Flutter/Skia interpole via l'axe "wght" de la police variable.
   fonts:
-    - family: BigShouldersDisplay
+    - family: Exo2
       fonts:
-        - asset: assets/fonts/BigShouldersDisplay-Variable.ttf
+        - asset: assets/fonts/Exo2-Variable.ttf
           weight: 400
-        - asset: assets/fonts/BigShouldersDisplay-Variable.ttf
+        - asset: assets/fonts/Exo2-Variable.ttf
           weight: 500
-        - asset: assets/fonts/BigShouldersDisplay-Variable.ttf
+        - asset: assets/fonts/Exo2-Variable.ttf
+          weight: 600
+        - asset: assets/fonts/Exo2-Variable.ttf
           weight: 700
-        - asset: assets/fonts/BigShouldersDisplay-Variable.ttf
+        - asset: assets/fonts/Exo2-Variable.ttf
           weight: 800
-        - asset: assets/fonts/BigShouldersDisplay-Variable.ttf
+        - asset: assets/fonts/Exo2-Variable.ttf
           weight: 900
+        - asset: assets/fonts/Exo2-Italic-Variable.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/Exo2-Italic-Variable.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Exo2-Italic-Variable.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/Exo2-Italic-Variable.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/Exo2-Italic-Variable.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/Exo2-Italic-Variable.ttf
+          weight: 900
+          style: italic
     - family: Manrope
       fonts:
         - asset: assets/fonts/Manrope-Variable.ttf
@@ -107,3 +134,30 @@ flutter:
           weight: 700
         - asset: assets/fonts/Manrope-Variable.ttf
           weight: 800
+
+# Icône d'application générée depuis le logo :
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: assets/icon/app_icon.png
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  adaptive_icon_background: "#0C3051"
+  adaptive_icon_foreground: assets/icon/app_icon_foreground.png
+  web:
+    generate: true
+    background_color: "#041833"
+    theme_color: "#F28A17"
+  macos:
+    generate: true
+
+# Écran de lancement natif (bleu nuit + icône du logo) :
+#   dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#041833"
+  image: assets/logo_icon.png
+  android_12:
+    color: "#041833"
+    image: assets/icon/splash_android12.png
+    icon_background_color: "#041833"
+  web: true

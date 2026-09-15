@@ -5,6 +5,7 @@ import '../data/beers.dart';
 import '../models/beer_style.dart';
 import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/brand.dart';
 import '../l10n/l10n.dart';
 
 /// Rangée de badges de progression : styles goûtés, pays visités, et une
@@ -30,7 +31,7 @@ class BadgesRow extends StatelessWidget {
             label: context.l10n.styles,
             achieved: triedStyles.length,
             total: beerStyles.length,
-            color: AppColors.copper,
+            color: AppColors.amber,
           ),
           _Badge(
             icon: Icons.public,
@@ -100,9 +101,19 @@ class _BadgeCard extends StatelessWidget {
       width: 92,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            color.withValues(alpha: locked ? 0.04 : 0.12),
+            color.withValues(alpha: 0.04),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppTheme.radiusControl),
+        border: Border.all(
+          color: color.withValues(alpha: locked ? 0.3 : 0.7),
+          width: 1.5,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -123,15 +134,7 @@ class _BadgeCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: badge.ratio,
-              minHeight: 4,
-              backgroundColor: color.withValues(alpha: 0.15),
-              valueColor: AlwaysStoppedAnimation(color),
-            ),
-          ),
+          GradientProgressBar(value: badge.ratio, height: 4, color: color),
         ],
       ),
     );

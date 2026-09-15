@@ -92,7 +92,7 @@ class _Message extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 44, color: AppColors.copper),
+          Icon(icon, size: 44, color: AppColors.amber),
           const SizedBox(height: 12),
           Text(text, textAlign: TextAlign.center),
           if (onRetry != null) ...[
@@ -235,7 +235,7 @@ class _Stat extends StatelessWidget {
         children: [
           Text(
             value,
-            style: textTheme.headlineSmall?.copyWith(color: AppColors.copper),
+            style: textTheme.headlineSmall?.copyWith(color: AppColors.amber),
           ),
           Text(label, style: textTheme.bodySmall),
         ],

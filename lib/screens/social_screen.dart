@@ -127,12 +127,12 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 24, bottom: 8),
-        child: Text(
-          text.toUpperCase(),
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-      );
+    padding: const EdgeInsets.only(top: 24, bottom: 8),
+    child: Text(
+      text.toUpperCase(),
+      style: Theme.of(context).textTheme.titleSmall,
+    ),
+  );
 }
 
 class _ProfileCard extends StatelessWidget {
@@ -156,8 +156,9 @@ class _ProfileCard extends StatelessWidget {
       ShareParams(
         uri: link,
         subject: context.l10n.socialShareSubject,
-        sharePositionOrigin:
-            box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+        sharePositionOrigin: box == null
+            ? null
+            : box.localToGlobal(Offset.zero) & box.size,
       ),
     );
   }
@@ -205,8 +206,8 @@ class _ProfileCard extends StatelessWidget {
             Row(
               children: [
                 const CircleAvatar(
-                  backgroundColor: Color(0x29C9752B),
-                  foregroundColor: AppColors.copper,
+                  backgroundColor: Color(0x29F28A17),
+                  foregroundColor: AppColors.amber,
                   child: Icon(Icons.person),
                 ),
                 const SizedBox(width: 12),
@@ -243,7 +244,7 @@ class _ProfileCard extends StatelessWidget {
                     ProfileVisibility.public => Icons.public,
                   },
                   size: 18,
-                  color: AppColors.copper,
+                  color: AppColors.amber,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -537,52 +538,53 @@ class _FriendshipTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitle =
-        friendship.displayName != null ? '@${friendship.username}' : null;
+    final subtitle = friendship.displayName != null
+        ? '@${friendship.username}'
+        : null;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const CircleAvatar(
-        backgroundColor: Color(0x29C9752B),
-        foregroundColor: AppColors.copper,
+        backgroundColor: Color(0x29F28A17),
+        foregroundColor: AppColors.amber,
         child: Icon(Icons.person_outline),
       ),
       title: Text(friendship.label),
       subtitle: subtitle == null ? null : Text(subtitle),
       onTap: friendship.accepted
           ? () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) =>
-                      SharedProfileScreen(username: friendship.username),
-                ),
-              )
+              MaterialPageRoute(
+                builder: (_) =>
+                    SharedProfileScreen(username: friendship.username),
+              ),
+            )
           : null,
       trailing: switch ((friendship.accepted, friendship.sentByMe)) {
         (true, _) => IconButton(
-            tooltip: context.l10n.socialRemoveFriend,
-            icon: const Icon(Icons.person_remove_outlined),
-            onPressed: () => _remove(context),
-          ),
+          tooltip: context.l10n.socialRemoveFriend,
+          icon: const Icon(Icons.person_remove_outlined),
+          onPressed: () => _remove(context),
+        ),
         (false, false) => Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                tooltip: context.l10n.decline,
-                icon: const Icon(Icons.close),
-                onPressed: () => _remove(context),
-              ),
-              IconButton.filled(
-                tooltip: context.l10n.accept,
-                icon: const Icon(Icons.check),
-                onPressed: () => SocialService.instance
-                    .acceptFriendRequest(friendship.id)
-                    .catchError(onError),
-              ),
-            ],
-          ),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: context.l10n.decline,
+              icon: const Icon(Icons.close),
+              onPressed: () => _remove(context),
+            ),
+            IconButton.filled(
+              tooltip: context.l10n.accept,
+              icon: const Icon(Icons.check),
+              onPressed: () => SocialService.instance
+                  .acceptFriendRequest(friendship.id)
+                  .catchError(onError),
+            ),
+          ],
+        ),
         (false, true) => TextButton(
-            onPressed: () => _remove(context),
-            child: Text(context.l10n.cancel),
-          ),
+          onPressed: () => _remove(context),
+          child: Text(context.l10n.cancel),
+        ),
       },
     );
   }

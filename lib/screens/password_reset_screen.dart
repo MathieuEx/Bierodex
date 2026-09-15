@@ -42,36 +42,35 @@ class _PasswordResetScreenState extends State<PasswordResetScreen>
   }
 
   Future<void> _sendCode() => run(() async {
-        final email =
-            _sentTo ?? AuthService.normalizeEmail(_emailController.text);
-        if (email == null) {
-          throw AuthFailure(context.l10n.authInvalidEmail);
-        }
-        await _auth.sendPasswordReset(email);
-        if (!mounted) return;
-        setState(() => _sentTo = email);
-        _codeController.clear();
-        startCooldownTicker();
-        _codeFocus.requestFocus();
-      });
+    final email = _sentTo ?? AuthService.normalizeEmail(_emailController.text);
+    if (email == null) {
+      throw AuthFailure(context.l10n.authInvalidEmail);
+    }
+    await _auth.sendPasswordReset(email);
+    if (!mounted) return;
+    setState(() => _sentTo = email);
+    _codeController.clear();
+    startCooldownTicker();
+    _codeFocus.requestFocus();
+  });
 
   Future<void> _reset() => run(() async {
-        final email = _sentTo;
-        if (email == null) return;
-        try {
-          await _auth.resetPassword(
-            email: email,
-            code: _codeController.text,
-            newPassword: _passwordController.text,
-          );
-          TextInput.finishAutofillContext();
-        } on AuthFailure {
-          // Le code n'est plus bon après un refus du serveur ; le mot de passe,
-          // lui, peut simplement être corrigé.
-          if (!_auth.isSignedIn) _codeController.clear();
-          rethrow;
-        }
-      });
+    final email = _sentTo;
+    if (email == null) return;
+    try {
+      await _auth.resetPassword(
+        email: email,
+        code: _codeController.text,
+        newPassword: _passwordController.text,
+      );
+      TextInput.finishAutofillContext();
+    } on AuthFailure {
+      // Le code n'est plus bon après un refus du serveur ; le mot de passe,
+      // lui, peut simplement être corrigé.
+      if (!_auth.isSignedIn) _codeController.clear();
+      rethrow;
+    }
+  });
 
   void _changeEmail() {
     setState(() {

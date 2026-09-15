@@ -28,11 +28,13 @@ class GlobePainter extends CustomPainter {
     final lambda = lng * math.pi / 180;
     final phi0 = center.lat * math.pi / 180;
     final lambda0 = center.lng * math.pi / 180;
-    final cosC = math.sin(phi0) * math.sin(phi) +
+    final cosC =
+        math.sin(phi0) * math.sin(phi) +
         math.cos(phi0) * math.cos(phi) * math.cos(lambda - lambda0);
     if (cosC < 0) return null;
     final x = math.cos(phi) * math.sin(lambda - lambda0);
-    final y = math.cos(phi0) * math.sin(phi) -
+    final y =
+        math.cos(phi0) * math.sin(phi) -
         math.sin(phi0) * math.cos(phi) * math.cos(lambda - lambda0);
     return origin + Offset(x * radius, -y * radius);
   }
@@ -48,7 +50,7 @@ class GlobePainter extends CustomPainter {
       origin,
       radius + 6,
       Paint()
-        ..color = AppColors.copper.withValues(alpha: 0.18)
+        ..color = AppColors.amber.withValues(alpha: 0.18)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
     );
 
@@ -60,9 +62,9 @@ class GlobePainter extends CustomPainter {
           center: const Alignment(-0.35, -0.4),
           radius: 1.1,
           colors: const [
-            Color(0xFF4A3524),
-            Color(0xFF241A13),
-            Color(0xFF120E0B),
+            Color(0xFF1A4A7A),
+            Color(0xFF0A2444),
+            Color(0xFF031226),
           ],
           stops: const [0, 0.65, 1],
         ).createShader(sphere),
@@ -107,7 +109,7 @@ class GlobePainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2
-        ..color = AppColors.copper.withValues(alpha: 0.55),
+        ..color = AppColors.amber.withValues(alpha: 0.55),
     );
 
     final h = highlight;
@@ -117,9 +119,9 @@ class GlobePainter extends CustomPainter {
         canvas.drawCircle(
           o,
           radius * 0.11,
-          Paint()..color = AppColors.copper.withValues(alpha: 0.25),
+          Paint()..color = AppColors.amber.withValues(alpha: 0.25),
         );
-        canvas.drawCircle(o, radius * 0.055, Paint()..color = AppColors.copper);
+        canvas.drawCircle(o, radius * 0.055, Paint()..color = AppColors.amber);
         canvas.drawCircle(
           o,
           radius * 0.055,

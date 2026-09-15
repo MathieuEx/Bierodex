@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as ll;
 
+import '../config/map_config.dart';
 import '../data/beer_styles.dart';
 import '../data/beers.dart';
 import '../data/brewery_locations.dart';
@@ -12,6 +13,7 @@ import '../models/beer_style.dart';
 import '../services/beer_collection_service.dart';
 import '../services/collection_insights.dart';
 import '../theme/app_theme.dart';
+import '../theme/brand.dart';
 import 'beer_detail_screen.dart';
 import '../l10n/l10n.dart';
 
@@ -103,7 +105,8 @@ class StatsScreen extends StatelessWidget {
                           _BarRow(
                             label: s.style.name,
                             value: s.average,
-                            valueLabel: '${formatDecimal(s.average)}/5'
+                            valueLabel:
+                                '${formatDecimal(s.average)}/5'
                                 ' · ${s.count}',
                             color: AppColors.gold,
                           ),
@@ -204,15 +207,13 @@ class _SummaryTiles extends StatelessWidget {
         for (var i = 0; i < tiles.length; i++) ...[
           if (i > 0) const SizedBox(width: 8),
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(14),
-              ),
+            child: BrandFrame(
+              radius: AppTheme.radiusControl,
+              borderWidth: 1.5,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
               child: Column(
                 children: [
-                  Text(
+                  GradientText(
                     tiles[i].$1,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
@@ -240,7 +241,7 @@ class _BarRow {
     required this.label,
     required this.value,
     required this.valueLabel,
-    this.color = AppColors.copper,
+    this.color = AppColors.amber,
   });
 }
 
@@ -263,7 +264,8 @@ class _BarListState extends State<_BarList> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final max = widget.maxValue ??
+    final max =
+        widget.maxValue ??
         widget.rows.fold<double>(0, (m, r) => math.max(m, r.value));
     final limit = widget.collapsedCount;
     final canCollapse = limit != null && widget.rows.length > limit;
@@ -369,12 +371,13 @@ class _MonthlyChart extends StatelessWidget {
                   const SizedBox(height: 2),
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 3),
-                    height:
-                        max == 0 ? 2 : math.max(2, chartHeight * d.count / max),
+                    height: max == 0
+                        ? 2
+                        : math.max(2, chartHeight * d.count / max),
                     decoration: BoxDecoration(
                       color: d.count == 0
                           ? Theme.of(context).colorScheme.outlineVariant
-                          : AppColors.copper,
+                          : AppColors.amber,
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(4),
                       ),
@@ -415,8 +418,7 @@ class _CountryHeatmap extends StatelessWidget {
               AppColors.gold,
               AppColors.wine,
               d.count / max,
-            )!
-                .withValues(alpha: 0.75),
+            )!.withValues(alpha: 0.75),
             borderColor: Colors.white,
             borderStrokeWidth: 1.5,
           ),
@@ -436,10 +438,7 @@ class _CountryHeatmap extends StatelessWidget {
                 maxZoom: 6,
               ),
               children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.bierodex.app',
-                ),
+                MapConfig.tileLayer(),
                 CircleLayer(circles: circles),
               ],
             ),
@@ -450,7 +449,7 @@ class _CountryHeatmap extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 color: Colors.white70,
                 child: const Text(
-                  '© OpenStreetMap contributors',
+                  MapConfig.attribution,
                   style: TextStyle(fontSize: 10, color: Colors.black87),
                 ),
               ),
@@ -482,8 +481,9 @@ class _Recommendations extends StatelessWidget {
             ListTile(
               leading: Icon(
                 item.onWishlist ? Icons.bookmark : Icons.recommend_outlined,
-                color: findStyleById(item.beer.styleId)?.family.color ??
-                    AppColors.copper,
+                color:
+                    findStyleById(item.beer.styleId)?.family.color ??
+                    AppColors.amber,
               ),
               title: Text(item.beer.name),
               subtitle: Text(
@@ -510,7 +510,8 @@ class _AchievementGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sorted = [...items]..sort((a, b) {
+    final sorted = [...items]
+      ..sort((a, b) {
         if (a.unlocked != b.unlocked) return a.unlocked ? -1 : 1;
         return b.ratio.compareTo(a.ratio);
       });

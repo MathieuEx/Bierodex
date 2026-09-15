@@ -19,9 +19,9 @@ class StylesTab extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Text(
               family.label.toUpperCase(),
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: family.color,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(color: family.color),
             ),
           ),
           for (final style in stylesForFamily(family)) StyleTile(style: style),

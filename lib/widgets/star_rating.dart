@@ -35,10 +35,7 @@ class StarRating extends StatelessWidget {
         return InkWell(
           customBorder: const CircleBorder(),
           onTap: () => onChanged!(index + 1),
-          child: Padding(
-            padding: const EdgeInsets.all(2),
-            child: icon,
-          ),
+          child: Padding(padding: const EdgeInsets.all(2), child: icon),
         );
       }),
     );

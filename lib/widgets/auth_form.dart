@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/brand.dart';
 import 'health_notice.dart';
 import '../l10n/l10n.dart';
 
@@ -34,74 +35,67 @@ class AuthScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Scaffold(
-      backgroundColor: AppColors.stout,
-      appBar: showBack
-          ? AppBar(
-              backgroundColor: Colors.transparent,
-              foregroundColor: AppColors.foam,
-              elevation: 0,
-            )
-          : null,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: AutofillGroup(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Icon(
-                      Icons.sports_bar,
-                      size: 48,
-                      color: AppColors.copper,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'BIERODEX',
-                      textAlign: TextAlign.center,
-                      style: textTheme.displayMedium?.copyWith(
-                        color: AppColors.foam,
-                        letterSpacing: 2,
+    return NightBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: showBack
+            ? AppBar(
+                backgroundColor: Colors.transparent,
+                foregroundColor: AppColors.foam,
+                elevation: 0,
+              )
+            : null,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: AutofillGroup(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Image.asset('assets/logo_icon.png', height: 110),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      subtitle,
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.foamSoft,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    child,
-                    if (error != null) ...[
                       const SizedBox(height: 16),
+                      const Center(child: BrandWordmark(size: 40)),
+                      const SizedBox(height: 8),
                       Text(
-                        error!,
+                        subtitle,
                         textAlign: TextAlign.center,
                         style: textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFFE08A6F),
+                          color: AppColors.foamSoft,
                         ),
                       ),
+                      const SizedBox(height: 32),
+                      child,
+                      if (error != null) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          error!,
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: const Color(0xFFE08A6F),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 32),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.foamSoft,
+                        ),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const PrivacyPolicyScreen(),
+                          ),
+                        ),
+                        child: Text(context.l10n.privacyPolicyTitle),
+                      ),
+                      const SizedBox(height: 4),
+                      const HealthNotice(onDark: true),
                     ],
-                    const SizedBox(height: 32),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.foamSoft,
-                      ),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const PrivacyPolicyScreen(),
-                        ),
-                      ),
-                      child: Text(context.l10n.privacyPolicyTitle),
-                    ),
-                    const SizedBox(height: 4),
-                    const HealthNotice(onDark: true),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -173,13 +167,13 @@ InputDecoration authFieldDecoration(
     prefixIcon: Icon(icon, color: AppColors.foamSoft),
     suffixIcon: suffixIcon,
     filled: true,
-    fillColor: AppColors.stoutDim,
+    fillColor: AppColors.nightDim,
     counterText: '',
     border: border,
     enabledBorder: border,
     disabledBorder: border,
     focusedBorder: border.copyWith(
-      borderSide: const BorderSide(color: AppColors.copper, width: 1.6),
+      borderSide: const BorderSide(color: AppColors.amber, width: 1.6),
     ),
   );
 }
@@ -284,8 +278,9 @@ class _PasswordFieldState extends State<PasswordField> {
         Icons.lock_outline,
         helperText: widget.helperText,
         suffixIcon: IconButton(
-          tooltip:
-              _obscure ? context.l10n.showPassword : context.l10n.hidePassword,
+          tooltip: _obscure
+              ? context.l10n.showPassword
+              : context.l10n.hidePassword,
           color: AppColors.foamSoft,
           icon: Icon(
             _obscure
@@ -386,12 +381,7 @@ class AuthPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilledButton(
-      style: FilledButton.styleFrom(
-        backgroundColor: AppColors.copper,
-        foregroundColor: AppColors.stout,
-        minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
+      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(54)),
       onPressed: loading ? null : onPressed,
       child: loading
           ? const SizedBox(

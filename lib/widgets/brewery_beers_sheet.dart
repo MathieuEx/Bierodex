@@ -50,7 +50,7 @@ void showBreweryBeersSheet(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
                   child: Row(
                     children: [
-                      const Icon(Icons.location_on, color: AppColors.copper),
+                      const Icon(Icons.location_on, color: AppColors.amber),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -78,8 +78,9 @@ void showBreweryBeersSheet(
                   child: ListView(
                     controller: scrollController,
                     padding: const EdgeInsets.only(bottom: 24),
-                    children:
-                        breweryBeers.map((b) => BeerTile(beer: b)).toList(),
+                    children: breweryBeers
+                        .map((b) => BeerTile(beer: b))
+                        .toList(),
                   ),
                 ),
               ],

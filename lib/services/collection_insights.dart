@@ -48,9 +48,9 @@ class CollectionInsights {
         if (styleOf(entry.key) != null)
           (style: styleOf(entry.key)!, count: entry.value),
     ]..sort((a, b) {
-        final byCount = b.count.compareTo(a.count);
-        return byCount != 0 ? byCount : a.style.name.compareTo(b.style.name);
-      });
+      final byCount = b.count.compareTo(a.count);
+      return byCount != 0 ? byCount : a.style.name.compareTo(b.style.name);
+    });
   }
 
   Map<BeerFamily, int> get countByFamily {
@@ -72,9 +72,9 @@ class CollectionInsights {
       for (final entry in counts.entries)
         (country: entry.key, count: entry.value),
     ]..sort((a, b) {
-        final byCount = b.count.compareTo(a.count);
-        return byCount != 0 ? byCount : a.country.compareTo(b.country);
-      });
+      final byCount = b.count.compareTo(a.count);
+      return byCount != 0 ? byCount : a.country.compareTo(b.country);
+    });
   }
 
   /// Note moyenne par style (uniquement les styles ayant au moins une bière
@@ -95,9 +95,9 @@ class CollectionInsights {
             count: entry.value.length,
           ),
     ]..sort((a, b) {
-        final byAverage = b.average.compareTo(a.average);
-        return byAverage != 0 ? byAverage : b.count.compareTo(a.count);
-      });
+      final byAverage = b.average.compareTo(a.average);
+      return byAverage != 0 ? byAverage : b.count.compareTo(a.count);
+    });
   }
 
   /// Dégustations par mois sur les [months] derniers mois (le mois courant
@@ -126,8 +126,9 @@ class CollectionInsights {
 
   List<Achievement> get achievements {
     final countries = {for (final t in tasted) t.beer.country};
-    final europeanCountries =
-        countries.where((c) => countryContinents[c] == 'Europe').length;
+    final europeanCountries = countries
+        .where((c) => countryContinents[c] == 'Europe')
+        .length;
     final continents = {
       for (final c in countries)
         if (countryContinents[c] != null) countryContinents[c]!,
@@ -145,7 +146,7 @@ class CollectionInsights {
         title: l10n.achievementFirstTastingTitle,
         description: l10n.achievementFirstTastingDescription,
         icon: Icons.sports_bar,
-        color: const Color(0xFFC9752B),
+        color: const Color(0xFFF28A17),
         progress: tasted.length,
         target: 1,
       ),
@@ -154,7 +155,7 @@ class CollectionInsights {
         title: l10n.achievementTasted10Title,
         description: l10n.achievementTasted10Description,
         icon: Icons.menu_book_outlined,
-        color: const Color(0xFFC9752B),
+        color: const Color(0xFFF28A17),
         progress: tasted.length,
         target: 10,
       ),
@@ -163,7 +164,7 @@ class CollectionInsights {
         title: l10n.achievementTasted25Title,
         description: l10n.achievementTasted25Description,
         icon: Icons.auto_stories_outlined,
-        color: const Color(0xFFD9A62E),
+        color: const Color(0xFFFDB602),
         progress: tasted.length,
         target: 25,
       ),
@@ -172,7 +173,7 @@ class CollectionInsights {
         title: l10n.achievementTasted50Title,
         description: l10n.achievementTasted50Description,
         icon: Icons.workspace_premium_outlined,
-        color: const Color(0xFFD9A62E),
+        color: const Color(0xFFFDB602),
         progress: tasted.length,
         target: 50,
       ),
@@ -246,7 +247,7 @@ class CollectionInsights {
         title: l10n.achievementDetailed5Title,
         description: l10n.achievementDetailed5Description,
         icon: Icons.radar,
-        color: const Color(0xFFC9752B),
+        color: const Color(0xFFF28A17),
         progress: detailed,
         target: 5,
       ),
@@ -269,8 +270,7 @@ class CollectionInsights {
       for (final t in tasted)
         if (t.status.triedAt != null)
           t.status.triedAt!.year * 12 + t.status.triedAt!.month,
-    }.toList()
-      ..sort();
+    }.toList()..sort();
     var best = 0;
     var current = 0;
     for (var i = 0; i < months.length; i++) {
