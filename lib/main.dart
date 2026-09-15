@@ -9,7 +9,7 @@ import 'config/supabase_config.dart';
 import 'screens/age_gate_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/shared_profile_screen.dart';
-import 'screens/world_map_screen.dart';
+import 'screens/home_shell.dart';
 import 'services/achievement_service.dart';
 import 'services/auth_service.dart';
 import 'services/beer_collection_service.dart';
@@ -194,7 +194,7 @@ class _BierodexAppState extends State<BierodexApp> {
             final shared = widget.sharedProfile;
             return shared != null
                 ? SharedProfileScreen(username: shared, standalone: true)
-                : const WorldMapScreen();
+                : const HomeShell();
           },
         ),
       ),

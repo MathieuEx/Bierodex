@@ -1460,6 +1460,36 @@ abstract class AppLocalizations {
   /// **'Styles'**
   String get styles;
 
+  /// No description provided for @navMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte'**
+  String get navMap;
+
+  /// No description provided for @navCollection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collection'**
+  String get navCollection;
+
+  /// No description provided for @navScan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner'**
+  String get navScan;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get navProfile;
+
+  /// No description provided for @searchBeerHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une bière, une brasserie…'**
+  String get searchBeerHint;
+
   /// No description provided for @beerDeleteTitle.
   ///
   /// In fr, this message translates to:

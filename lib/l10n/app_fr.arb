@@ -409,6 +409,11 @@
   "search": "Rechercher",
   "scanBeer": "Scanner une bière",
   "styles": "Styles",
+  "navMap": "Carte",
+  "navCollection": "Collection",
+  "navScan": "Scanner",
+  "navProfile": "Profil",
+  "searchBeerHint": "Rechercher une bière, une brasserie…",
   "beerDeleteTitle": "Supprimer cette bière ?",
   "beerDeleteDescription": "\"{name}\" sera retirée de ton carnet personnel. Cette action est définitive.",
   "@beerDeleteDescription": {

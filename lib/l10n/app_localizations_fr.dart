@@ -831,6 +831,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get styles => 'Styles';
 
   @override
+  String get navMap => 'Carte';
+
+  @override
+  String get navCollection => 'Collection';
+
+  @override
+  String get navScan => 'Scanner';
+
+  @override
+  String get navProfile => 'Profil';
+
+  @override
+  String get searchBeerHint => 'Rechercher une bière, une brasserie…';
+
+  @override
   String get beerDeleteTitle => 'Supprimer cette bière ?';
 
   @override
