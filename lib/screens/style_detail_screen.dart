@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/beer_styles.dart';
 import '../data/beers.dart';
 import '../widgets/beer_tile.dart';
+import '../l10n/l10n.dart';
 
 class StyleDetailScreen extends StatelessWidget {
   final String styleId;
@@ -13,7 +14,7 @@ class StyleDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = findStyleById(styleId);
     if (style == null) {
-      return const Scaffold(body: Center(child: Text('Style introuvable')));
+      return Scaffold(body: Center(child: Text(context.l10n.styleNotFound)));
     }
     final beersOfStyle = beersForStyle(styleId);
     final color = style.family.color;
@@ -43,8 +44,8 @@ class StyleDetailScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: color),
                       side: BorderSide(color: color.withValues(alpha: 0.4)),
                     ),
-                    Chip(label: Text('Origine : ${style.origin}')),
-                    Chip(label: Text('ABV : ${style.abvRange}')),
+                    Chip(label: Text(context.l10n.styleOrigin(style.origin))),
+                    Chip(label: Text(context.l10n.abvValue(style.abvRange))),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -58,14 +59,14 @@ class StyleDetailScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 16, 8),
             child: Text(
-              'EXEMPLES DE BIÈRES',
+              context.l10n.styleExamples.toUpperCase(),
               style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
           if (beersOfStyle.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text('Aucun exemple pour ce style pour le moment.'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(context.l10n.styleNoExamples),
             )
           else
             ...beersOfStyle.map((b) => BeerTile(beer: b)),

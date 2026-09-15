@@ -7,25 +7,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/google_config.dart';
+import '../l10n/l10n.dart';
 
-/// Authentification via Supabase Auth, sans mot de passe (rien à voler ni à
-/// réutiliser) : code à usage unique envoyé par e-mail (OTP), ou compte
-/// Google (voir [signInWithGoogle] et [oauthRedirectUrl]).
-///
-/// La connexion est obligatoire pour utiliser l'app (voir `BierodexApp` dans
-/// `lib/main.dart`) mais n'est demandée qu'une fois : Supabase persiste la
-/// session (voir `SecureSessionStorage`) et rafraîchit le token tout seul.
-///
-/// Les vraies protections contre le brute-force et le spam sont côté
-/// serveur (limites de débit, expiration du code, captcha — à régler dans
-/// le tableau de bord Supabase) ; les limites ci-dessous évitent seulement
-/// de solliciter le serveur pour rien et guident l'utilisateur.
 class AuthService extends ChangeNotifier {
   AuthService._() {
     Supabase.instance.client.auth.onAuthStateChange.listen(
       (_) => notifyListeners(),
-      // Un refresh token révoqué ou expiré remonte ici : la session est
-      // alors vidée et l'utilisateur renvoyé vers l'écran de connexion.
       onError: (Object _) => notifyListeners(),
     );
   }
@@ -34,13 +21,10 @@ class AuthService extends ChangeNotifier {
 
   static const codeLength = 6;
   static const maxEmailLength = 254;
+  static const minPasswordLength = 8;
+  static const maxPasswordLength = 72;
   static const maxVerifyAttempts = 5;
   static const resendCooldown = Duration(seconds: 60);
-
-  /// Schéma d'URL vers lequel Supabase redirige une fois la connexion
-  /// Google terminée côté navigateur, pour revenir dans l'app mobile.
-  /// Doit être déclaré côté OS (voir AndroidManifest.xml / Info.plist) et
-  /// dans la liste des "Redirect URLs" du dashboard Supabase.
   static const oauthRedirectUrl = 'io.supabase.bierodex://login-callback/';
 
   GoTrueClient get _auth => Supabase.instance.client.auth;
@@ -49,13 +33,11 @@ class AuthService extends ChangeNotifier {
   bool get isSignedIn => currentUser != null;
   String? get userEmail => currentUser?.email;
 
-  // Volontairement simple : la vraie validation est l'arrivée du code.
   static final _emailPattern = RegExp(
     r"^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$",
   );
   static final _codePattern = RegExp('^[0-9]{$codeLength}\$');
 
-  /// Adresse nettoyée (espaces, casse) ou `null` si elle n'est pas valable.
   static String? normalizeEmail(String input) {
     final email = input.trim().toLowerCase();
     if (email.isEmpty || email.length > maxEmailLength) return null;
@@ -64,10 +46,23 @@ class AuthService extends ChangeNotifier {
 
   static bool isValidCode(String input) => _codePattern.hasMatch(input);
 
+  static String? passwordProblem(String password) {
+    if (password.length < minPasswordLength) {
+      return L10n.current.authPasswordTooShort(minPasswordLength);
+    }
+    if (utf8.encode(password).length > maxPasswordLength) {
+      return L10n.current.authPasswordTooLong;
+    }
+    if (!password.contains(RegExp('[A-Za-z]')) ||
+        !password.contains(RegExp('[0-9]'))) {
+      return L10n.current.authPasswordNeedsLettersAndDigits;
+    }
+    return null;
+  }
+
   DateTime? _lastCodeSentAt;
   int _failedAttempts = 0;
 
-  /// Temps restant avant de pouvoir redemander un code.
   Duration get resendWait {
     final sentAt = _lastCodeSentAt;
     if (sentAt == null) return Duration.zero;
@@ -75,63 +70,153 @@ class AuthService extends ChangeNotifier {
     return remaining.isNegative ? Duration.zero : remaining;
   }
 
-  /// Trop d'essais ratés sur le code en cours : il faut en redemander un.
   bool get isCodeLocked => _failedAttempts >= maxVerifyAttempts;
 
-  /// Envoie un code à [email]. Le message affiché ensuite est le même que
-  /// le compte existe ou non, pour ne pas révéler qui est inscrit.
-  Future<void> sendCode(String email) async {
+  static String _requireEmail(String email) {
     final normalized = normalizeEmail(email);
     if (normalized == null) {
-      throw const AuthFailure('Adresse e-mail invalide.');
+      throw AuthFailure(L10n.current.authInvalidEmail);
     }
-    if (resendWait > Duration.zero) {
-      throw AuthFailure(
-        'Patiente ${resendWait.inSeconds} s avant de redemander un code.',
-      );
-    }
+    return normalized;
+  }
+
+  static Future<T> _guard<T>(
+    Future<T> Function() request, {
+    AuthFailure Function(AuthException e)? onAuthException,
+  }) async {
     try {
-      await _auth.signInWithOtp(email: normalized);
+      return await request();
+    } on AuthFailure {
+      rethrow;
     } on AuthException catch (e) {
-      throw AuthFailure.fromAuthException(e);
+      throw onAuthException?.call(e) ?? AuthFailure.fromAuthException(e);
     } catch (_) {
-      throw const AuthFailure(
-        'Impossible de contacter le serveur. Vérifie ta connexion internet.',
-      );
+      throw AuthFailure(L10n.current.errorServerUnreachable);
     }
+  }
+
+  Future<void> signIn({required String email, required String password}) async {
+    final normalized = _requireEmail(email);
+    if (password.isEmpty) {
+      throw AuthFailure(L10n.current.authEnterPassword);
+    }
+    await _guard(
+      () => _auth.signInWithPassword(email: normalized, password: password),
+      onAuthException: (e) => switch (e.code) {
+        'email_not_confirmed' => EmailNotConfirmed(),
+        'invalid_credentials' => AuthFailure(
+            L10n.current.authInvalidCredentials,
+          ),
+        _ => AuthFailure.fromAuthException(e),
+      },
+    );
+  }
+
+  /// Crée un compte. Retourne `true` si l'adresse doit encore être
+  /// confirmée avec le code envoyé par e-mail (voir [confirmSignUp]),
+  /// `false` si l'utilisateur est déjà connecté (confirmation désactivée
+  /// côté Supabase). Si l'adresse est déjà inscrite, Supabase répond comme
+  /// pour une nouvelle adresse (sans envoyer de code) : là encore, rien
+  /// n'est révélé.
+  Future<bool> signUp({required String email, required String password}) async {
+    final normalized = _requireEmail(email);
+    final problem = passwordProblem(password);
+    if (problem != null) throw AuthFailure(problem);
+    final response = await _guard(
+      () => _auth.signUp(email: normalized, password: password),
+      onAuthException: (e) => switch (e) {
+        AuthWeakPasswordException() => AuthFailure(
+            L10n.current.authWeakPasswordChooseAnother,
+          ),
+        _ when e.code == 'user_already_exists' => AuthFailure(
+            L10n.current.authUserAlreadyExists,
+          ),
+        _ => AuthFailure.fromAuthException(e),
+      },
+    );
+    _codeSent();
+    return response.session == null;
+  }
+
+  /// Renvoie le code de confirmation d'inscription à [email].
+  Future<void> resendSignUpCode(String email) async {
+    final normalized = _requireEmail(email);
+    _checkResendWait();
+    await _guard(() => _auth.resend(type: OtpType.signup, email: normalized));
+    _codeSent();
+  }
+
+  /// Confirme l'adresse avec le [code] reçu et connecte l'utilisateur.
+  Future<void> confirmSignUp({required String email, required String code}) =>
+      _verifyCode(email: email, code: code, type: OtpType.email);
+
+  /// Envoie un code de réinitialisation à [email]. Le message affiché
+  /// ensuite est le même que le compte existe ou non.
+  Future<void> sendPasswordReset(String email) async {
+    final normalized = _requireEmail(email);
+    _checkResendWait();
+    await _guard(() => _auth.resetPasswordForEmail(normalized));
+    _codeSent();
+  }
+
+  /// Vérifie le [code] de réinitialisation puis enregistre [newPassword].
+  /// La vérification ouvre une session : l'utilisateur est connecté même
+  /// si l'enregistrement du nouveau mot de passe échoue ensuite.
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    final problem = passwordProblem(newPassword);
+    if (problem != null) throw AuthFailure(problem);
+    await _verifyCode(email: email, code: code, type: OtpType.recovery);
+    await _guard(
+      () => _auth.updateUser(UserAttributes(password: newPassword)),
+      onAuthException: (e) => switch (e) {
+        AuthWeakPasswordException() => AuthFailure(
+            L10n.current.authWeakPassword,
+          ),
+        _ when e.code == 'same_password' => AuthFailure(
+            L10n.current.authSamePassword,
+          ),
+        _ => AuthFailure.fromAuthException(e),
+      },
+    );
+  }
+
+  void _checkResendWait() {
+    if (resendWait > Duration.zero) {
+      throw AuthFailure(L10n.current.authResendWait(resendWait.inSeconds));
+    }
+  }
+
+  void _codeSent() {
     _lastCodeSentAt = DateTime.now();
     _failedAttempts = 0;
   }
 
-  /// Vérifie le [code] reçu par e-mail et connecte l'utilisateur.
-  Future<void> verifyCode({required String email, required String code}) async {
-    final normalized = normalizeEmail(email);
-    if (normalized == null) {
-      throw const AuthFailure('Adresse e-mail invalide.');
-    }
+  Future<void> _verifyCode({
+    required String email,
+    required String code,
+    required OtpType type,
+  }) async {
+    final normalized = _requireEmail(email);
     if (isCodeLocked) {
-      throw const AuthFailure('Trop de tentatives. Demande un nouveau code.');
+      throw AuthFailure(L10n.current.authTooManyCodeAttempts);
     }
     if (!isValidCode(code)) {
-      throw const AuthFailure('Le code contient $codeLength chiffres.');
+      throw AuthFailure(L10n.current.authCodeLength(codeLength));
     }
-    try {
-      await _auth.verifyOTP(
-        email: normalized,
-        token: code,
-        type: OtpType.email,
-      );
-    } on AuthException catch (e) {
-      _failedAttempts++;
-      if (isCodeLocked) {
-        throw const AuthFailure('Trop de tentatives. Demande un nouveau code.');
-      }
-      throw AuthFailure.fromAuthException(e, codeRejected: true);
-    } catch (_) {
-      throw const AuthFailure(
-        'Impossible de contacter le serveur. Vérifie ta connexion internet.',
-      );
-    }
+    await _guard(
+      () => _auth.verifyOTP(email: normalized, token: code, type: type),
+      onAuthException: (e) {
+        _failedAttempts++;
+        if (isCodeLocked) {
+          return AuthFailure(L10n.current.authTooManyCodeAttempts);
+        }
+        return AuthFailure.fromAuthException(e, codeRejected: true);
+      },
+    );
     _failedAttempts = 0;
     _lastCodeSentAt = null;
   }
@@ -176,14 +261,11 @@ class AuthService extends ChangeNotifier {
           e.code == GoogleSignInExceptionCode.interrupted) {
         return;
       }
-      throw const AuthFailure('Connexion Google impossible pour le moment.');
+      throw AuthFailure(L10n.current.authGoogleUnavailable);
     } on AuthException catch (e) {
       throw AuthFailure.fromAuthException(e);
     } catch (_) {
-      throw const AuthFailure(
-        'Impossible d\'ouvrir la connexion Google. Vérifie ta connexion '
-        'internet.',
-      );
+      throw AuthFailure(L10n.current.authGoogleCannotOpen);
     }
   }
 
@@ -203,7 +285,7 @@ class AuthService extends ChangeNotifier {
     final account = await GoogleSignIn.instance.authenticate();
     final idToken = account.authentication.idToken;
     if (idToken == null) {
-      throw const AuthFailure('Connexion Google impossible pour le moment.');
+      throw AuthFailure(L10n.current.authGoogleUnavailable);
     }
     await _auth.signInWithIdToken(
       provider: OAuthProvider.google,
@@ -227,13 +309,9 @@ class AuthService extends ChangeNotifier {
     try {
       await Supabase.instance.client.functions.invoke('delete-account');
     } on FunctionException {
-      throw const AuthFailure(
-        'La suppression a échoué. Réessaie plus tard ; tes données sont intactes.',
-      );
+      throw AuthFailure(L10n.current.authDeleteFailed);
     } catch (_) {
-      throw const AuthFailure(
-        'Impossible de contacter le serveur. Vérifie ta connexion internet.',
-      );
+      throw AuthFailure(L10n.current.errorServerUnreachable);
     }
     if (_usesNativeGoogle && _googleNonce != null) {
       try {
@@ -281,18 +359,20 @@ class AuthFailure implements Exception {
     bool codeRejected = false,
   }) {
     if (e.statusCode == '429' || (e.code?.startsWith('over_') ?? false)) {
-      return const AuthFailure(
-        'Trop de tentatives. Réessaie dans quelques minutes.',
-      );
+      return AuthFailure(L10n.current.authRateLimited);
     }
     if (codeRejected) {
-      return const AuthFailure('Code invalide ou expiré.');
+      return AuthFailure(L10n.current.authInvalidCode);
     }
-    return const AuthFailure(
-      'Connexion impossible pour le moment. Réessaie plus tard.',
-    );
+    return AuthFailure(L10n.current.authSignInUnavailable);
   }
 
   @override
   String toString() => message;
+}
+
+/// Le compte existe mais l'adresse n'a jamais été confirmée : l'écran de
+/// connexion propose alors de saisir le code d'inscription.
+class EmailNotConfirmed extends AuthFailure {
+  EmailNotConfirmed() : super(L10n.current.authEmailNotConfirmed);
 }

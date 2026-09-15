@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import '../data/beers.dart' as beers_data;
 import '../models/beer.dart';
 import 'auth_service.dart';
+import 'sync_queue.dart';
 
 /// Bières ajoutées à la main par l'utilisateur, typiquement après un scan
 /// de code-barres sans correspondance dans le catalogue partagé (voir
@@ -20,6 +22,10 @@ import 'auth_service.dart';
 /// [beers_data.beers] (avec [Beer.isCustom] à `true`) : le reste de l'app
 /// (recherche, fiche détail, collection...) n'a donc rien de spécial à
 /// faire pour les afficher.
+///
+/// Comme pour `BeerCollectionService`, les ajouts et suppressions faits
+/// hors-ligne sont mis en file d'attente ([syncQueue]) et envoyés au retour
+/// du réseau.
 class UserBeerService extends ChangeNotifier {
   UserBeerService._() {
     AuthService.instance.addListener(_onAuthChanged);
@@ -32,6 +38,10 @@ class UserBeerService extends ChangeNotifier {
   static const _uuid = Uuid();
 
   final Map<String, Beer> _beers = {};
+
+  /// Bières ajoutées ou supprimées localement, pas encore confirmées par
+  /// Supabase.
+  final SyncQueue syncQueue = SyncQueue(_table);
   bool _loaded = false;
 
   /// Compte dont [_beers] contient les ajouts (`null` : personne).
@@ -50,6 +60,7 @@ class UserBeerService extends ChangeNotifier {
   static Future<void> forgetUser(String userId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyFor(userId));
+    await SyncQueue.forgetUser(_table, userId);
   }
 
   Future<void> load() async {
@@ -61,15 +72,16 @@ class UserBeerService extends ChangeNotifier {
     _loaded = true;
     _mergeIntoCatalog();
     notifyListeners();
-    if (_userId != null) {
-      await syncWithRemote();
-    }
+    // La copie locale suffit pour démarrer : la synchronisation se fait en
+    // arrière-plan et ne bloque pas l'app sur un réseau lent.
+    if (_userId != null) unawaited(syncWithRemote());
   }
 
   Future<void> _loadFor(String? userId) async {
     final prefs = await SharedPreferences.getInstance();
     _userId = userId;
     _beers.clear();
+    await syncQueue.load(userId);
     var raw = prefs.getString(_keyFor(userId));
     // Ajouts faits avant la connexion obligatoire : rattachés une seule
     // fois au premier compte qui se connecte sur cet appareil.
@@ -126,7 +138,7 @@ class UserBeerService extends ChangeNotifier {
     _mergeIntoCatalog();
     notifyListeners();
     await _persist();
-    await _pushRemote(beer);
+    await _enqueue([beer.id]);
     return beer;
   }
 
@@ -135,13 +147,7 @@ class UserBeerService extends ChangeNotifier {
     _mergeIntoCatalog();
     notifyListeners();
     await _persist();
-    final user = AuthService.instance.currentUser;
-    if (user == null || user.id != _userId) return;
-    await Supabase.instance.client
-        .from(_table)
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+    await _enqueue([id]);
   }
 
   /// Remplace les bières personnelles de [beers_data.beers] par la
@@ -162,12 +168,50 @@ class UserBeerService extends ChangeNotifier {
     );
   }
 
-  Future<void> _pushRemote(Beer beer) async {
+  bool get _canSync {
     final user = AuthService.instance.currentUser;
-    if (user == null || user.id != _userId) return;
-    await Supabase.instance.client.from(_table).upsert({
+    return user != null && user.id == _userId;
+  }
+
+  Future<void> _enqueue(List<String> ids) async {
+    if (_userId == null) return;
+    for (final id in ids) {
+      await syncQueue.mark(id);
+    }
+    unawaited(flushPending());
+  }
+
+  Future<bool>? _flushing;
+
+  /// Envoie les ajouts et suppressions en attente (voir [syncQueue]). Ne
+  /// lève jamais d'exception ; renvoie `true` si tout est parti.
+  Future<bool> flushPending() {
+    if (!_canSync) return Future.value(syncQueue.pending.isEmpty);
+    final running = _flushing;
+    final next = (running ?? Future.value(true))
+        .then((_) => syncQueue.flush(_send))
+        .catchError((Object _) => false);
+    _flushing = next;
+    next.whenComplete(() {
+      if (identical(_flushing, next)) _flushing = null;
+    });
+    return next;
+  }
+
+  Future<void> _send(String id) async {
+    final userId = _userId;
+    if (!_canSync || userId == null) {
+      throw StateError('Compte changé pendant la synchronisation');
+    }
+    final table = Supabase.instance.client.from(_table);
+    final beer = _beers[id];
+    if (beer == null) {
+      await table.delete().eq('id', id).eq('user_id', userId);
+      return;
+    }
+    await table.upsert({
       'id': beer.id,
-      'user_id': user.id,
+      'user_id': userId,
       'name': beer.name,
       'brewery': beer.brewery,
       'country': beer.country,
@@ -180,33 +224,43 @@ class UserBeerService extends ChangeNotifier {
     });
   }
 
-  /// Récupère les bières personnelles de l'utilisateur connecté depuis
-  /// Supabase (le serveur fait foi) et pousse celles qu'il ne connaît pas
-  /// encore (ajoutées hors-ligne ou avant la première connexion).
+  /// Envoie d'abord les modifications en attente, puis récupère les bières
+  /// personnelles de l'utilisateur connecté depuis Supabase (le serveur fait
+  /// foi) et pousse celles qu'il ne connaît pas encore (ajoutées avant la
+  /// première connexion). Sans réseau, ne fait rien et ne lève pas
+  /// d'exception.
   Future<void> syncWithRemote() async {
     final user = AuthService.instance.currentUser;
     if (user == null || user.id != _userId) return;
 
-    final rows = await Supabase.instance.client
-        .from(_table)
-        .select()
-        .eq('user_id', user.id);
+    await flushPending();
+    final List<Map<String, dynamic>> rows;
+    try {
+      rows = await Supabase.instance.client
+          .from(_table)
+          .select()
+          .eq('user_id', user.id);
+    } catch (error) {
+      debugPrint('Synchronisation des bières personnelles reportée : $error');
+      return;
+    }
+    if (user.id != _userId) return;
+
     final remoteIds = <String>{};
     for (final row in rows) {
       final beer = Beer.fromJson(row, isCustom: true);
       remoteIds.add(beer.id);
+      // Supprimée hors-ligne, pas encore confirmée : ne pas la ressusciter.
+      if (syncQueue.isPending(beer.id)) continue;
       _beers[beer.id] = beer;
-    }
-
-    final toPush = _beers.values
-        .where((beer) => !remoteIds.contains(beer.id))
-        .toList();
-    for (final beer in toPush) {
-      await _pushRemote(beer);
     }
 
     _mergeIntoCatalog();
     await _persist();
     notifyListeners();
+    await _enqueue([
+      for (final id in _beers.keys)
+        if (!remoteIds.contains(id)) id,
+    ]);
   }
 }

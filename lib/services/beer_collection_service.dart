@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -6,10 +7,17 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/beer_user_status.dart';
 import 'auth_service.dart';
+import 'sync_queue.dart';
+import 'tasting_photo_service.dart';
 
 /// Suivi personnel des bières (essayées / à goûter / notées / commentées).
 /// Toujours persisté localement sur l'appareil ; synchronisé en plus avec
 /// Supabase quand l'utilisateur est connecté (voir [AuthService]).
+///
+/// Chaque modification est d'abord enregistrée sur l'appareil puis mise en
+/// file d'attente ([syncQueue]) : sans réseau, elle part dès que la
+/// connexion revient (voir `OfflineSyncService`), même après un redémarrage
+/// de l'app.
 class BeerCollectionService extends ChangeNotifier {
   BeerCollectionService._() {
     AuthService.instance.addListener(_onAuthChanged);
@@ -21,6 +29,10 @@ class BeerCollectionService extends ChangeNotifier {
   static const _table = 'beer_status';
 
   final Map<String, BeerUserStatus> _statuses = {};
+
+  /// Bières dont la dernière version locale n'a pas encore été confirmée
+  /// par Supabase.
+  final SyncQueue syncQueue = SyncQueue(_table);
   bool _loaded = false;
 
   /// Compte dont [_statuses] contient les données (`null` : personne).
@@ -39,6 +51,7 @@ class BeerCollectionService extends ChangeNotifier {
   static Future<void> forgetUser(String userId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyFor(userId));
+    await SyncQueue.forgetUser(_table, userId);
   }
 
   Future<void> load() async {
@@ -46,15 +59,16 @@ class BeerCollectionService extends ChangeNotifier {
     await _loadFor(AuthService.instance.currentUser?.id);
     _loaded = true;
     notifyListeners();
-    if (_userId != null) {
-      await syncWithRemote();
-    }
+    // La copie locale suffit pour démarrer : la synchronisation se fait en
+    // arrière-plan et ne bloque pas l'app sur un réseau lent.
+    if (_userId != null) unawaited(syncWithRemote());
   }
 
   Future<void> _loadFor(String? userId) async {
     final prefs = await SharedPreferences.getInstance();
     _userId = userId;
     _statuses.clear();
+    await syncQueue.load(userId);
     var raw = prefs.getString(_keyFor(userId));
     // Avant la connexion obligatoire, la collection était rangée sans
     // compte associé : elle revient une seule fois au premier compte qui
@@ -85,6 +99,10 @@ class BeerCollectionService extends ChangeNotifier {
   BeerUserStatus statusFor(String beerId) =>
       _statuses[beerId] ?? const BeerUserStatus();
 
+  /// Tous les statuts connus, en lecture seule (statistiques, badges,
+  /// recommandations).
+  Map<String, BeerUserStatus> get statuses => Map.unmodifiable(_statuses);
+
   bool isTried(String beerId) => statusFor(beerId).tried;
 
   bool isWishlist(String beerId) => statusFor(beerId).wishlist;
@@ -95,83 +113,122 @@ class BeerCollectionService extends ChangeNotifier {
 
   String? noteFor(String beerId) => statusFor(beerId).note;
 
+  Future<void> _update(
+    String beerId,
+    BeerUserStatus Function(BeerUserStatus current) change,
+  ) async {
+    _statuses[beerId] = change(statusFor(beerId));
+    notifyListeners();
+    await _persist();
+    await _enqueue([beerId]);
+  }
+
   /// Marque [beerId] comme bue ou non. La marquer comme bue l'enlève de la
   /// liste "à goûter" et horodate la dégustation (sauf si une date était
-  /// déjà connue) ; revenir en arrière efface la date et la note.
+  /// déjà connue) ; revenir en arrière efface toute la dégustation (date,
+  /// note, fiche détaillée et photo).
   Future<void> setTried(String beerId, bool tried) async {
-    final current = statusFor(beerId);
-    _statuses[beerId] = BeerUserStatus(
-      tried: tried,
-      wishlist: tried ? false : current.wishlist,
-      rating: tried ? current.rating : null,
-      triedAt: tried ? (current.triedAt ?? DateTime.now()) : null,
-      note: tried ? current.note : null,
+    final photoPath = statusFor(beerId).photoPath;
+    await _update(
+      beerId,
+      (current) => tried
+          ? current.copyWith(
+              tried: true,
+              wishlist: false,
+              triedAt: current.triedAt ?? DateTime.now(),
+            )
+          : current.withoutTasting(),
     );
-    notifyListeners();
-    await _persist();
-    await _pushRemote(beerId);
+    if (!tried && photoPath != null) {
+      await TastingPhotoService.instance.delete(photoPath);
+    }
   }
 
-  /// Ajoute ou retire [beerId] de la liste "à goûter". L'y ajouter la
-  /// retire du statut "bue" (note, date et statut effacés) : les deux
-  /// statuts sont mutuellement exclusifs, comme [setTried].
+  /// Ajoute ou retire [beerId] de la liste "à goûter". L'y ajouter efface
+  /// la dégustation (voir [setTried]) : les deux statuts sont mutuellement
+  /// exclusifs.
   Future<void> setWishlist(String beerId, bool wishlist) async {
-    final current = statusFor(beerId);
-    _statuses[beerId] = BeerUserStatus(
-      tried: wishlist ? false : current.tried,
-      wishlist: wishlist,
-      rating: wishlist ? null : current.rating,
-      triedAt: wishlist ? null : current.triedAt,
-      note: wishlist ? null : current.note,
+    final photoPath = statusFor(beerId).photoPath;
+    await _update(
+      beerId,
+      (current) => wishlist
+          ? current.withoutTasting().copyWith(wishlist: true)
+          : current.copyWith(wishlist: false),
     );
-    notifyListeners();
-    await _persist();
-    await _pushRemote(beerId);
+    if (wishlist && photoPath != null) {
+      await TastingPhotoService.instance.delete(photoPath);
+    }
   }
 
-  Future<void> setRating(String beerId, int? rating) async {
-    final current = statusFor(beerId);
-    _statuses[beerId] = BeerUserStatus(
-      tried: current.tried,
-      wishlist: current.wishlist,
-      rating: rating,
-      triedAt: current.triedAt,
-      note: current.note,
-    );
-    notifyListeners();
-    await _persist();
-    await _pushRemote(beerId);
-  }
+  Future<void> setRating(String beerId, int? rating) =>
+      _update(beerId, (current) => current.copyWith(rating: rating));
 
   /// Corrige manuellement la date de dégustation d'une bière déjà marquée
   /// comme bue.
   Future<void> setTriedAt(String beerId, DateTime date) async {
-    final current = statusFor(beerId);
-    if (!current.tried) return;
-    _statuses[beerId] = BeerUserStatus(
-      tried: current.tried,
-      wishlist: current.wishlist,
-      rating: current.rating,
-      triedAt: date,
-      note: current.note,
-    );
-    notifyListeners();
-    await _persist();
-    await _pushRemote(beerId);
+    if (!isTried(beerId)) return;
+    await _update(beerId, (current) => current.copyWith(triedAt: date));
   }
 
-  Future<void> setNote(String beerId, String? note) async {
-    final current = statusFor(beerId);
-    _statuses[beerId] = BeerUserStatus(
-      tried: current.tried,
-      wishlist: current.wishlist,
-      rating: current.rating,
-      triedAt: current.triedAt,
+  Future<void> setNote(String beerId, String? note) => _update(
+    beerId,
+    (current) => current.copyWith(
       note: (note == null || note.trim().isEmpty) ? null : note,
+    ),
+  );
+
+  /// Met à jour la fiche de dégustation détaillée (critères de 1 à 5 et
+  /// arômes), uniquement pour une bière marquée comme bue.
+  Future<void> setTastingProfile(
+    String beerId, {
+    required int? color,
+    required int? bitterness,
+    required int? sweetness,
+    required int? body,
+    required List<String> aromas,
+  }) async {
+    if (!isTried(beerId)) return;
+    await _update(
+      beerId,
+      (current) => current.copyWith(
+        color: color,
+        bitterness: bitterness,
+        sweetness: sweetness,
+        body: body,
+        aromas: List.unmodifiable(aromas),
+      ),
     );
+  }
+
+  /// Remplace (ou retire, avec `null`) la photo de dégustation. L'ancienne
+  /// photo est supprimée du stockage une fois la collection à jour.
+  Future<void> setPhotoPath(String beerId, String? photoPath) async {
+    final previous = statusFor(beerId).photoPath;
+    if (photoPath != null && !isTried(beerId)) return;
+    await _update(beerId, (current) => current.copyWith(photoPath: photoPath));
+    if (previous != null && previous != photoPath) {
+      await TastingPhotoService.instance.delete(previous);
+    }
+  }
+
+  /// Rattache le suivi de [from] à la bière [to] (bière personnelle
+  /// acceptée au catalogue commun, voir `SubmissionService`). Si [to] a
+  /// déjà un suivi, il est conservé tel quel. La photo suit la ligne : son
+  /// chemin reste dans le dossier du même compte.
+  Future<void> moveStatus({required String from, required String to}) async {
+    final moved = _statuses.remove(from);
+    if (moved == null) return;
+    final adopted = !_statuses.containsKey(to);
+    if (adopted) {
+      _statuses[to] = moved;
+    } else if (moved.photoPath != null &&
+        moved.photoPath != _statuses[to]!.photoPath) {
+      await TastingPhotoService.instance.delete(moved.photoPath!);
+    }
     notifyListeners();
     await _persist();
-    await _pushRemote(beerId);
+    // L'ancienne ligne n'existe plus localement : son envoi la supprime.
+    await _enqueue([if (adopted) to, from]);
   }
 
   List<String> get triedBeerIds =>
@@ -214,70 +271,94 @@ class BeerCollectionService extends ChangeNotifier {
     await prefs.setString(_keyFor(_userId), jsonEncode(map));
   }
 
-  /// Envoie une entrée vers Supabase si l'utilisateur est connecté.
-  Future<void> _pushRemote(String beerId) async {
+  bool get _canSync {
     final user = AuthService.instance.currentUser;
-    if (user == null || user.id != _userId) return;
-    final status = _statuses[beerId];
-    if (status == null) return;
-    await Supabase.instance.client.from(_table).upsert({
-      'user_id': user.id,
-      'beer_id': beerId,
-      'tried': status.tried,
-      'wishlist': status.wishlist,
-      'rating': status.rating,
-      'tried_at': status.triedAt?.toIso8601String(),
-      'note': status.note,
-    });
+    return user != null && user.id == _userId;
   }
 
-  /// Récupère les données de l'utilisateur connecté depuis Supabase (le
-  /// serveur fait foi pour les bières qu'il connaît déjà) et pousse les
-  /// entrées locales que le serveur n'a pas encore (ex. ajoutées hors-ligne
-  /// ou avant la première connexion).
+  Future<void> _enqueue(List<String> beerIds) async {
+    if (_userId == null) return;
+    for (final beerId in beerIds) {
+      await syncQueue.mark(beerId);
+    }
+    // L'app n'attend pas le réseau : l'enregistrement local suffit.
+    unawaited(flushPending());
+  }
+
+  Future<bool>? _flushing;
+
+  /// Envoie les modifications en attente (voir [syncQueue]). Sans réseau,
+  /// elles restent en file ; ne lève jamais d'exception. Renvoie `true` si
+  /// tout est parti.
+  Future<bool> flushPending() {
+    if (!_canSync) return Future.value(syncQueue.pending.isEmpty);
+    // Un seul envoi à la fois : un appel pendant l'envoi relance une
+    // tournée juste après, pour prendre les dernières modifications.
+    final running = _flushing;
+    final next = (running ?? Future.value(true))
+        .then((_) => syncQueue.flush(_send))
+        .catchError((Object _) => false);
+    _flushing = next;
+    next.whenComplete(() {
+      if (identical(_flushing, next)) _flushing = null;
+    });
+    return next;
+  }
+
+  /// Envoie la version locale de [beerId], ou supprime la ligne distante
+  /// si elle n'existe plus localement.
+  Future<void> _send(String beerId) async {
+    final userId = _userId;
+    if (!_canSync || userId == null) {
+      throw StateError('Compte changé pendant la synchronisation');
+    }
+    final status = _statuses[beerId];
+    final table = Supabase.instance.client.from(_table);
+    if (status == null) {
+      await table.delete().eq('user_id', userId).eq('beer_id', beerId);
+    } else {
+      await table.upsert(status.toRow(userId: userId, beerId: beerId));
+    }
+  }
+
+  /// Envoie d'abord les modifications en attente, puis récupère les données
+  /// de l'utilisateur connecté depuis Supabase (le serveur fait foi pour les
+  /// bières qu'il connaît déjà, sauf celles encore en attente d'envoi) et
+  /// pousse les entrées locales que le serveur n'a pas encore (ex. ajoutées
+  /// avant la première connexion). Sans réseau, ne fait rien et ne lève pas
+  /// d'exception : la copie locale reste utilisable.
   Future<void> syncWithRemote() async {
     final user = AuthService.instance.currentUser;
     if (user == null || user.id != _userId) return;
 
-    // Le filtre double la policy RLS : même mal configurée côté serveur,
-    // l'app n'importera jamais les données d'un autre compte.
-    final rows = await Supabase.instance.client
-        .from(_table)
-        .select()
-        .eq('user_id', user.id);
+    await flushPending();
+    final List<Map<String, dynamic>> rows;
+    try {
+      // Le filtre double la policy RLS : même mal configurée côté serveur,
+      // l'app n'importera jamais les données d'un autre compte.
+      rows = await Supabase.instance.client
+          .from(_table)
+          .select()
+          .eq('user_id', user.id);
+    } catch (error) {
+      debugPrint('Synchronisation de la collection reportée : $error');
+      return;
+    }
+    if (user.id != _userId) return;
+
     final remoteIds = <String>{};
     for (final row in rows) {
       final beerId = row['beer_id'] as String;
       remoteIds.add(beerId);
-      final triedAtRaw = row['tried_at'] as String?;
-      _statuses[beerId] = BeerUserStatus(
-        tried: row['tried'] as bool? ?? false,
-        wishlist: row['wishlist'] as bool? ?? false,
-        rating: row['rating'] as int?,
-        triedAt: triedAtRaw != null ? DateTime.tryParse(triedAtRaw) : null,
-        note: row['note'] as String?,
-      );
-    }
-
-    final toPush = _statuses.entries
-        .where((e) => !remoteIds.contains(e.key))
-        .toList();
-    if (toPush.isNotEmpty) {
-      await Supabase.instance.client.from(_table).upsert([
-        for (final entry in toPush)
-          {
-            'user_id': user.id,
-            'beer_id': entry.key,
-            'tried': entry.value.tried,
-            'wishlist': entry.value.wishlist,
-            'rating': entry.value.rating,
-            'tried_at': entry.value.triedAt?.toIso8601String(),
-            'note': entry.value.note,
-          },
-      ]);
+      if (syncQueue.isPending(beerId)) continue;
+      _statuses[beerId] = BeerUserStatus.fromRow(row);
     }
 
     await _persist();
     notifyListeners();
+    await _enqueue([
+      for (final beerId in _statuses.keys)
+        if (!remoteIds.contains(beerId)) beerId,
+    ]);
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/legal_age_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/health_notice.dart';
+import '../l10n/l10n.dart';
 
 /// Premier écran de l'app sur un nouvel appareil : l'utilisateur déclare
 /// avoir l'âge légal avant d'accéder au moindre contenu sur la bière.
@@ -47,9 +48,7 @@ class _AgeGateScreenState extends State<AgeGateScreen> {
                   const SizedBox(height: 32),
                   if (_refused)
                     Text(
-                      'Le Bierodex est réservé aux personnes ayant l\'âge '
-                      'légal de consommer de l\'alcool. Reviens nous voir '
-                      'dans quelques années !',
+                      context.l10n.ageGateRefused,
                       textAlign: TextAlign.center,
                       style: textTheme.titleMedium?.copyWith(
                         color: AppColors.foam,
@@ -57,7 +56,7 @@ class _AgeGateScreenState extends State<AgeGateScreen> {
                     )
                   else ...[
                     Text(
-                      'As-tu ${LegalAgeService.legalAge} ans ou plus ?',
+                      context.l10n.ageGateQuestion(LegalAgeService.legalAge),
                       textAlign: TextAlign.center,
                       style: textTheme.headlineSmall?.copyWith(
                         color: AppColors.foam,
@@ -65,8 +64,7 @@ class _AgeGateScreenState extends State<AgeGateScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Cette application présente des boissons alcoolisées. '
-                      'Elle est réservée aux personnes majeures.',
+                      context.l10n.ageGateNotice,
                       textAlign: TextAlign.center,
                       style: textTheme.bodyMedium?.copyWith(
                         color: AppColors.foamSoft,
@@ -84,7 +82,7 @@ class _AgeGateScreenState extends State<AgeGateScreen> {
                       ),
                       onPressed: LegalAgeService.instance.confirm,
                       child: Text(
-                        'Oui, j\'ai ${LegalAgeService.legalAge} ans ou plus',
+                        context.l10n.ageGateYes(LegalAgeService.legalAge),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -94,7 +92,7 @@ class _AgeGateScreenState extends State<AgeGateScreen> {
                         minimumSize: const Size.fromHeight(48),
                       ),
                       onPressed: () => setState(() => _refused = true),
-                      child: const Text('Non'),
+                      child: Text(context.l10n.no),
                     ),
                   ],
                   const SizedBox(height: 40),

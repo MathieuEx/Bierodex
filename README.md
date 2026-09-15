@@ -28,9 +28,39 @@ jeu de données (`lib/data/`) est fait pour être complété facilement.
 ## Compte et synchronisation
 
 La collection personnelle (bières bues / notées) est toujours
-disponible hors connexion (stockage local). En se connectant (code
-reçu par e-mail, ou compte Google, via Supabase Auth), elle se
+disponible hors connexion (stockage local). En se connectant (e-mail
+et mot de passe, ou compte Google, via Supabase Auth), elle se
 synchronise en plus entre appareils.
+
+Hors-ligne, chaque modification (dégustation, note, bière ajoutée ou
+supprimée) est enregistrée sur l'appareil puis mise en file d'attente
+(`lib/services/sync_queue.dart`). La file survit à un redémarrage et
+part au retour du réseau, au retour au premier plan de l'app, ou toutes
+les minutes tant qu'il reste des envois (`OfflineSyncService`). « Mon
+compte » affiche le nombre de modifications en attente. Le catalogue est
+lui aussi gardé en cache. Les fonctions sociales (amis, propositions,
+modération) et l'envoi de photos restent en ligne uniquement.
+
+## Rappels
+
+Deux rappels locaux, programmés sur l'appareil sans serveur
+(`NotificationService`, mobile uniquement) : « rien goûté depuis un
+mois » (reporté à chaque nouvelle dégustation) et une bière de la
+wishlist toutes les deux semaines. Désactivables dans « Mon compte ».
+
+## Langues
+
+L'interface est en français (langue de référence) et en anglais, via
+les outils de traduction de Flutter (`flutter gen-l10n`, voir
+`l10n.yaml`) : français sur un appareil réglé en français, anglais
+ailleurs. Les textes sont dans `lib/l10n/app_fr.arb` et
+`lib/l10n/app_en.arb` ; les fichiers `app_localizations*.dart` sont
+générés (régénérés par `flutter pub get`) et commités. Dans un widget :
+`context.l10n.maCle` ; ailleurs (services) : `L10n.current.maCle`.
+
+Le contenu du catalogue (descriptions des styles et des bières) vient
+de Supabase et reste en français ; seuls les noms de pays sont traduits
+à l'affichage (`countryName` dans `lib/data/countries.dart`).
 
 ## Structure du code
 
@@ -54,6 +84,11 @@ commités (le repo est public) : ils sont fournis au build via
 2. Renseigne `SUPABASE_URL` et `SUPABASE_ANON_KEY` (Project Settings →
    API Keys sur le dashboard Supabase — la clé "anon public", jamais la
    "service_role").
+
+3. Optionnel : renseigne `SENTRY_DSN` pour le suivi des plantages (projet
+   Flutter gratuit sur sentry.io, Settings → Client Keys). Laissé vide,
+   Sentry n'est pas initialisé. Les rapports ne contiennent ni e-mail, ni
+   identifiant, ni adresse IP (voir `lib/services/crash_reporting.dart`).
 
 `env.json` est ignoré par git.
 
@@ -103,6 +138,13 @@ le navigateur). Sinon, l'app garde le flux OAuth ci-dessus :
 - Exécuter `supabase/secure_auth.sql` dans l'éditeur SQL.
 - Compléter `lib/config/legal_config.dart` et `web/confidentialite.html`
   (éditeur, contact, région Supabase) avant toute publication.
+
+## Intégration continue
+
+`.github/workflows/ci.yml` lance, à chaque push sur `main` et sur chaque
+pull request : vérification que les traductions générées sont à jour,
+`flutter analyze`, `flutter test`, puis les builds web, Android (APK
+debug) et iOS (sans signature). Aucun secret n'est nécessaire.
 
 ## Lancer le projet
 

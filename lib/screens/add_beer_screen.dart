@@ -5,6 +5,7 @@ import '../models/beer_style.dart';
 import '../services/open_food_facts_service.dart';
 import '../services/user_beer_service.dart';
 import 'beer_detail_screen.dart';
+import '../l10n/l10n.dart';
 
 /// Formulaire d'ajout d'une bière absente du catalogue partagé, ouvert le
 /// plus souvent après un scan de code-barres sans correspondance (voir
@@ -67,9 +68,9 @@ class _AddBeerScreenState extends State<AddBeerScreen> {
     final formOk = _formKey.currentState?.validate() ?? false;
     if (!formOk) return;
     if (_styleId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Choisis un style de bière.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.addBeerChooseStyle)));
       return;
     }
 
@@ -78,6 +79,7 @@ class _AddBeerScreenState extends State<AddBeerScreen> {
       name: _nameController.text.trim(),
       brewery: _breweryController.text.trim(),
       country: _countryController.text.trim().isEmpty
+          // Clé stockée, traduite à l'affichage (voir `countryName`).
           ? 'Inconnu'
           : _countryController.text.trim(),
       styleId: _styleId!,
@@ -96,7 +98,7 @@ class _AddBeerScreenState extends State<AddBeerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajouter une bière')),
+      appBar: AppBar(title: Text(context.l10n.addBeerTitle)),
       body: _loadingLookup
           ? const Center(child: CircularProgressIndicator())
           : Form(
@@ -108,7 +110,7 @@ class _AddBeerScreenState extends State<AddBeerScreen> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Text(
-                        'Code-barres : ${widget.barcode}',
+                        context.l10n.barcodeValue(widget.barcode!),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
@@ -128,26 +130,36 @@ class _AddBeerScreenState extends State<AddBeerScreen> {
                     ),
                   TextFormField(
                     controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'Nom de la bière'),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Requis' : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.addBeerName,
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? context.l10n.required
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _breweryController,
-                    decoration: const InputDecoration(labelText: 'Brasserie'),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Requis' : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.fieldBrewery,
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? context.l10n.required
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _countryController,
-                    decoration: const InputDecoration(labelText: 'Pays'),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.fieldCountry,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: _styleId,
-                    decoration: const InputDecoration(labelText: 'Style'),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.fieldStyle,
+                    ),
                     items: [
                       for (final family in BeerFamily.values)
                         ...stylesForFamily(family).map(
@@ -165,15 +177,18 @@ class _AddBeerScreenState extends State<AddBeerScreen> {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _abvController,
-                    decoration: const InputDecoration(labelText: 'ABV (%)'),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.fieldAbv,
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description (optionnel)',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.fieldDescriptionOptional,
                     ),
                     minLines: 2,
                     maxLines: 4,
@@ -190,12 +205,11 @@ class _AddBeerScreenState extends State<AddBeerScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Ajouter à mon carnet'),
+                        : Text(context.l10n.addBeerSubmit),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Cette bière n\'est visible que dans ton carnet, pas dans '
-                    'le catalogue partagé.',
+                    context.l10n.addBeerPrivateNotice,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),

@@ -46,4 +46,28 @@ void main() {
       }
     });
   });
+
+  group('passwordProblem', () {
+    test('accepte un mot de passe assez long avec lettres et chiffres', () {
+      expect(AuthService.passwordProblem('biere2024'), isNull);
+      expect(AuthService.passwordProblem('Houblon & malt 42 !'), isNull);
+    });
+
+    test(
+      'refuse les mots de passe trop courts, trop longs ou trop simples',
+      () {
+        for (final input in [
+          '',
+          'abc123',
+          'motdepasse',
+          '12345678',
+          '${'a1' * 36}x',
+          // 72 caractères mais plus de 72 octets en UTF-8.
+          '${'é' * 40}1234',
+        ]) {
+          expect(AuthService.passwordProblem(input), isNotNull, reason: input);
+        }
+      },
+    );
+  });
 }

@@ -5,6 +5,7 @@ import '../data/beers.dart';
 import '../theme/app_theme.dart';
 import 'add_beer_screen.dart';
 import 'beer_detail_screen.dart';
+import '../l10n/l10n.dart';
 
 /// Scanne le code-barres d'une bouteille ou canette : si le code correspond
 /// à une bière déjà connue (catalogue partagé ou ajout personnel — les deux
@@ -47,7 +48,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     final existing = findBeerByBarcode(code);
     if (existing != null) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => BeerDetailScreen(beerId: existing.id)),
+        MaterialPageRoute(
+          builder: (_) => BeerDetailScreen(beerId: existing.id),
+        ),
       );
     } else {
       Navigator.of(context).pushReplacement(
@@ -63,10 +66,10 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('Scanner une bière'),
+        title: Text(context.l10n.scanBeer),
         actions: [
           IconButton(
-            tooltip: 'Lampe torche',
+            tooltip: context.l10n.torch,
             icon: ValueListenableBuilder<MobileScannerState>(
               valueListenable: _controller,
               builder: (context, state, _) => Icon(
@@ -101,15 +104,17 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             bottom: 40,
             child: Center(
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: const Text(
-                  'Vise le code-barres de l\'étiquette',
-                  style: TextStyle(color: Colors.white),
+                child: Text(
+                  context.l10n.scannerHint,
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),

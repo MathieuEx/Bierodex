@@ -136,11 +136,11 @@ void main() {
 
     // Retour à la carte (deux pages empilées : style puis bière, en plus de
     // l'écran styles lui-même).
-    await tester.pageBack();
+    await tester.tap(find.byType(BackButton));
     await settle(tester);
-    await tester.pageBack();
+    await tester.tap(find.byType(BackButton));
     await settle(tester);
-    await tester.pageBack();
+    await tester.tap(find.byType(BackButton));
     await settle(tester);
 
     await tester.tap(find.byIcon(Icons.local_bar_outlined));
