@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as ll;
 
+import '../config/map_config.dart';
 import '../data/beers.dart';
 import '../data/brewery_locations.dart';
+import '../data/countries.dart';
+import '../l10n/l10n.dart';
 import '../widgets/brewery_beers_sheet.dart';
 import '../widgets/brewery_pin.dart';
-import '../l10n/l10n.dart';
-import '../data/countries.dart';
 
 /// Carte détaillée (tuiles OpenStreetMap) centrée sur un pays, avec un
 /// repère précis par brasserie connue. Ouverte depuis le marqueur pays de
@@ -79,10 +80,7 @@ class _CountryMapScreenState extends State<CountryMapScreen> {
                 maxZoom: 17,
               ),
               children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.bierodex.app',
-                ),
+                MapConfig.tileLayer(),
                 MarkerLayer(
                   markers: [
                     for (final entry in points.entries)
@@ -124,7 +122,7 @@ class _AttributionOverlay extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         color: Colors.white70,
         child: const Text(
-          '© OpenStreetMap contributors',
+          MapConfig.attribution,
           style: TextStyle(fontSize: 10, color: Colors.black87),
         ),
       ),
