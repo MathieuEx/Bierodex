@@ -66,45 +66,45 @@ class _SignUpScreenState extends State<SignUpScreen> with AuthFormState {
   }
 
   Future<void> _signUp() => run(() async {
-        if (_passwordController.text != _confirmController.text) {
-          throw AuthFailure(context.l10n.passwordsDoNotMatch);
-        }
-        final needsConfirmation = await _auth.signUp(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-        TextInput.finishAutofillContext();
-        if (!needsConfirmation || !mounted) return;
-        setState(() {
-          _pendingEmail = AuthService.normalizeEmail(_emailController.text);
-          _passwordController.clear();
-          _confirmController.clear();
-        });
-        startCooldownTicker();
-        _codeFocus.requestFocus();
-      });
+    if (_passwordController.text != _confirmController.text) {
+      throw AuthFailure(context.l10n.passwordsDoNotMatch);
+    }
+    final needsConfirmation = await _auth.signUp(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+    TextInput.finishAutofillContext();
+    if (!needsConfirmation || !mounted) return;
+    setState(() {
+      _pendingEmail = AuthService.normalizeEmail(_emailController.text);
+      _passwordController.clear();
+      _confirmController.clear();
+    });
+    startCooldownTicker();
+    _codeFocus.requestFocus();
+  });
 
   Future<void> _resendCode() => run(() async {
-        final email = _pendingEmail;
-        if (email == null) return;
-        await _auth.resendSignUpCode(email);
-        _codeController.clear();
-        startCooldownTicker();
-        _codeFocus.requestFocus();
-      });
+    final email = _pendingEmail;
+    if (email == null) return;
+    await _auth.resendSignUpCode(email);
+    _codeController.clear();
+    startCooldownTicker();
+    _codeFocus.requestFocus();
+  });
 
   // En cas de succès, l'utilisateur est connecté et `BierodexApp` referme
   // cette page.
   Future<void> _confirm() => run(() async {
-        final email = _pendingEmail;
-        if (email == null) return;
-        try {
-          await _auth.confirmSignUp(email: email, code: _codeController.text);
-        } on AuthFailure {
-          _codeController.clear();
-          rethrow;
-        }
-      });
+    final email = _pendingEmail;
+    if (email == null) return;
+    try {
+      await _auth.confirmSignUp(email: email, code: _codeController.text);
+    } on AuthFailure {
+      _codeController.clear();
+      rethrow;
+    }
+  });
 
   void _changeEmail() {
     setState(() {

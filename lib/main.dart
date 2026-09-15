@@ -22,6 +22,7 @@ import 'services/secure_session_storage.dart';
 import 'services/submission_service.dart';
 import 'services/user_beer_service.dart';
 import 'theme/app_theme.dart';
+import 'theme/brand.dart';
 import 'widgets/achievement_unlocked.dart';
 import 'l10n/l10n.dart';
 
@@ -161,6 +162,9 @@ class _BierodexAppState extends State<BierodexApp> {
       localeResolutionCallback: (locale, _) => resolveAppLocale(locale),
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      // Identité bleu nuit du logo : l'app est sombre quel que soit le
+      // réglage du système (le thème clair reste défini).
+      themeMode: ThemeMode.dark,
       home: ListenableBuilder(
         // Ordre d'entrée : âge légal (une fois par appareil), connexion
         // (une fois par session), puis l'app.
@@ -212,11 +216,11 @@ class _CatalogLoadingScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.sports_bar, size: 48, color: AppColors.copper),
+            Image.asset('assets/logo_icon.png', height: 88),
             const SizedBox(height: 20),
             const CircularProgressIndicator(),
             const SizedBox(height: 20),
-            Text('Bierodex', style: Theme.of(context).textTheme.headlineSmall),
+            const BrandWordmark(size: 30),
             const SizedBox(height: 4),
             Text(
               context.l10n.catalogLoading,

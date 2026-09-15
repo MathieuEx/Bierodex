@@ -43,8 +43,8 @@ class _SignedInView extends StatelessWidget {
           child: ListTile(
             contentPadding: const EdgeInsets.all(14),
             leading: const CircleAvatar(
-              backgroundColor: Color(0x29C9752B),
-              foregroundColor: AppColors.copper,
+              backgroundColor: Color(0x29F28A17),
+              foregroundColor: AppColors.amber,
               child: Icon(Icons.person),
             ),
             title: Text(email),
@@ -190,8 +190,8 @@ class _ModerationEntry extends StatefulWidget {
 }
 
 class _ModerationEntryState extends State<_ModerationEntry> {
-  late final Future<bool> _isModerator =
-      SubmissionService.instance.loadIsModerator();
+  late final Future<bool> _isModerator = SubmissionService.instance
+      .loadIsModerator();
 
   @override
   Widget build(BuildContext context) {
@@ -324,7 +324,11 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
           child: Text(context.l10n.cancel),
         ),
         FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+          // Action destructrice : rouge uni plutôt que le dégradé ambré.
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.error,
+            foregroundColor: Colors.white,
+          ).copyWith(backgroundBuilder: (_, _, child) => child!),
           onPressed: matches ? () => Navigator.of(context).pop(true) : null,
           child: Text(context.l10n.deleteAccountConfirm),
         ),

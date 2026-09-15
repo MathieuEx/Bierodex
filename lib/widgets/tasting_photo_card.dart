@@ -189,15 +189,15 @@ class _SignedPhotoState extends State<_SignedPhoto> {
   }
 
   Widget _retry(Color color) => ColoredBox(
-        color: color,
-        child: Center(
-          child: TextButton.icon(
-            icon: const Icon(Icons.refresh),
-            label: Text(context.l10n.photoUnavailableRetry),
-            onPressed: () => setState(() {
-              _url = TastingPhotoService.instance.signedUrl(widget.path);
-            }),
-          ),
-        ),
-      );
+    color: color,
+    child: Center(
+      child: TextButton.icon(
+        icon: const Icon(Icons.refresh),
+        label: Text(context.l10n.photoUnavailableRetry),
+        onPressed: () => setState(() {
+          _url = TastingPhotoService.instance.signedUrl(widget.path);
+        }),
+      ),
+    ),
+  );
 }

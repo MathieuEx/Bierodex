@@ -46,8 +46,9 @@ class _ShareTastingCardScreenState extends State<ShareTastingCardScreen> {
         : buttonBox.localToGlobal(Offset.zero) & buttonBox.size;
     setState(() => _sharing = true);
     try {
-      final boundary = _boundaryKey.currentContext!.findRenderObject()!
-          as RenderRepaintBoundary;
+      final boundary =
+          _boundaryKey.currentContext!.findRenderObject()!
+              as RenderRepaintBoundary;
       final image = await boundary.toImage(
         pixelRatio: 1080 / tastingShareCardSize.width,
       );

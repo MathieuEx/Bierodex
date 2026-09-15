@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as ll;
 
+import '../config/map_config.dart';
 import '../data/beers.dart';
 import '../data/brewery_locations.dart';
 import '../data/countries.dart';
 import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/brand.dart';
 import 'country_map_screen.dart';
 import 'search_screen.dart';
 import '../l10n/l10n.dart';
@@ -72,9 +74,9 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
   Color _progressColor(double ratio) {
     if (ratio <= 0) return _untouchedColor;
     if (ratio < 0.5) {
-      return Color.lerp(_untouchedColor, AppColors.copper, ratio / 0.5)!;
+      return Color.lerp(_untouchedColor, AppColors.amber, ratio / 0.5)!;
     }
-    return Color.lerp(AppColors.copper, AppColors.gold, (ratio - 0.5) / 0.5)!;
+    return Color.lerp(AppColors.amber, AppColors.gold, (ratio - 0.5) / 0.5)!;
   }
 
   void _openCountry(String country) {
@@ -125,7 +127,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.stout,
+      backgroundColor: AppColors.night,
       body: Stack(
         children: [
           Positioned.fill(
@@ -138,10 +140,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                 maxZoom: 7,
               ),
               children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.bierodex.app',
-                ),
+                MapConfig.tileLayer(),
                 MarkerLayer(markers: markers),
               ],
             ),
@@ -160,8 +159,8 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      AppColors.stout.withValues(alpha: 0.9),
-                      AppColors.stout.withValues(alpha: 0),
+                      AppColors.night.withValues(alpha: 0.9),
+                      AppColors.night.withValues(alpha: 0),
                     ],
                   ),
                 ),
@@ -242,7 +241,7 @@ class _AttributionBadge extends StatelessWidget {
       child: const Padding(
         padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         child: Text(
-          '© OpenStreetMap contributors',
+          MapConfig.attribution,
           style: TextStyle(fontSize: 10, color: Colors.black87),
         ),
       ),
@@ -267,20 +266,14 @@ class _TopBar extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.sports_bar, color: AppColors.copper, size: 22),
+              Image.asset('assets/logo_icon.png', height: 28),
               const SizedBox(width: 10),
-              Text(
-                'BIERODEX',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.foam,
-                  letterSpacing: 1.4,
-                ),
-              ),
+              const BrandWordmark(size: 22),
             ],
           ),
           const SizedBox(height: 10),
           Material(
-            color: AppColors.stout.withValues(alpha: 0.72),
+            color: AppColors.night.withValues(alpha: 0.72),
             shape: StadiumBorder(
               side: BorderSide(color: AppColors.foam.withValues(alpha: 0.18)),
             ),
@@ -361,9 +354,9 @@ class _ContinentChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.stout.withValues(alpha: 0.55),
+      color: AppColors.night.withValues(alpha: 0.55),
       shape: StadiumBorder(
-        side: BorderSide(color: AppColors.copper.withValues(alpha: 0.6)),
+        side: BorderSide(color: AppColors.amber.withValues(alpha: 0.6)),
       ),
       child: InkWell(
         customBorder: const StadiumBorder(),

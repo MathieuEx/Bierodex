@@ -6,6 +6,7 @@ import '../data/brewery_locations.dart';
 import '../models/beer.dart';
 import '../models/beer_user_status.dart';
 import '../theme/app_theme.dart';
+import '../theme/brand.dart';
 import 'globe_painter.dart';
 import '../l10n/l10n.dart';
 import '../data/countries.dart';
@@ -37,8 +38,9 @@ class TastingShareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = findStyleById(beer.styleId);
     final location = breweryLocations[beer.brewery];
-    final highlight =
-        location == null ? null : (lat: location.lat, lng: location.lng);
+    final highlight = location == null
+        ? null
+        : (lat: location.lat, lng: location.lng);
     // Légèrement décalé vers le sud-ouest du repère : le globe paraît
     // incliné plutôt que parfaitement centré.
     final center = highlight == null
@@ -49,11 +51,16 @@ class TastingShareCard extends StatelessWidget {
           );
 
     const display = TextStyle(
-      fontFamily: 'BigShouldersDisplay',
+      fontFamily: AppTheme.displayFont,
+      fontStyle: FontStyle.italic,
+      fontWeight: FontWeight.w900,
       color: AppColors.foam,
       height: 1,
     );
-    const body = TextStyle(fontFamily: 'Manrope', color: AppColors.foamSoft);
+    const body = TextStyle(
+      fontFamily: AppTheme.bodyFont,
+      color: AppColors.foamSoft,
+    );
     final aromas = [
       for (final id in status.aromas.take(4))
         if (tastingAromas[id] != null) tastingAromas[id]!,
@@ -66,7 +73,7 @@ class TastingShareCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF2A1F17), AppColors.stout],
+            colors: [Color(0xFF123A66), AppColors.night],
           ),
         ),
         child: Stack(
@@ -99,20 +106,9 @@ class TastingShareCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(
-                        Icons.sports_bar,
-                        color: AppColors.copper,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'BIERODEX',
-                        style: display.copyWith(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 2,
-                        ),
-                      ),
+                      Image.asset('assets/logo_icon.png', height: 22),
+                      const SizedBox(width: 8),
+                      const BrandWordmark(size: 16),
                     ],
                   ),
                   const Spacer(),
@@ -123,7 +119,7 @@ class TastingShareCard extends StatelessWidget {
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.4,
-                        color: AppColors.copper,
+                        color: AppColors.amber,
                       ),
                     )
                   else
@@ -133,7 +129,7 @@ class TastingShareCard extends StatelessWidget {
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.4,
-                        color: AppColors.copper,
+                        color: AppColors.amber,
                       ),
                     ),
                   const SizedBox(height: 8),
@@ -193,7 +189,7 @@ class TastingShareCard extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: AppColors.copper.withValues(alpha: 0.6),
+                                color: AppColors.amber.withValues(alpha: 0.6),
                               ),
                             ),
                             child: Padding(
@@ -252,6 +248,6 @@ class TastingShareCard extends StatelessWidget {
 
 /// Brasseries des bières marquées comme bues, à passer à [TastingShareCard].
 Set<String> triedBreweriesFrom(Iterable<String> triedBeerIds) => {
-      for (final id in triedBeerIds)
-        if (findBeerById(id) case final beer?) beer.brewery,
-    };
+  for (final id in triedBeerIds)
+    if (findBeerById(id) case final beer?) beer.brewery,
+};

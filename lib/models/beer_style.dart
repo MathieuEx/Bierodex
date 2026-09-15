@@ -39,9 +39,9 @@ enum BeerFamily {
   Color get color {
     switch (this) {
       case BeerFamily.aleHaute:
-        return const Color(0xFFC9752B);
+        return const Color(0xFFF28A17);
       case BeerFamily.lagerBasse:
-        return const Color(0xFFD9A62E);
+        return const Color(0xFFFDB602);
       case BeerFamily.spontanee:
         return const Color(0xFF8B3A3A);
       case BeerFamily.mixte:
@@ -70,11 +70,11 @@ class BeerStyle {
   });
 
   factory BeerStyle.fromJson(Map<String, dynamic> row) => BeerStyle(
-        id: row['id'] as String,
-        name: row['name'] as String,
-        family: BeerFamily.values.byName(row['family'] as String),
-        origin: row['origin'] as String,
-        abvRange: row['abv_range'] as String,
-        description: row['description'] as String,
-      );
+    id: row['id'] as String,
+    name: row['name'] as String,
+    family: BeerFamily.values.byName(row['family'] as String),
+    origin: row['origin'] as String,
+    abvRange: row['abv_range'] as String,
+    description: row['description'] as String,
+  );
 }

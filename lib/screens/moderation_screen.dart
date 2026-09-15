@@ -20,12 +20,12 @@ class ModerationScreen extends StatefulWidget {
 }
 
 class _ModerationScreenState extends State<ModerationScreen> {
-  late Future<List<BeerSubmission>> _future =
-      SubmissionService.instance.pendingSubmissions();
+  late Future<List<BeerSubmission>> _future = SubmissionService.instance
+      .pendingSubmissions();
 
   void _reload() => setState(() {
-        _future = SubmissionService.instance.pendingSubmissions();
-      });
+    _future = SubmissionService.instance.pendingSubmissions();
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -96,28 +96,33 @@ class _HomeShellState extends State<HomeShell> {
   }
 }
 
-/// Pastille cuivre pleine : l'action principale de l'app se repère d'un
-/// coup d'œil au milieu des autres onglets.
+/// Pastille en dégradé or → orange cerclée de bleu ciel, comme le lettrage
+/// du logo : l'action principale se repère d'un coup d'œil.
 class _ScanButton extends StatelessWidget {
   const _ScanButton();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 52,
-      height: 36,
+      width: 56,
+      height: 40,
       decoration: BoxDecoration(
-        color: AppColors.copper,
-        borderRadius: BorderRadius.circular(18),
+        gradient: AppGradients.amber,
+        borderRadius: BorderRadius.circular(AppTheme.radiusControl),
+        border: Border.all(color: AppColors.sky, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppColors.copper.withValues(alpha: 0.35),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: AppColors.amber.withValues(alpha: 0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 22),
+      child: const Icon(
+        Icons.qr_code_scanner,
+        color: AppColors.night,
+        size: 24,
+      ),
     );
   }
 }

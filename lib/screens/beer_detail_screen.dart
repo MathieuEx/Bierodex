@@ -59,8 +59,8 @@ class BeerDetailScreen extends StatelessWidget {
         actions: [
           ListenableBuilder(
             listenable: BeerCollectionService.instance,
-            builder: (context, _) => BeerCollectionService.instance
-                    .isTried(beerId)
+            builder: (context, _) =>
+                BeerCollectionService.instance.isTried(beerId)
                 ? IconButton(
                     tooltip: context.l10n.shareMyTasting,
                     icon: const Icon(Icons.ios_share),

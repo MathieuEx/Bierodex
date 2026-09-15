@@ -20,8 +20,8 @@ class CommunitySubmissionCard extends StatefulWidget {
 
 class _CommunitySubmissionCardState extends State<CommunitySubmissionCard> {
   late Future<void> _loading = SubmissionService.instance.loadMine().catchError(
-        (_) {},
-      );
+    (_) {},
+  );
   bool _busy = false;
 
   Future<void> _run(Future<void> Function() action, String success) async {
@@ -78,25 +78,25 @@ class _CommunitySubmissionCardState extends State<CommunitySubmissionCard> {
 
           final (icon, title, text) = switch (submission?.status) {
             null => (
-                Icons.public,
-                l10n.submissionSharedCatalog,
-                l10n.submissionSharedCatalogDescription,
-              ),
+              Icons.public,
+              l10n.submissionSharedCatalog,
+              l10n.submissionSharedCatalogDescription,
+            ),
             SubmissionStatus.pending => (
-                Icons.hourglass_top,
-                l10n.submissionPending,
-                l10n.submissionPendingDescription,
-              ),
+              Icons.hourglass_top,
+              l10n.submissionPending,
+              l10n.submissionPendingDescription,
+            ),
             SubmissionStatus.approved => (
-                Icons.verified_outlined,
-                l10n.submissionApproved,
-                l10n.submissionApprovedDescription,
-              ),
+              Icons.verified_outlined,
+              l10n.submissionApproved,
+              l10n.submissionApprovedDescription,
+            ),
             SubmissionStatus.rejected => (
-                Icons.block,
-                l10n.submissionRejectedTitle,
-                submission!.reviewNote ?? l10n.submissionRejectedDescription,
-              ),
+              Icons.block,
+              l10n.submissionRejectedTitle,
+              submission!.reviewNote ?? l10n.submissionRejectedDescription,
+            ),
           };
 
           return Card(
@@ -107,7 +107,7 @@ class _CommunitySubmissionCardState extends State<CommunitySubmissionCard> {
                 children: [
                   Row(
                     children: [
-                      Icon(icon, color: AppColors.copper, size: 20),
+                      Icon(icon, color: AppColors.amber, size: 20),
                       const SizedBox(width: 8),
                       Text(title, style: textTheme.titleMedium),
                     ],
@@ -131,11 +131,11 @@ class _CommunitySubmissionCardState extends State<CommunitySubmissionCard> {
                         onPressed: _busy
                             ? null
                             : () => _run(
-                                  () => SubmissionService.instance.withdraw(
-                                    submission,
-                                  ),
-                                  l10n.submissionWithdrawn,
+                                () => SubmissionService.instance.withdraw(
+                                  submission,
                                 ),
+                                l10n.submissionWithdrawn,
+                              ),
                         child: Text(context.l10n.submissionWithdraw),
                       ),
                   ] else

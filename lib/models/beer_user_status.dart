@@ -115,20 +115,19 @@ class BeerUserStatus {
     Object? body = _unset,
     List<String>? aromas,
     Object? photoPath = _unset,
-  }) =>
-      BeerUserStatus(
-        tried: tried ?? this.tried,
-        wishlist: wishlist ?? this.wishlist,
-        rating: rating == _unset ? this.rating : rating as int?,
-        triedAt: triedAt == _unset ? this.triedAt : triedAt as DateTime?,
-        note: note == _unset ? this.note : note as String?,
-        color: color == _unset ? this.color : color as int?,
-        bitterness: bitterness == _unset ? this.bitterness : bitterness as int?,
-        sweetness: sweetness == _unset ? this.sweetness : sweetness as int?,
-        body: body == _unset ? this.body : body as int?,
-        aromas: aromas ?? this.aromas,
-        photoPath: photoPath == _unset ? this.photoPath : photoPath as String?,
-      );
+  }) => BeerUserStatus(
+    tried: tried ?? this.tried,
+    wishlist: wishlist ?? this.wishlist,
+    rating: rating == _unset ? this.rating : rating as int?,
+    triedAt: triedAt == _unset ? this.triedAt : triedAt as DateTime?,
+    note: note == _unset ? this.note : note as String?,
+    color: color == _unset ? this.color : color as int?,
+    bitterness: bitterness == _unset ? this.bitterness : bitterness as int?,
+    sweetness: sweetness == _unset ? this.sweetness : sweetness as int?,
+    body: body == _unset ? this.body : body as int?,
+    aromas: aromas ?? this.aromas,
+    photoPath: photoPath == _unset ? this.photoPath : photoPath as String?,
+  );
 
   /// Tout ce qui décrit une dégustation, effacé quand la bière n'est plus
   /// marquée comme bue.
@@ -136,18 +135,18 @@ class BeerUserStatus {
       BeerUserStatus(tried: false, wishlist: wishlist);
 
   Map<String, dynamic> toJson() => {
-        'tried': tried,
-        if (wishlist) 'wishlist': wishlist,
-        if (rating != null) 'rating': rating,
-        if (triedAt != null) 'triedAt': triedAt!.toIso8601String(),
-        if (note != null) 'note': note,
-        if (color != null) 'color': color,
-        if (bitterness != null) 'bitterness': bitterness,
-        if (sweetness != null) 'sweetness': sweetness,
-        if (body != null) 'body': body,
-        if (aromas.isNotEmpty) 'aromas': aromas,
-        if (photoPath != null) 'photoPath': photoPath,
-      };
+    'tried': tried,
+    if (wishlist) 'wishlist': wishlist,
+    if (rating != null) 'rating': rating,
+    if (triedAt != null) 'triedAt': triedAt!.toIso8601String(),
+    if (note != null) 'note': note,
+    if (color != null) 'color': color,
+    if (bitterness != null) 'bitterness': bitterness,
+    if (sweetness != null) 'sweetness': sweetness,
+    if (body != null) 'body': body,
+    if (aromas.isNotEmpty) 'aromas': aromas,
+    if (photoPath != null) 'photoPath': photoPath,
+  };
 
   factory BeerUserStatus.fromJson(Map<String, dynamic> json) {
     final triedAtRaw = json['triedAt'] as String?;
@@ -170,22 +169,21 @@ class BeerUserStatus {
   Map<String, dynamic> toRow({
     required String userId,
     required String beerId,
-  }) =>
-      {
-        'user_id': userId,
-        'beer_id': beerId,
-        'tried': tried,
-        'wishlist': wishlist,
-        'rating': rating,
-        'tried_at': triedAt?.toIso8601String(),
-        'note': note,
-        'color': color,
-        'bitterness': bitterness,
-        'sweetness': sweetness,
-        'body': body,
-        'aromas': aromas,
-        'photo_path': photoPath,
-      };
+  }) => {
+    'user_id': userId,
+    'beer_id': beerId,
+    'tried': tried,
+    'wishlist': wishlist,
+    'rating': rating,
+    'tried_at': triedAt?.toIso8601String(),
+    'note': note,
+    'color': color,
+    'bitterness': bitterness,
+    'sweetness': sweetness,
+    'body': body,
+    'aromas': aromas,
+    'photo_path': photoPath,
+  };
 
   factory BeerUserStatus.fromRow(Map<String, dynamic> row) {
     final triedAtRaw = row['tried_at'] as String?;

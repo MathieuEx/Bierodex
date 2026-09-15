@@ -61,15 +61,15 @@ class Beer {
   /// [UserBeerService]) : [isCustom] n'en fait pas partie, c'est le
   /// contexte de chargement qui le détermine.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'brewery': brewery,
-        'country': country,
-        'style_id': styleId,
-        'abv': abv,
-        'description': description,
-        if (imageUrl != null) 'image_url': imageUrl,
-        if (imageCredit != null) 'image_credit': imageCredit,
-        if (barcode != null) 'barcode': barcode,
-      };
+    'id': id,
+    'name': name,
+    'brewery': brewery,
+    'country': country,
+    'style_id': styleId,
+    'abv': abv,
+    'description': description,
+    if (imageUrl != null) 'image_url': imageUrl,
+    if (imageCredit != null) 'image_credit': imageCredit,
+    if (barcode != null) 'barcode': barcode,
+  };
 }

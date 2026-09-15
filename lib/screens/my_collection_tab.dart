@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/beers.dart';
 import '../models/beer.dart';
 import '../services/beer_collection_service.dart';
-import '../theme/app_theme.dart';
+import '../theme/brand.dart';
 import '../widgets/badges_row.dart';
 import '../widgets/beer_tile.dart';
 import 'stats_screen.dart';
@@ -66,8 +66,6 @@ class _MyCollectionTabState extends State<MyCollectionTab>
             const BadgesRow(),
             TabBar(
               controller: _tabController,
-              labelColor: AppColors.copper,
-              indicatorColor: AppColors.copper,
               tabs: [
                 Tab(
                   text: '${context.l10n.tastedSection} (${triedBeers.length})',
@@ -130,73 +128,60 @@ class _StatsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ratio = total == 0 ? 0.0 : triedCount / total;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.collectionTitle.toUpperCase(),
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            context.l10n.collectionProgress(triedCount, total),
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: ratio,
-              minHeight: 6,
-              backgroundColor: Theme.of(
-                context,
-              ).colorScheme.outlineVariant.withValues(alpha: 0.4),
-              valueColor: const AlwaysStoppedAnimation(AppColors.copper),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: BrandFrame(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.collectionTitle.toUpperCase(),
+              style: Theme.of(context).textTheme.titleSmall,
             ),
-          ),
-          if (averageRating != null) ...[
+            const SizedBox(height: 6),
+            GradientText(
+              context.l10n.collectionProgress(triedCount, total),
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 10),
-            Text(
-              context.l10n.collectionAverageRating(
-                formatDecimal(averageRating!),
+            GradientProgressBar(value: ratio),
+            if (averageRating != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                context.l10n.collectionAverageRating(
+                  formatDecimal(averageRating!),
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-              style: Theme.of(context).textTheme.bodySmall,
+            ],
+            if (lastTried != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                context.l10n.collectionLastTasting(
+                  lastTriedAt != null
+                      ? '${lastTried!.name} · ${formatDate(lastTriedAt!)}'
+                      : lastTried!.name,
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.insights_outlined, size: 18),
+              label: Text(context.l10n.collectionStatsButton),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+              ),
+              onPressed: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const StatsScreen())),
             ),
           ],
-          if (lastTried != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              context.l10n.collectionLastTasting(
-                lastTriedAt != null
-                    ? '${lastTried!.name} · ${formatDate(lastTriedAt!)}'
-                    : lastTried!.name,
-              ),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            icon: const Icon(Icons.insights_outlined, size: 18),
-            label: Text(context.l10n.collectionStatsButton),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            ),
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const StatsScreen())),
-          ),
-        ],
+        ),
       ),
     );
   }

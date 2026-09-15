@@ -13,21 +13,21 @@ enum ProfileVisibility {
   const ProfileVisibility(this.value);
 
   String get label => switch (this) {
-        private => L10n.current.visibilityPrivate,
-        friends => L10n.current.visibilityFriends,
-        public => L10n.current.visibilityPublic,
-      };
+    private => L10n.current.visibilityPrivate,
+    friends => L10n.current.visibilityFriends,
+    public => L10n.current.visibilityPublic,
+  };
 
   String get description => switch (this) {
-        private => L10n.current.visibilityPrivateDescription,
-        friends => L10n.current.visibilityFriendsDescription,
-        public => L10n.current.visibilityPublicDescription,
-      };
+    private => L10n.current.visibilityPrivateDescription,
+    friends => L10n.current.visibilityFriendsDescription,
+    public => L10n.current.visibilityPublicDescription,
+  };
 
   static ProfileVisibility fromValue(String? value) => values.firstWhere(
-        (v) => v.value == value,
-        orElse: () => ProfileVisibility.private,
-      );
+    (v) => v.value == value,
+    orElse: () => ProfileVisibility.private,
+  );
 }
 
 /// Le profil de l'utilisateur connecté (sa propre ligne de `profiles`).
@@ -43,10 +43,10 @@ class UserProfile {
   });
 
   factory UserProfile.fromRow(Map<String, dynamic> row) => UserProfile(
-        username: row['username'] as String,
-        displayName: row['display_name'] as String?,
-        visibility: ProfileVisibility.fromValue(row['visibility'] as String?),
-      );
+    username: row['username'] as String,
+    displayName: row['display_name'] as String?,
+    visibility: ProfileVisibility.fromValue(row['visibility'] as String?),
+  );
 }
 
 /// Relation entre l'utilisateur connecté et un autre profil, telle que
@@ -54,12 +54,12 @@ class UserProfile {
 enum ProfileRelation { self, friend, pendingSent, pendingReceived, none }
 
 ProfileRelation _relationFrom(String? value) => switch (value) {
-      'self' => ProfileRelation.self,
-      'friend' => ProfileRelation.friend,
-      'pending_sent' => ProfileRelation.pendingSent,
-      'pending_received' => ProfileRelation.pendingReceived,
-      _ => ProfileRelation.none,
-    };
+  'self' => ProfileRelation.self,
+  'friend' => ProfileRelation.friend,
+  'pending_sent' => ProfileRelation.pendingSent,
+  'pending_received' => ProfileRelation.pendingReceived,
+  _ => ProfileRelation.none,
+};
 
 class FoundProfile {
   final String username;
@@ -73,10 +73,10 @@ class FoundProfile {
   });
 
   factory FoundProfile.fromRow(Map<String, dynamic> row) => FoundProfile(
-        username: row['username'] as String,
-        displayName: row['display_name'] as String?,
-        relation: _relationFrom(row['relation'] as String?),
-      );
+    username: row['username'] as String,
+    displayName: row['display_name'] as String?,
+    relation: _relationFrom(row['relation'] as String?),
+  );
 }
 
 /// Un ami, ou une demande d'ami reçue / envoyée (`list_friendships`).
@@ -100,12 +100,12 @@ class Friendship {
   String get label => displayName ?? '@$username';
 
   factory Friendship.fromRow(Map<String, dynamic> row) => Friendship(
-        id: row['id'] as String,
-        username: row['username'] as String,
-        displayName: row['display_name'] as String?,
-        accepted: row['status'] == 'accepted',
-        sentByMe: row['direction'] == 'sent',
-      );
+    id: row['id'] as String,
+    username: row['username'] as String,
+    displayName: row['display_name'] as String?,
+    accepted: row['status'] == 'accepted',
+    sentByMe: row['direction'] == 'sent',
+  );
 }
 
 /// Collection d'un autre profil, en lecture seule, telle que la renvoie
@@ -193,23 +193,23 @@ class BeerSubmission {
   });
 
   factory BeerSubmission.fromRow(Map<String, dynamic> row) => BeerSubmission(
-        id: row['id'] as String,
-        userBeerId: row['user_beer_id'] as String,
-        name: row['name'] as String,
-        brewery: row['brewery'] as String,
-        country: row['country'] as String,
-        styleId: row['style_id'] as String,
-        abv: (row['abv'] as num).toDouble(),
-        description: row['description'] as String? ?? '',
-        barcode: row['barcode'] as String?,
-        imageUrl: row['image_url'] as String?,
-        status: SubmissionStatus.values.firstWhere(
-          (s) => s.name == row['status'],
-          orElse: () => SubmissionStatus.pending,
-        ),
-        reviewNote: row['review_note'] as String?,
-        catalogBeerId: row['catalog_beer_id'] as String?,
-        createdAt: DateTime.tryParse(row['created_at'] as String? ?? '') ??
-            DateTime.now(),
-      );
+    id: row['id'] as String,
+    userBeerId: row['user_beer_id'] as String,
+    name: row['name'] as String,
+    brewery: row['brewery'] as String,
+    country: row['country'] as String,
+    styleId: row['style_id'] as String,
+    abv: (row['abv'] as num).toDouble(),
+    description: row['description'] as String? ?? '',
+    barcode: row['barcode'] as String?,
+    imageUrl: row['image_url'] as String?,
+    status: SubmissionStatus.values.firstWhere(
+      (s) => s.name == row['status'],
+      orElse: () => SubmissionStatus.pending,
+    ),
+    reviewNote: row['review_note'] as String?,
+    catalogBeerId: row['catalog_beer_id'] as String?,
+    createdAt:
+        DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now(),
+  );
 }
