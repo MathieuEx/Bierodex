@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/l10n.dart';
 
 /// Grande famille de fermentation, le premier niveau de classification.
 enum BeerFamily {
@@ -8,28 +9,30 @@ enum BeerFamily {
   mixte;
 
   String get label {
+    final l10n = L10n.current;
     switch (this) {
       case BeerFamily.aleHaute:
-        return 'Fermentation haute (Ale)';
+        return l10n.familyAle;
       case BeerFamily.lagerBasse:
-        return 'Fermentation basse (Lager)';
+        return l10n.familyLager;
       case BeerFamily.spontanee:
-        return 'Fermentation spontanée';
+        return l10n.familySpontaneous;
       case BeerFamily.mixte:
-        return 'Fermentation mixte';
+        return l10n.familyMixed;
     }
   }
 
   String get shortLabel {
+    final l10n = L10n.current;
     switch (this) {
       case BeerFamily.aleHaute:
         return 'Ale';
       case BeerFamily.lagerBasse:
         return 'Lager';
       case BeerFamily.spontanee:
-        return 'Spontanée';
+        return l10n.familySpontaneousShort;
       case BeerFamily.mixte:
-        return 'Mixte';
+        return l10n.familyMixedShort;
     }
   }
 

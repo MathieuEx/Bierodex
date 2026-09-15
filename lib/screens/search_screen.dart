@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 
 import '../data/beer_styles.dart';
 import '../data/beers.dart';
+import '../data/countries.dart';
 import '../models/beer.dart';
 import '../models/beer_style.dart';
 import '../theme/app_theme.dart';
 import '../utils/text_normalize.dart';
 import '../widgets/beer_tile.dart';
+import '../l10n/l10n.dart';
 
 enum _SortOption {
-  relevance('Pertinence'),
-  nameAsc('Nom (A→Z)'),
-  abvAsc('ABV croissant'),
-  abvDesc('ABV décroissant');
+  relevance,
+  nameAsc,
+  abvAsc,
+  abvDesc;
 
-  final String label;
-  const _SortOption(this.label);
+  String get label => switch (this) {
+        relevance => L10n.current.sortRelevance,
+        nameAsc => L10n.current.sortNameAsc,
+        abvAsc => L10n.current.sortAbvAsc,
+        abvDesc => L10n.current.sortAbvDesc,
+      };
 }
 
 /// État des filtres et du tri de la recherche. Un [ChangeNotifier] partagé
@@ -81,15 +87,13 @@ class BeerSearchDelegate extends SearchDelegate<void> {
               _filters.isActive ? Icons.filter_alt : Icons.filter_alt_outlined,
               color: _filters.isActive ? AppColors.copper : null,
             ),
-            tooltip: 'Filtrer et trier',
+            tooltip: context.l10n.filterAndSort,
             onPressed: () => _openFilters(context),
           ),
         ),
         if (query.isNotEmpty)
           IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () => query = '',
-          ),
+              icon: const Icon(Icons.clear), onPressed: () => query = ''),
       ];
 
   @override
@@ -135,6 +139,7 @@ class _SearchResults extends StatelessWidget {
         final matches = normalizeForSearch(b.name).contains(q) ||
             normalizeForSearch(b.brewery).contains(q) ||
             normalizeForSearch(b.country).contains(q) ||
+            normalizeForSearch(countryName(b.country)).contains(q) ||
             (style != null && normalizeForSearch(style.name).contains(q));
         if (!matches) return false;
       }
@@ -167,7 +172,7 @@ class _SearchResults extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Cherche une bière, une brasserie, un style ou un pays',
+            context.l10n.searchHint,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -178,14 +183,12 @@ class _SearchResults extends StatelessWidget {
     if (results.isEmpty) {
       return Center(
         child: Text(
-          'Aucun résultat',
+          context.l10n.noResults,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       );
     }
-    return ListView(
-      children: results.map((b) => BeerTile(beer: b)).toList(),
-    );
+    return ListView(children: results.map((b) => BeerTile(beer: b)).toList());
   }
 }
 
@@ -202,8 +205,10 @@ class _FiltersSheetState extends State<_FiltersSheet> {
   late BeerFamily? _family = widget.filters.family;
   late String? _styleId = widget.filters.styleId;
   late String? _country = widget.filters.country;
-  late RangeValues _abvRange =
-      RangeValues(widget.filters.minAbv, widget.filters.maxAbv);
+  late RangeValues _abvRange = RangeValues(
+    widget.filters.minAbv,
+    widget.filters.maxAbv,
+  );
   late _SortOption _sort = widget.filters.sort;
 
   void _apply() {
@@ -253,7 +258,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Filtrer et trier',
+                  context.l10n.filterAndSort,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 TextButton(
@@ -264,12 +269,15 @@ class _FiltersSheetState extends State<_FiltersSheet> {
                     _abvRange = const RangeValues(0, 20);
                     _sort = _SortOption.relevance;
                   }),
-                  child: const Text('Réinitialiser'),
+                  child: Text(context.l10n.reset),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Text('TRIER PAR', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.sortBy.toUpperCase(),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -284,7 +292,10 @@ class _FiltersSheetState extends State<_FiltersSheet> {
               ],
             ),
             const SizedBox(height: 20),
-            Text('FAMILLE', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.family.toUpperCase(),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -305,7 +316,10 @@ class _FiltersSheetState extends State<_FiltersSheet> {
               ],
             ),
             const SizedBox(height: 20),
-            Text('STYLE', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.fieldStyle.toUpperCase(),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -321,7 +335,10 @@ class _FiltersSheetState extends State<_FiltersSheet> {
               ],
             ),
             const SizedBox(height: 20),
-            Text('PAYS', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.fieldCountry.toUpperCase(),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -329,7 +346,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
               children: [
                 for (final country in allCountries)
                   ChoiceChip(
-                    label: Text(country),
+                    label: Text(countryName(country)),
                     selected: _country == country,
                     onSelected: (selected) =>
                         setState(() => _country = selected ? country : null),
@@ -338,8 +355,10 @@ class _FiltersSheetState extends State<_FiltersSheet> {
             ),
             const SizedBox(height: 20),
             Text(
-              'ABV : ${_abvRange.start.toStringAsFixed(1)} – '
-              '${_abvRange.end.toStringAsFixed(1)} %',
+              context.l10n.abvValue(
+                '${formatDecimal(_abvRange.start)} – '
+                '${formatDecimal(_abvRange.end)} %',
+              ),
               style: Theme.of(context).textTheme.titleSmall,
             ),
             RangeSlider(
@@ -348,16 +367,13 @@ class _FiltersSheetState extends State<_FiltersSheet> {
               max: 20,
               divisions: 40,
               labels: RangeLabels(
-                _abvRange.start.toStringAsFixed(1),
-                _abvRange.end.toStringAsFixed(1),
+                formatDecimal(_abvRange.start),
+                formatDecimal(_abvRange.end),
               ),
               onChanged: (values) => setState(() => _abvRange = values),
             ),
             const SizedBox(height: 12),
-            FilledButton(
-              onPressed: _apply,
-              child: const Text('Appliquer'),
-            ),
+            FilledButton(onPressed: _apply, child: Text(context.l10n.apply)),
             const SizedBox(height: 8),
           ],
         ),

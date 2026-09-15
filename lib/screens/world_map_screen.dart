@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart' as ll;
 
 import '../data/beers.dart';
 import '../data/brewery_locations.dart';
+import '../data/countries.dart';
 import '../services/auth_service.dart';
 import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
@@ -12,7 +13,9 @@ import 'barcode_scanner_screen.dart';
 import 'country_map_screen.dart';
 import 'my_collection_tab.dart';
 import 'search_screen.dart';
+import 'stats_screen.dart';
 import 'styles_tab.dart';
+import '../l10n/l10n.dart';
 
 /// Écran unique de l'app : une carte du monde (tuiles OpenStreetMap), avec
 /// un repère par pays ayant au moins une brasserie référencée. Toucher un
@@ -115,7 +118,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => Scaffold(
-          appBar: AppBar(title: const Text('Styles de bières')),
+          appBar: AppBar(title: Text(context.l10n.stylesTitle)),
           body: const StylesTab(),
         ),
       ),
@@ -132,11 +135,17 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => Scaffold(
-          appBar: AppBar(title: const Text('Ma collection')),
+          appBar: AppBar(title: Text(context.l10n.collectionTitle)),
           body: const MyCollectionTab(),
         ),
       ),
     );
+  }
+
+  void _openStats() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const StatsScreen()));
   }
 
   void _openAccount() {
@@ -177,8 +186,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
               ),
               children: [
                 TileLayer(
-                  urlTemplate:
-                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.bierodex.app',
                 ),
                 MarkerLayer(markers: markers),
@@ -219,6 +227,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                   onScan: _openScanner,
                   onStyles: _openStyles,
                   onCollection: _openCollection,
+                  onStats: _openStats,
                   onAccount: _openAccount,
                 ),
                 const Spacer(),
@@ -298,6 +307,7 @@ class _TopBar extends StatelessWidget {
   final VoidCallback onScan;
   final VoidCallback onStyles;
   final VoidCallback onCollection;
+  final VoidCallback onStats;
   final VoidCallback onAccount;
 
   const _TopBar({
@@ -305,6 +315,7 @@ class _TopBar extends StatelessWidget {
     required this.onScan,
     required this.onStyles,
     required this.onCollection,
+    required this.onStats,
     required this.onAccount,
   });
 
@@ -328,23 +339,28 @@ class _TopBar extends StatelessWidget {
           ),
           _MapIconButton(
             icon: Icons.search,
-            tooltip: 'Rechercher',
+            tooltip: context.l10n.search,
             onPressed: onSearch,
           ),
           _MapIconButton(
             icon: Icons.qr_code_scanner,
-            tooltip: 'Scanner une bière',
+            tooltip: context.l10n.scanBeer,
             onPressed: onScan,
           ),
           _MapIconButton(
             icon: Icons.local_drink_outlined,
-            tooltip: 'Styles',
+            tooltip: context.l10n.styles,
             onPressed: onStyles,
           ),
           _MapIconButton(
             icon: Icons.local_bar_outlined,
-            tooltip: 'Ma collection',
+            tooltip: context.l10n.collectionTitle,
             onPressed: onCollection,
+          ),
+          _MapIconButton(
+            icon: Icons.insights_outlined,
+            tooltip: context.l10n.statsTitle,
+            onPressed: onStats,
           ),
           ListenableBuilder(
             listenable: AuthService.instance,
@@ -352,7 +368,7 @@ class _TopBar extends StatelessWidget {
               final signedIn = AuthService.instance.isSignedIn;
               return _MapIconButton(
                 icon: signedIn ? Icons.person : Icons.person_outline,
-                tooltip: 'Mon compte',
+                tooltip: context.l10n.accountTitle,
                 onPressed: onAccount,
               );
             },
@@ -413,7 +429,7 @@ class _ContinentChips extends StatelessWidget {
         children: [
           for (final continent in _continents) ...[
             _ContinentChip(
-              label: continent,
+              label: continentName(continent),
               onTap: () => onContinent(continent),
             ),
             const SizedBox(width: 8),

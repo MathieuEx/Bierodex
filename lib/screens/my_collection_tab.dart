@@ -6,6 +6,8 @@ import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/badges_row.dart';
 import '../widgets/beer_tile.dart';
+import 'stats_screen.dart';
+import '../l10n/l10n.dart';
 
 class MyCollectionTab extends StatefulWidget {
   const MyCollectionTab({super.key});
@@ -67,8 +69,13 @@ class _MyCollectionTabState extends State<MyCollectionTab>
               labelColor: AppColors.copper,
               indicatorColor: AppColors.copper,
               tabs: [
-                Tab(text: 'Bues (${triedBeers.length})'),
-                Tab(text: 'À goûter (${wishlistBeers.length})'),
+                Tab(
+                  text: '${context.l10n.tastedSection} (${triedBeers.length})',
+                ),
+                Tab(
+                  text:
+                      '${context.l10n.wishlistLabel} (${wishlistBeers.length})',
+                ),
               ],
             ),
             Expanded(
@@ -76,11 +83,9 @@ class _MyCollectionTabState extends State<MyCollectionTab>
                 controller: _tabController,
                 children: [
                   triedBeers.isEmpty
-                      ? const _EmptyState(
+                      ? _EmptyState(
                           icon: Icons.local_bar_outlined,
-                          message: 'Aucune bière essayée pour l\'instant.\n'
-                              'Ouvre une bière et coche "J\'ai bu cette bière" '
-                              'pour commencer ta collection.',
+                          message: context.l10n.collectionEmptyTasted,
                         )
                       : ListView(
                           children: triedBeers
@@ -88,11 +93,9 @@ class _MyCollectionTabState extends State<MyCollectionTab>
                               .toList(),
                         ),
                   wishlistBeers.isEmpty
-                      ? const _EmptyState(
+                      ? _EmptyState(
                           icon: Icons.bookmark_outline,
-                          message: 'Aucune bière à goûter pour l\'instant.\n'
-                              'Ouvre une bière et coche "À goûter" pour '
-                              'la garder sous le coude.',
+                          message: context.l10n.collectionEmptyWishlist,
                         )
                       : ListView(
                           children: wishlistBeers
@@ -142,12 +145,12 @@ class _StatsHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'MA COLLECTION',
+            context.l10n.collectionTitle.toUpperCase(),
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 6),
           Text(
-            '$triedCount / $total bières essayées',
+            context.l10n.collectionProgress(triedCount, total),
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 10),
@@ -156,38 +159,47 @@ class _StatsHeader extends StatelessWidget {
             child: LinearProgressIndicator(
               value: ratio,
               minHeight: 6,
-              backgroundColor:
-                  Theme.of(context).colorScheme.outlineVariant.withValues(
-                        alpha: 0.4,
-                      ),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.outlineVariant.withValues(alpha: 0.4),
               valueColor: const AlwaysStoppedAnimation(AppColors.copper),
             ),
           ),
           if (averageRating != null) ...[
             const SizedBox(height: 10),
             Text(
-              'Note moyenne donnée : ${averageRating!.toStringAsFixed(1)} / 5',
+              context.l10n.collectionAverageRating(
+                formatDecimal(averageRating!),
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
           if (lastTried != null) ...[
             const SizedBox(height: 4),
             Text(
-              'Dernière dégustation : ${lastTried!.name}'
-              '${lastTriedAt != null ? ' · ${_formatDate(lastTriedAt!)}' : ''}',
+              context.l10n.collectionLastTasting(
+                lastTriedAt != null
+                    ? '${lastTried!.name} · ${formatDate(lastTriedAt!)}'
+                    : lastTried!.name,
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.insights_outlined, size: 18),
+            label: Text(context.l10n.collectionStatsButton),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const StatsScreen())),
+          ),
         ],
       ),
     );
   }
-}
-
-String _formatDate(DateTime date) {
-  final day = date.day.toString().padLeft(2, '0');
-  final month = date.month.toString().padLeft(2, '0');
-  return '$day/$month/${date.year}';
 }
 
 class _EmptyState extends StatelessWidget {
@@ -204,11 +216,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 48,
-              color: Theme.of(context).colorScheme.outline,
-            ),
+            Icon(icon, size: 48, color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 16),
             Text(
               message,

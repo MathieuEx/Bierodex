@@ -45,10 +45,37 @@ Deno.serve(async (req) => {
 
   // Suppression explicite plutôt que de compter sur `on delete cascade` :
   // beer_status a été créée à la main et sa clé étrangère n'est pas garantie.
-  for (const table of ["beer_status", "user_beers"]) {
-    const { error: deleteError } = await admin.from(table).delete().eq("user_id", user.id);
+  // Les bières déjà acceptées au catalogue commun (table `beers`) restent :
+  // elles ne contiennent aucune donnée personnelle. Seules les propositions
+  // (qui portent l'auteur) sont effacées.
+  const deletions = [
+    { table: "beer_status", filter: `user_id.eq.${user.id}` },
+    { table: "user_beers", filter: `user_id.eq.${user.id}` },
+    { table: "beer_submissions", filter: `submitted_by.eq.${user.id}` },
+    { table: "friendships", filter: `requester_id.eq.${user.id},addressee_id.eq.${user.id}` },
+    { table: "profiles", filter: `user_id.eq.${user.id}` },
+  ];
+  for (const { table, filter } of deletions) {
+    const { error: deleteError } = await admin.from(table).delete().or(filter);
     if (deleteError) {
       console.error(`delete-account: ${table}`, deleteError.message);
+      return json(500, { error: "delete_failed" });
+    }
+  }
+
+  // Photos de dégustation (bucket privé, dossier `<user_id>/`). Paginé :
+  // `list` renvoie au plus `limit` fichiers par appel.
+  const storage = admin.storage.from("tasting-photos");
+  while (true) {
+    const { data: files, error: listError } = await storage.list(user.id, { limit: 1000 });
+    if (listError) {
+      console.error("delete-account: list photos", listError.message);
+      return json(500, { error: "delete_failed" });
+    }
+    if (!files || files.length === 0) break;
+    const { error: removeError } = await storage.remove(files.map((f) => `${user.id}/${f.name}`));
+    if (removeError) {
+      console.error("delete-account: remove photos", removeError.message);
       return json(500, { error: "delete_failed" });
     }
   }

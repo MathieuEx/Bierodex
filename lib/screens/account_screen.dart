@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthException;
 
+import '../services/achievement_service.dart';
 import '../services/auth_service.dart';
 import '../services/beer_collection_service.dart';
+import '../services/notification_service.dart';
+import '../services/offline_sync_service.dart';
 import '../services/user_beer_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/health_notice.dart';
+import '../services/submission_service.dart';
+import 'moderation_screen.dart';
 import 'privacy_policy_screen.dart';
+import 'social_screen.dart';
+import '../l10n/l10n.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -14,7 +21,7 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mon compte')),
+      appBar: AppBar(title: Text(context.l10n.accountTitle)),
       // Toujours connecté ici : la connexion est obligatoire pour entrer
       // dans l'app, et une déconnexion referme cette page (voir
       // `BierodexApp` dans lib/main.dart).
@@ -42,27 +49,37 @@ class _SignedInView extends StatelessWidget {
             ),
             title: Text(email),
             subtitle: Text(
-              'Connecté',
+              context.l10n.accountSignedIn,
               style: TextStyle(color: AppColors.success),
             ),
           ),
         ),
         const SizedBox(height: 16),
-        Text(
-          'Ta collection (bières bues et notées) est synchronisée avec ce '
-          'compte et accessible depuis n\'importe quel appareil.',
-          style: Theme.of(context).textTheme.bodyMedium,
+        const _SyncStatus(),
+        const SizedBox(height: 16),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.group_outlined),
+            title: Text(context.l10n.accountFriendsAndProfile),
+            subtitle: Text(context.l10n.accountFriendsAndProfileDescription),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const SocialScreen())),
+          ),
         ),
+        const _ModerationEntry(),
+        if (NotificationService.isSupported) const _ReminderSettings(),
         const SizedBox(height: 24),
         OutlinedButton.icon(
           icon: const Icon(Icons.logout),
-          label: const Text('Se déconnecter'),
+          label: Text(context.l10n.signOut),
           onPressed: () => AuthService.instance.signOut(),
         ),
         const SizedBox(height: 8),
         TextButton.icon(
           icon: const Icon(Icons.devices_other),
-          label: const Text('Se déconnecter de tous les appareils'),
+          label: Text(context.l10n.signOutEverywhere),
           onPressed: () => _signOutEverywhere(context),
         ),
         const SizedBox(height: 32),
@@ -70,7 +87,7 @@ class _SignedInView extends StatelessWidget {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.privacy_tip_outlined),
-          title: const Text('Politique de confidentialité'),
+          title: Text(context.l10n.privacyPolicyTitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
@@ -79,11 +96,11 @@ class _SignedInView extends StatelessWidget {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.delete_forever, color: AppColors.error),
-          title: const Text(
-            'Supprimer mon compte',
-            style: TextStyle(color: AppColors.error),
+          title: Text(
+            context.l10n.deleteAccount,
+            style: const TextStyle(color: AppColors.error),
           ),
-          subtitle: const Text('Efface définitivement toutes tes données.'),
+          subtitle: Text(context.l10n.deleteAccountDescription),
           onTap: () => _deleteAccount(context),
         ),
         const SizedBox(height: 24),
@@ -93,24 +110,128 @@ class _SignedInView extends StatelessWidget {
   }
 }
 
+/// Rassure sur la synchronisation, ou indique combien de modifications
+/// faites hors-ligne attendent le retour du réseau.
+class _SyncStatus extends StatelessWidget {
+  const _SyncStatus();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: OfflineSyncService.instance,
+      builder: (context, _) {
+        final pending = OfflineSyncService.instance.pendingCount;
+        if (pending == 0) {
+          return Text(
+            context.l10n.accountSyncedDescription,
+            style: Theme.of(context).textTheme.bodyMedium,
+          );
+        }
+        return Card(
+          child: ListTile(
+            leading: const Icon(Icons.cloud_upload_outlined),
+            title: Text(context.l10n.accountPendingChanges(pending)),
+            subtitle: Text(context.l10n.accountPendingChangesDescription),
+            trailing: IconButton(
+              tooltip: context.l10n.retryNow,
+              icon: const Icon(Icons.refresh),
+              onPressed: OfflineSyncService.instance.flush,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ReminderSettings extends StatelessWidget {
+  const _ReminderSettings();
+
+  @override
+  Widget build(BuildContext context) {
+    final service = NotificationService.instance;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Card(
+        child: ListenableBuilder(
+          listenable: service,
+          builder: (context, _) => Column(
+            children: [
+              SwitchListTile(
+                secondary: const Icon(Icons.notifications_outlined),
+                title: Text(context.l10n.reminderInactivitySetting),
+                subtitle: Text(
+                  context.l10n.reminderInactivitySettingDescription,
+                ),
+                value: service.inactivityEnabled,
+                onChanged: service.setInactivityEnabled,
+              ),
+              SwitchListTile(
+                secondary: const Icon(Icons.bookmark_border),
+                title: Text(context.l10n.reminderWishlistSetting),
+                subtitle: Text(context.l10n.reminderWishlistSettingDescription),
+                value: service.wishlistEnabled,
+                onChanged: service.setWishlistEnabled,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Visible uniquement pour les comptes listés dans la table `moderators`.
+class _ModerationEntry extends StatefulWidget {
+  const _ModerationEntry();
+
+  @override
+  State<_ModerationEntry> createState() => _ModerationEntryState();
+}
+
+class _ModerationEntryState extends State<_ModerationEntry> {
+  late final Future<bool> _isModerator =
+      SubmissionService.instance.loadIsModerator();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _isModerator,
+      builder: (context, snapshot) {
+        if (snapshot.data != true) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Card(
+            child: ListTile(
+              leading: const Icon(Icons.fact_check_outlined),
+              title: Text(context.l10n.moderationTitle),
+              subtitle: Text(context.l10n.moderationDescription),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ModerationScreen()),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 Future<void> _signOutEverywhere(BuildContext context) async {
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Tous les appareils ?'),
-      content: const Text(
-        'Toutes les sessions ouvertes avec ce compte (téléphone, tablette, '
-        'navigateur...) seront fermées. À faire en cas de perte ou de vol '
-        'd\'un appareil.',
-      ),
+      title: Text(context.l10n.signOutEverywhereTitle),
+      content: Text(context.l10n.signOutEverywhereDescription),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Annuler'),
+          child: Text(context.l10n.cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Tout déconnecter'),
+          child: Text(context.l10n.signOutEverywhereConfirm),
         ),
       ],
     ),
@@ -121,11 +242,7 @@ Future<void> _signOutEverywhere(BuildContext context) async {
   } on AuthException {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Impossible de joindre le serveur. Vérifie ta connexion internet.',
-        ),
-      ),
+      SnackBar(content: Text(context.l10n.errorServerUnreachable)),
     );
   }
 }
@@ -138,9 +255,10 @@ Future<void> _deleteAccount(BuildContext context) async {
   if (confirmed != true || !context.mounted) return;
 
   final messenger = ScaffoldMessenger.of(context);
+  final l10n = context.l10n;
   messenger.showSnackBar(
-    const SnackBar(
-      content: Text('Suppression en cours...'),
+    SnackBar(
+      content: Text(l10n.deleteAccountInProgress),
       duration: Duration(minutes: 1),
     ),
   );
@@ -149,12 +267,11 @@ Future<void> _deleteAccount(BuildContext context) async {
     if (userId != null) {
       await BeerCollectionService.forgetUser(userId);
       await UserBeerService.forgetUser(userId);
+      await AchievementService.forgetUser(userId);
     }
     // La déconnexion referme cette page et ramène à l'écran de connexion.
     messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Ton compte a été supprimé.')),
-    );
+    messenger.showSnackBar(SnackBar(content: Text(l10n.deleteAccountDone)));
   } on AuthFailure catch (e) {
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(SnackBar(content: Text(e.message)));
@@ -171,8 +288,6 @@ class _DeleteAccountDialog extends StatefulWidget {
 }
 
 class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
-  static const _confirmationWord = 'SUPPRIMER';
-
   final _controller = TextEditingController();
   @override
   void dispose() {
@@ -182,20 +297,17 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final matches = _controller.text.trim().toUpperCase() == _confirmationWord;
+    final confirmationWord = context.l10n.deleteAccountConfirmationWord;
+    final matches = _controller.text.trim().toUpperCase() == confirmationWord;
     return AlertDialog(
-      title: const Text('Supprimer ton compte ?'),
+      title: Text(context.l10n.deleteAccountTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Ta collection, tes notes, tes commentaires et les bières que tu '
-            'as ajoutées seront effacés définitivement, sur tous tes '
-            'appareils. Cette action est irréversible.',
-          ),
+          Text(context.l10n.deleteAccountWarning),
           const SizedBox(height: 16),
-          const Text('Tape $_confirmationWord pour confirmer :'),
+          Text(context.l10n.deleteAccountTypeToConfirm(confirmationWord)),
           const SizedBox(height: 8),
           TextField(
             controller: _controller,
@@ -209,12 +321,12 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Annuler'),
+          child: Text(context.l10n.cancel),
         ),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: AppColors.error),
           onPressed: matches ? () => Navigator.of(context).pop(true) : null,
-          child: const Text('Supprimer définitivement'),
+          child: Text(context.l10n.deleteAccountConfirm),
         ),
       ],
     );

@@ -6,6 +6,8 @@ import '../data/beers.dart';
 import '../data/brewery_locations.dart';
 import '../widgets/brewery_beers_sheet.dart';
 import '../widgets/brewery_pin.dart';
+import '../l10n/l10n.dart';
+import '../data/countries.dart';
 
 /// Carte détaillée (tuiles OpenStreetMap) centrée sur un pays, avec un
 /// repère précis par brasserie connue. Ouverte depuis le marqueur pays de
@@ -41,13 +43,13 @@ class _CountryMapScreenState extends State<CountryMapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.country),
+        title: Text(countryName(widget.country)),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(
               child: Text(
-                '${points.length} brasserie${points.length > 1 ? 's' : ''}',
+                context.l10n.breweryCount(points.length),
                 style: Theme.of(context).textTheme.labelMedium,
               ),
             ),
@@ -57,7 +59,7 @@ class _CountryMapScreenState extends State<CountryMapScreen> {
       body: points.isEmpty
           ? Center(
               child: Text(
-                'Aucune brasserie localisée pour ${widget.country}.',
+                context.l10n.noBreweryLocated(countryName(widget.country)),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             )
@@ -78,8 +80,7 @@ class _CountryMapScreenState extends State<CountryMapScreen> {
               ),
               children: [
                 TileLayer(
-                  urlTemplate:
-                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.bierodex.app',
                 ),
                 MarkerLayer(

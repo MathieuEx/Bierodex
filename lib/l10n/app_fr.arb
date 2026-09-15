@@ -1,0 +1,756 @@
+{
+  "@@locale": "fr",
+  "authPasswordTooShort": "Le mot de passe doit faire au moins {min} caractères.",
+  "@authPasswordTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "authPasswordTooLong": "Le mot de passe est trop long.",
+  "authPasswordNeedsLettersAndDigits": "Le mot de passe doit contenir des lettres et des chiffres.",
+  "authInvalidEmail": "Adresse e-mail invalide.",
+  "errorServerUnreachable": "Impossible de contacter le serveur. Vérifie ta connexion internet.",
+  "authEnterPassword": "Saisis ton mot de passe.",
+  "authInvalidCredentials": "E-mail ou mot de passe incorrect.",
+  "authWeakPasswordChooseAnother": "Ce mot de passe est trop faible ou a déjà fuité ailleurs. Choisis-en un autre.",
+  "authUserAlreadyExists": "Un compte existe déjà avec cette adresse. Connecte-toi.",
+  "authWeakPassword": "Ce mot de passe est trop faible ou a déjà fuité ailleurs.",
+  "authSamePassword": "Choisis un mot de passe différent de l'ancien.",
+  "authResendWait": "Patiente {seconds} s avant de redemander un code.",
+  "@authResendWait": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authTooManyCodeAttempts": "Trop de tentatives. Demande un nouveau code.",
+  "authCodeLength": "Le code contient {length} chiffres.",
+  "@authCodeLength": {
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "authGoogleUnavailable": "Connexion Google impossible pour le moment.",
+  "authGoogleCannotOpen": "Impossible d'ouvrir la connexion Google. Vérifie ta connexion internet.",
+  "authDeleteFailed": "La suppression a échoué. Réessaie plus tard ; tes données sont intactes.",
+  "authRateLimited": "Trop de tentatives. Réessaie dans quelques minutes.",
+  "authInvalidCode": "Code invalide ou expiré.",
+  "authSignInUnavailable": "Connexion impossible pour le moment. Réessaie plus tard.",
+  "authEmailNotConfirmed": "Confirme d'abord ton adresse e-mail avec le code reçu.",
+  "usernameLength": "Entre {min} et {max} caractères.",
+  "@usernameLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "usernameCharacters": "Lettres minuscules, chiffres et _ uniquement.",
+  "errorSignInRequired": "Connexion requise.",
+  "displayNameTooLong": "Le nom affiché est trop long.",
+  "socialUsernameTaken": "Ce pseudo est déjà pris.",
+  "socialInvalidProfile": "Pseudo ou nom affiché invalide.",
+  "socialProfileRequired": "Choisis d'abord ton pseudo.",
+  "socialProfileNotFound": "Aucun profil ne porte ce pseudo.",
+  "socialCannotAddSelf": "C'est ton propre pseudo.",
+  "socialTooManyRequests": "Trop de demandes en attente. Réessaie plus tard.",
+  "socialRequestNotFound": "Cette demande n'existe plus.",
+  "errorGeneric": "Une erreur est survenue. Réessaie plus tard.",
+  "submissionAlreadySubmitted": "Cette bière a déjà été proposée.",
+  "submissionAlreadyInCatalog": "Une bière avec ce code-barres existe déjà dans le catalogue.",
+  "submissionTooMany": "Tu as déjà beaucoup de propositions en attente.",
+  "submissionBeerNotSynced": "Cette bière n'est pas encore synchronisée. Réessaie dans un instant.",
+  "submissionNotModerator": "Action réservée aux modérateurs.",
+  "submissionAlreadyReviewed": "Cette proposition a déjà été traitée.",
+  "familyAle": "Fermentation haute (Ale)",
+  "familyLager": "Fermentation basse (Lager)",
+  "familySpontaneous": "Fermentation spontanée",
+  "familyMixed": "Fermentation mixte",
+  "familySpontaneousShort": "Spontanée",
+  "familyMixedShort": "Mixte",
+  "visibilityPrivate": "Privé",
+  "visibilityFriends": "Amis",
+  "visibilityPublic": "Public",
+  "visibilityPrivateDescription": "Personne d'autre que toi.",
+  "visibilityFriendsDescription": "Tes amis acceptés uniquement.",
+  "visibilityPublicDescription": "Toute personne ayant le lien, même sans compte.",
+  "aromaAgrumes": "Agrumes",
+  "aromaFruitsRouges": "Fruits rouges",
+  "aromaFruitsExotiques": "Fruits exotiques",
+  "aromaFloral": "Floral",
+  "aromaHerbace": "Herbacé",
+  "aromaResineux": "Résineux",
+  "aromaEpices": "Épices",
+  "aromaBananeClou": "Banane / clou de girofle",
+  "aromaMiel": "Miel",
+  "aromaBiscuit": "Biscuit / céréale",
+  "aromaCaramel": "Caramel",
+  "aromaTorrefie": "Torréfié",
+  "aromaChocolat": "Chocolat",
+  "aromaCafe": "Café",
+  "aromaBoise": "Boisé",
+  "aromaAcidule": "Acidulé",
+  "aromaFunky": "Funky / Brett",
+  "achievementFirstTastingTitle": "Première gorgée",
+  "achievementFirstTastingDescription": "Déguster une première bière.",
+  "achievementTasted10Title": "Carnet entamé",
+  "achievementTasted10Description": "Déguster 10 bières.",
+  "achievementTasted25Title": "Amateur éclairé",
+  "achievementTasted25Description": "Déguster 25 bières.",
+  "achievementTasted50Title": "Connaisseur",
+  "achievementTasted50Description": "Déguster 50 bières.",
+  "achievementStyles10Title": "Palette de styles",
+  "achievementStyles10Description": "Goûter 10 styles différents.",
+  "achievementEuropeTourTitle": "Tour d'Europe",
+  "achievementEuropeTourDescription": "Goûter des bières de 10 pays européens.",
+  "achievementWorldTourTitle": "Tour du monde",
+  "achievementWorldTourDescription": "Goûter des bières des 5 continents.",
+  "achievementSpontaneousTitle": "Explorateur des fermentations spontanées",
+  "achievementSpontaneousDescription": "Déguster 3 bières à fermentation spontanée (lambic, gueuze, kriek...).",
+  "achievementFourFamiliesTitle": "Les quatre fermentations",
+  "achievementFourFamiliesDescription": "Goûter au moins une bière de chaque famille.",
+  "achievementStreak3Title": "Régulier",
+  "achievementStreak3Description": "Au moins une dégustation 3 mois d'affilée.",
+  "achievementStreak6Title": "Fidèle au carnet",
+  "achievementStreak6Description": "Au moins une dégustation 6 mois d'affilée.",
+  "achievementDetailed5Title": "Palais aiguisé",
+  "achievementDetailed5Description": "Remplir 5 fiches de dégustation détaillées.",
+  "achievementPhotos5Title": "Photographe",
+  "achievementPhotos5Description": "Photographier 5 dégustations.",
+  "recommendationLikedStyle": "Tu as aimé tes {style} ({average}/5)",
+  "@recommendationLikedStyle": {
+    "placeholders": {
+      "style": {
+        "type": "String"
+      },
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "recommendationLikedFamily": "Tu apprécies la {family} : découvre le style {style}",
+  "@recommendationLikedFamily": {
+    "placeholders": {
+      "family": {
+        "type": "String"
+      },
+      "style": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderInactivityTitle": "Une petite soif ?",
+  "reminderInactivityBody": "Ça fait {days} jours que tu n'as rien goûté. Une nouvelle bière à découvrir ?",
+  "@reminderInactivityBody": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "reminderWishlistTitle": "Ta wishlist t'attend",
+  "reminderWishlistBody": "Toujours envie de goûter {beer} ({brewery}) ?",
+  "@reminderWishlistBody": {
+    "placeholders": {
+      "beer": {
+        "type": "String"
+      },
+      "brewery": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderChannelName": "Rappels",
+  "reminderChannelDescription": "Rappels de dégustation et de wishlist",
+  "catalogLoading": "Chargement du catalogue...",
+  "catalogLoadError": "Impossible de charger le catalogue.",
+  "checkInternetConnection": "Vérifie ta connexion internet.",
+  "retry": "Réessayer",
+  "accountTitle": "Mon compte",
+  "accountSignedIn": "Connecté",
+  "accountSyncedDescription": "Ta collection (bières bues et notées) est synchronisée avec ce compte et accessible depuis n'importe quel appareil.",
+  "accountPendingChanges": "{count, plural, =1{1 modification en attente} other{{count} modifications en attente}}",
+  "@accountPendingChanges": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountPendingChangesDescription": "Enregistrées sur cet appareil, elles seront envoyées dès le retour de la connexion.",
+  "retryNow": "Réessayer maintenant",
+  "reminderInactivitySetting": "Rappel de dégustation",
+  "reminderInactivitySettingDescription": "Si tu n'as rien goûté depuis un mois",
+  "reminderWishlistSetting": "Rappel de wishlist",
+  "reminderWishlistSettingDescription": "Une bière à goûter, toutes les deux semaines",
+  "accountFriendsAndProfile": "Amis et profil",
+  "accountFriendsAndProfileDescription": "Pseudo, amis, lien de profil public",
+  "signOut": "Se déconnecter",
+  "signOutEverywhere": "Se déconnecter de tous les appareils",
+  "privacyPolicyTitle": "Politique de confidentialité",
+  "deleteAccount": "Supprimer mon compte",
+  "deleteAccountDescription": "Efface définitivement toutes tes données.",
+  "moderationTitle": "Modération",
+  "moderationDescription": "Bières proposées par la communauté",
+  "signOutEverywhereTitle": "Tous les appareils ?",
+  "signOutEverywhereDescription": "Toutes les sessions ouvertes avec ce compte (téléphone, tablette, navigateur...) seront fermées. À faire en cas de perte ou de vol d'un appareil.",
+  "cancel": "Annuler",
+  "signOutEverywhereConfirm": "Tout déconnecter",
+  "deleteAccountInProgress": "Suppression en cours...",
+  "deleteAccountDone": "Ton compte a été supprimé.",
+  "deleteAccountTitle": "Supprimer ton compte ?",
+  "deleteAccountWarning": "Ta collection, tes notes, tes commentaires et les bières que tu as ajoutées seront effacés définitivement, sur tous tes appareils. Cette action est irréversible.",
+  "deleteAccountTypeToConfirm": "Tape {word} pour confirmer :",
+  "@deleteAccountTypeToConfirm": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountConfirm": "Supprimer définitivement",
+  "deleteAccountConfirmationWord": "SUPPRIMER",
+  "privacyWhoTitle": "Qui est responsable ?",
+  "privacyWhoParagraph1": "Le Bierodex est édité par {publisher}, responsable du traitement de tes données. Contact : {contact}.",
+  "@privacyWhoParagraph1": {
+    "placeholders": {
+      "publisher": {
+        "type": "String"
+      },
+      "contact": {
+        "type": "String"
+      }
+    }
+  },
+  "privacyDataTitle": "Données collectées",
+  "privacyDataParagraph1": "Compte : ton adresse e-mail, ton mot de passe (conservé uniquement sous forme hachée, illisible même pour nous) et un identifiant technique. Si tu te connectes avec Google, Google nous transmet aussi ton nom et ta photo de profil ; nous ne recevons jamais ton mot de passe Google.",
+  "privacyDataParagraph2": "Collection : les bières marquées comme bues ou à goûter, tes notes, dates de dégustation, commentaires et fiches de dégustation (couleur, amertume, douceur, corps, arômes), ainsi que les bières que tu ajoutes toi-même (nom, brasserie, code-barres, photo).",
+  "privacyDataParagraph3": "Profil et amis (facultatifs) : ton pseudo, un nom affiché si tu en choisis un, la visibilité de ta collection et la liste de tes amis et demandes d'amis.",
+  "privacyDataParagraph4": "Photos de dégustation : uniquement celles que tu choisis de prendre ou d'importer. Elles sont stockées dans un espace privé accessible à ton seul compte, jamais publiées. Si ton appareil enregistre la position dans ses photos, cette information peut rester dans le fichier : l'app ne la lit ni ne l'exploite.",
+  "privacyDataParagraph5": "Aucune localisation collectée par l'app, aucun contact, aucune publicité, aucun traceur publicitaire.",
+  "privacyWhyTitle": "Pourquoi ?",
+  "privacyWhyParagraph1": "Uniquement pour faire fonctionner l'app : te connecter et synchroniser ta collection entre tes appareils (base légale : exécution du service que tu demandes). Tes données ne sont ni vendues, ni partagées à des fins commerciales.",
+  "privacySharingTitle": "Partage et communauté",
+  "privacySharingParagraph1": "Par défaut, ta collection est privée. Si tu rends ton profil visible par tes amis ou public, les personnes concernées (ou toute personne ayant ton lien, pour un profil public) voient ton pseudo, ton nom affiché, les bières bues et à goûter, leur note sur 5 et leur date. Jamais tes notes écrites, fiches de dégustation, photos ni ton adresse e-mail. Tu peux revenir en privé à tout moment.",
+  "privacySharingParagraph2": "Tes amis voient ton pseudo et ton nom affiché, même si ta collection est privée.",
+  "privacySharingParagraph3": "Proposer une bière au catalogue commun transmet ses informations (nom, brasserie, pays, style, degré, description, code-barres, photo) à un modérateur. Une fois acceptée, elle devient publique, sans mention de ton compte.",
+  "privacySharingParagraph4": "Les cartes de dégustation sont générées sur ton appareil : elles ne sont partagées que si tu choisis de les envoyer.",
+  "privacyStorageTitle": "Où sont-elles stockées ?",
+  "privacyStorageParagraph1": "Chez Supabase (hébergement {region}), avec un accès limité à ton seul compte (sauf ce que tu choisis de partager, voir ci-dessus). Une copie est gardée sur ton appareil pour un usage hors-ligne ; la session de connexion y est chiffrée par le système (Keychain / Keystore). Les modifications faites hors-ligne y attendent le retour du réseau avant d'être envoyées.",
+  "@privacyStorageParagraph1": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "privacyThirdPartiesTitle": "Services tiers",
+  "privacyThirdPartiesParagraph1": "Open Food Facts : quand tu scannes un code-barres inconnu, ce code est envoyé à Open Food Facts pour retrouver le produit.",
+  "privacyThirdPartiesParagraph2": "OpenStreetMap et Wikimedia Commons : fonds de carte et photos, chargés directement depuis leurs serveurs (ton adresse IP leur est donc visible).",
+  "privacyThirdPartiesParagraph3": "Google : uniquement si tu choisis \"Continuer avec Google\".",
+  "privacyThirdPartiesParagraph4": "Sentry : en cas de plantage, un rapport technique (message d'erreur, modèle d'appareil, version du système et de l'app) est envoyé pour corriger le problème. Il ne contient ni ton adresse e-mail, ni ton identifiant, ni ton adresse IP, ni le contenu de ta collection (base légale : intérêt légitime à faire fonctionner l'app).",
+  "privacyThirdPartiesParagraph5": "Les rappels (notifications) sont programmés sur ton appareil, sans aucun serveur. Tu peux les couper dans \"Mon compte\".",
+  "privacyRetentionTitle": "Durée de conservation",
+  "privacyRetentionParagraph1": "Tant que ton compte existe. La suppression du compte efface immédiatement et définitivement toutes tes données de nos serveurs et de l'appareil utilisé (profil, amis et propositions compris). Les bières déjà acceptées au catalogue commun, qui ne contiennent aucune donnée personnelle, y restent.",
+  "privacyRightsTitle": "Tes droits",
+  "privacyRightsParagraph1": "Tu peux accéder à tes données, les corriger, les exporter ou demander leur suppression, et t'opposer à leur traitement. La suppression est disponible directement dans \"Mon compte\" ; pour le reste, écris à {contact}.",
+  "@privacyRightsParagraph1": {
+    "placeholders": {
+      "contact": {
+        "type": "String"
+      }
+    }
+  },
+  "privacyRightsParagraph2": "Tu peux aussi introduire une réclamation auprès de la CNIL (www.cnil.fr).",
+  "privacyAgeTitle": "Âge",
+  "privacyAgeParagraph1": "L'app présente des boissons alcoolisées et est réservée aux personnes majeures.",
+  "privacyLastUpdated": "Dernière mise à jour : {date}",
+  "@privacyLastUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "privacyScreenTitle": "Confidentialité",
+  "socialReceivedRequests": "Demandes reçues",
+  "socialMyFriends": "Mes amis",
+  "socialSentRequests": "Demandes envoyées",
+  "socialNoFriends": "Pas encore d'amis. Ajoute-les avec leur pseudo.",
+  "socialShareSubject": "Ma collection sur le Bierodex",
+  "socialCreateProfile": "Crée ton profil",
+  "socialCreateProfileDescription": "Choisis un pseudo pour ajouter des amis et, si tu le souhaites, partager ta collection. Ton profil reste privé tant que tu ne changes pas sa visibilité.",
+  "socialChooseUsername": "Choisir mon pseudo",
+  "socialEditProfile": "Modifier le profil",
+  "socialCollectionVisibility": "Collection : {visibility} · {description}",
+  "@socialCollectionVisibility": {
+    "placeholders": {
+      "visibility": {
+        "type": "String"
+      },
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "socialViewAsOthers": "Voir comme les autres",
+  "socialShareLink": "Partager le lien",
+  "copy": "Copier",
+  "socialLinkCopied": "Lien copié.",
+  "socialMyProfile": "Mon profil",
+  "socialUsername": "Pseudo",
+  "socialUsernameHelper": "Visible par tes amis et dans ton lien public.",
+  "socialDisplayNameOptional": "Nom affiché (optionnel)",
+  "socialWhoCanSee": "Qui peut voir ma collection ?",
+  "socialSharedDataNotice": "Sont partagés : bières bues et à goûter, notes sur 5 et dates. Jamais tes notes écrites, fiches de dégustation, photos ni ton adresse e-mail.",
+  "saving": "Enregistrement...",
+  "save": "Enregistrer",
+  "socialNowFriends": "Vous êtes maintenant amis avec @{username}.",
+  "@socialNowFriends": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "socialRequestSent": "Demande envoyée à @{username}.",
+  "@socialRequestSent": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "socialAddFriend": "Ajouter un ami",
+  "socialAddFriendHint": "Son pseudo exact",
+  "socialSendRequest": "Envoyer la demande",
+  "socialRemoveFriendTitle": "Retirer {name} ?",
+  "@socialRemoveFriendTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "socialRemoveFriendDescription": "Vous ne verrez plus vos collections respectives si elles sont réservées aux amis.",
+  "remove": "Retirer",
+  "socialRemoveFriend": "Retirer cet ami",
+  "decline": "Refuser",
+  "accept": "Accepter",
+  "statsTitle": "Mes statistiques",
+  "statsEmpty": "Marque tes premières bières comme bues pour voir tes statistiques prendre forme.",
+  "statsByMonth": "Dégustations par mois",
+  "statsLast12Months": "12 derniers mois",
+  "statsByFamily": "Par famille de fermentation",
+  "statsByStyle": "Par style",
+  "statsAverageByStyle": "Note moyenne par style",
+  "statsCountries": "Pays goûtés",
+  "statsCountriesHint": "Plus le cercle est grand et foncé, plus tu as goûté de bières de ce pays.",
+  "statsForYou": "Pour toi",
+  "statsForYouHint": "D'après tes styles les mieux notés.",
+  "statsBadges": "Badges",
+  "statsTileBeers": "{count, plural, =1{bière} other{bières}}",
+  "@statsTileBeers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTileStyles": "{count, plural, =1{style} other{styles}}",
+  "@statsTileStyles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTileCountries": "{count, plural, =1{pays} other{pays}}",
+  "@statsTileCountries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTileAverage": "note moy.",
+  "showLess": "Voir moins",
+  "showAll": "Voir tout ({count})",
+  "@showAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsMonthTooltip": "{month} : {count, plural, =0{aucune dégustation} =1{1 dégustation} other{{count} dégustations}}",
+  "@statsMonthTooltip": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsNoRecommendations": "Note quelques bières (au moins 4 étoiles) pour recevoir des suggestions.",
+  "achievementUnlocked": "Débloqué",
+  "stylesTitle": "Styles de bières",
+  "collectionTitle": "Ma collection",
+  "search": "Rechercher",
+  "scanBeer": "Scanner une bière",
+  "styles": "Styles",
+  "beerDeleteTitle": "Supprimer cette bière ?",
+  "beerDeleteDescription": "\"{name}\" sera retirée de ton carnet personnel. Cette action est définitive.",
+  "@beerDeleteDescription": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "delete": "Supprimer",
+  "beerNotFound": "Bière introuvable",
+  "shareMyTasting": "Partager ma dégustation",
+  "beerDeleteFromNotebook": "Supprimer de mon carnet",
+  "beerAddedByYou": "Ajoutée par toi",
+  "beerStyle": "Style : {style}",
+  "@beerStyle": {
+    "placeholders": {
+      "style": {
+        "type": "String"
+      }
+    }
+  },
+  "photoCredit": "Photo : {credit}",
+  "@photoCredit": {
+    "placeholders": {
+      "credit": {
+        "type": "String"
+      }
+    }
+  },
+  "freeLicense": "licence libre",
+  "beerMyReview": "Mon avis",
+  "wishlistLabel": "À goûter",
+  "beerTried": "J'ai bu cette bière",
+  "beerMyRating": "Ma note :",
+  "beerClearRating": "Effacer la note",
+  "tastedOn": "Dégustée le {date}",
+  "@tastedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dateUnknown": "Date non renseignée",
+  "edit": "Modifier",
+  "tastingNotes": "Notes de dégustation",
+  "tastingNotesHint": "Arômes, contexte, avec qui...",
+  "moderationEmpty": "Aucune proposition en attente.",
+  "moderationPossibleDuplicate": "Doublon possible : {beers}",
+  "@moderationPossibleDuplicate": {
+    "placeholders": {
+      "beers": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidAbv": "Degré invalide.",
+  "moderationApproved": "Bière ajoutée au catalogue. Pense à renseigner la position de la brasserie si elle est nouvelle.",
+  "submissionRejected": "Proposition refusée.",
+  "moderationReview": "Relire la proposition",
+  "barcodeValue": "Code-barres : {barcode}",
+  "@barcodeValue": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldName": "Nom",
+  "fieldBrewery": "Brasserie",
+  "fieldCountry": "Pays",
+  "fieldStyle": "Style",
+  "fieldAbv": "ABV (%)",
+  "fieldDescription": "Description",
+  "moderationNote": "Message à l'auteur (optionnel)",
+  "moderationNoteHelper": "Affiché en cas de refus.",
+  "submissionConfirmTitle": "Proposer au catalogue ?",
+  "submissionConfirmDescription": "Le nom, la brasserie, le pays, le style, le degré, la description, le code-barres et la photo seront relus par un modérateur. Une fois acceptée, la bière sera visible par tous, et ta dégustation sera rattachée à la fiche commune. Ton pseudo n'est pas publié.",
+  "submit": "Proposer",
+  "submissionThanks": "Merci ! Ta proposition sera relue par un modérateur.",
+  "submissionSharedCatalog": "Catalogue commun",
+  "submissionSharedCatalogDescription": "Cette bière manque au catalogue ? Propose-la pour que tout le monde puisse la retrouver.",
+  "submissionPending": "Proposition en attente",
+  "submissionPendingDescription": "Un modérateur va relire cette bière.",
+  "submissionApproved": "Acceptée au catalogue",
+  "submissionApprovedDescription": "Ta dégustation sera rattachée à la fiche commune au prochain lancement de l'app.",
+  "submissionRejectedDescription": "Elle ne correspond pas au catalogue (doublon, informations incomplètes...).",
+  "submissionSubmit": "Proposer au catalogue",
+  "submissionResubmit": "Proposer à nouveau",
+  "submissionWithdrawn": "Proposition retirée.",
+  "submissionWithdraw": "Retirer ma proposition",
+  "loading": "Chargement...",
+  "submissionRejectedTitle": "Proposition refusée",
+  "sharedProfileUnavailable": "Ce profil n'existe pas ou sa collection n'est pas partagée avec toi.",
+  "sharedProfileTastedStat": "{count, plural, =1{bue} other{bues}}",
+  "@sharedProfileTastedStat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedProfileInCommon": "en commun",
+  "sharedProfilePreview": "Aperçu de ce que voient les autres ({visibility}).",
+  "@sharedProfilePreview": {
+    "placeholders": {
+      "visibility": {
+        "type": "String"
+      }
+    }
+  },
+  "tastedSection": "Bues",
+  "noBeersYet": "Aucune bière pour l'instant.",
+  "colorStraw": "Paille",
+  "colorGolden": "Dorée",
+  "colorAmber": "Ambrée",
+  "colorBrown": "Brune",
+  "colorBlack": "Noire",
+  "tastingProfileTitle": "Fiche de dégustation",
+  "tastingProfileHint": "Touche un niveau pour le choisir, retouche-le pour l'effacer.",
+  "criterionBitterness": "Amertume",
+  "bitternessLow": "Légère",
+  "bitternessHigh": "Intense",
+  "criterionSweetness": "Douceur",
+  "sweetnessLow": "Sèche",
+  "sweetnessHigh": "Sucrée",
+  "criterionBody": "Corps",
+  "bodyLow": "Léger",
+  "bodyHigh": "Rond",
+  "aromas": "Arômes",
+  "compareWithAnother": "Comparer avec une autre bière",
+  "levelOutOfFive": "{criterion} {level} sur 5",
+  "@levelOutOfFive": {
+    "placeholders": {
+      "criterion": {
+        "type": "String"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "criterionColor": "Couleur",
+  "sortRelevance": "Pertinence",
+  "sortNameAsc": "Nom (A→Z)",
+  "sortAbvAsc": "ABV croissant",
+  "sortAbvDesc": "ABV décroissant",
+  "filterAndSort": "Filtrer et trier",
+  "searchHint": "Cherche une bière, une brasserie, un style ou un pays",
+  "noResults": "Aucun résultat",
+  "reset": "Réinitialiser",
+  "sortBy": "Trier par",
+  "family": "Famille",
+  "apply": "Appliquer",
+  "collectionEmptyTasted": "Aucune bière essayée pour l'instant.\nOuvre une bière et coche \"J'ai bu cette bière\" pour commencer ta collection.",
+  "collectionEmptyWishlist": "Aucune bière à goûter pour l'instant.\nOuvre une bière et coche \"À goûter\" pour la garder sous le coude.",
+  "collectionProgress": "{count} / {total} bières essayées",
+  "@collectionProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionAverageRating": "Note moyenne donnée : {average} / 5",
+  "@collectionAverageRating": {
+    "placeholders": {
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionLastTasting": "Dernière dégustation : {beer}",
+  "@collectionLastTasting": {
+    "placeholders": {
+      "beer": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionStatsButton": "Mes statistiques et recommandations",
+  "addBeerChooseStyle": "Choisis un style de bière.",
+  "addBeerTitle": "Ajouter une bière",
+  "addBeerName": "Nom de la bière",
+  "required": "Requis",
+  "fieldDescriptionOptional": "Description (optionnel)",
+  "addBeerSubmit": "Ajouter à mon carnet",
+  "addBeerPrivateNotice": "Cette bière n'est visible que dans ton carnet. Tu pourras ensuite la proposer au catalogue commun depuis sa fiche.",
+  "emailAddress": "Adresse e-mail",
+  "password": "Mot de passe",
+  "showPassword": "Afficher le mot de passe",
+  "hidePassword": "Masquer le mot de passe",
+  "emailCode": "Code reçu par e-mail",
+  "resendCodeWait": "Renvoyer le code ({seconds} s)",
+  "@resendCodeWait": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "resendCode": "Renvoyer le code",
+  "or": "ou",
+  "continueWithGoogle": "Continuer avec Google",
+  "passwordsDoNotMatch": "Les deux mots de passe ne correspondent pas.",
+  "signUpSubtitle": "Crée ton compte pour sauvegarder ta collection et la retrouver sur tous tes appareils.",
+  "signUpCodeSent": "Si l'adresse {email} n'est pas déjà inscrite, un code à {length} chiffres vient d'y être envoyé pour la confirmer.",
+  "@signUpCodeSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "passwordHelper": "Au moins {min} caractères, avec des lettres et des chiffres.",
+  "@passwordHelper": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmPassword": "Confirmer le mot de passe",
+  "signUpSubmit": "Créer mon compte",
+  "alreadyHaveAccount": "Déjà un compte ?",
+  "signIn": "Se connecter",
+  "confirmEmail": "Confirmer mon adresse",
+  "changeEmail": "Changer d'adresse",
+  "passwordResetSubtitle": "Indique l'adresse de ton compte : tu y recevras un code pour choisir un nouveau mot de passe.",
+  "passwordResetCodeSent": "Si un compte existe pour {email}, un code à {length} chiffres vient d'y être envoyé.",
+  "@passwordResetCodeSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "getCode": "Recevoir un code",
+  "newPassword": "Nouveau mot de passe",
+  "changePassword": "Changer le mot de passe",
+  "loginSubtitle": "Connecte-toi pour retrouver ta collection sur tous tes appareils.",
+  "forgotPassword": "Mot de passe oublié ?",
+  "noAccountYet": "Pas encore de compte ?",
+  "createAccount": "Créer un compte",
+  "ageGateRefused": "Le Bierodex est réservé aux personnes ayant l'âge légal de consommer de l'alcool. Reviens nous voir dans quelques années !",
+  "ageGateQuestion": "As-tu {age} ans ou plus ?",
+  "@ageGateQuestion": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "ageGateNotice": "Cette application présente des boissons alcoolisées. Elle est réservée aux personnes majeures.",
+  "ageGateYes": "Oui, j'ai {age} ans ou plus",
+  "@ageGateYes": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "no": "Non",
+  "shareCardFileName": "bierodex-degustation.png",
+  "shareCardText": "{beer} · via le Bierodex",
+  "@shareCardText": {
+    "placeholders": {
+      "beer": {
+        "type": "String"
+      }
+    }
+  },
+  "shareFailed": "Le partage n'a pas pu s'ouvrir.",
+  "shareCardTitle": "Carte de dégustation",
+  "shareCardShowUsername": "Afficher mon pseudo",
+  "shareCardPrivacyNotice": "Seules la note et les arômes cochés apparaissent : tes notes écrites et ta photo restent privées.",
+  "preparing": "Préparation...",
+  "shareImage": "Partager l'image",
+  "tasted": "Dégustée",
+  "compare": "Comparer",
+  "compareEmpty": "Remplis la fiche de dégustation d'une autre bière pour la comparer à celle-ci.",
+  "compareWith": "Comparer avec",
+  "commonAromas": "Arômes en commun",
+  "noCommonAromas": "Aucun arôme en commun.",
+  "criterionRating": "Note",
+  "notSet": "non renseigné",
+  "photoSaveFailed": "La photo n'a pas pu être enregistrée. Vérifie ta connexion et l'accès à l'appareil photo.",
+  "photoDeleteTitle": "Supprimer la photo ?",
+  "myPhoto": "Ma photo",
+  "photoPrivate": "Visible par toi seul.",
+  "takePhoto": "Prendre une photo",
+  "chooseFromGallery": "Choisir dans la galerie",
+  "deletePhoto": "Supprimer la photo",
+  "photoUnavailableRetry": "Photo indisponible · Réessayer",
+  "breweryCount": "{count, plural, =0{aucune brasserie} =1{1 brasserie} other{{count} brasseries}}",
+  "@breweryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noBreweryLocated": "Aucune brasserie localisée pour {country}.",
+  "@noBreweryLocated": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "styleNotFound": "Style introuvable",
+  "styleOrigin": "Origine : {origin}",
+  "@styleOrigin": {
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExamples": "Exemples de bières",
+  "styleNoExamples": "Aucun exemple pour ce style pour le moment.",
+  "torch": "Lampe torche",
+  "scannerHint": "Vise le code-barres de l'étiquette",
+  "achievementUnlockedTitle": "Badge débloqué",
+  "cheers": "Santé !",
+  "healthNotice": "L'abus d'alcool est dangereux pour la santé. À consommer avec modération.",
+  "abvValue": "ABV : {value}",
+  "@abvValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
+}

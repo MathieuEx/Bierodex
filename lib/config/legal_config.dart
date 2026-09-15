@@ -6,5 +6,5 @@ class LegalConfig {
   static const publisher = '[Nom de l\'éditeur – à compléter]';
   static const contactEmail = '[adresse de contact – à compléter]';
   static const supabaseRegion = '[région Supabase – à compléter]';
-  static const lastUpdated = '14 septembre 2026';
+  static final lastUpdated = DateTime(2026, 9, 15);
 }

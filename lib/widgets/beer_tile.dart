@@ -6,6 +6,8 @@ import '../screens/beer_detail_screen.dart';
 import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
 import 'star_rating.dart';
+import '../l10n/l10n.dart';
+import '../data/countries.dart';
 
 /// Une bière, présentée comme une fiche de carnet : liseré coloré par
 /// famille sur le bord gauche, photo si disponible, sinon initiale stylisée.
@@ -97,7 +99,7 @@ class BeerTile extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${beer.brewery} · ${beer.country}',
+                            '${beer.brewery} · ${countryName(beer.country)}',
                             style: Theme.of(context).textTheme.bodySmall,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -111,10 +113,10 @@ class BeerTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${beer.abv.toStringAsFixed(1)}%',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: familyColor,
-                          ),
+                      '${formatDecimal(beer.abv)}%',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.labelLarge?.copyWith(color: familyColor),
                     ),
                   ],
                 ),

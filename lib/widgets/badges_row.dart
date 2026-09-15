@@ -5,6 +5,7 @@ import '../data/beers.dart';
 import '../models/beer_style.dart';
 import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
+import '../l10n/l10n.dart';
 
 /// Rangée de badges de progression : styles goûtés, pays visités, et une
 /// jauge par famille de fermentation. Dérivé du catalogue courant et de la
@@ -18,25 +19,22 @@ class BadgesRow extends StatelessWidget {
       listenable: BeerCollectionService.instance,
       builder: (context, _) {
         final triedIds = BeerCollectionService.instance.triedBeerIds.toSet();
-        final triedBeers =
-            beers.where((b) => triedIds.contains(b.id)).toList();
+        final triedBeers = beers.where((b) => triedIds.contains(b.id)).toList();
 
         final triedStyles = <String>{for (final b in triedBeers) b.styleId};
-        final triedCountries = <String>{
-          for (final b in triedBeers) b.country,
-        };
+        final triedCountries = <String>{for (final b in triedBeers) b.country};
 
         final badges = <_Badge>[
           _Badge(
             icon: Icons.local_drink_outlined,
-            label: 'Styles',
+            label: context.l10n.styles,
             achieved: triedStyles.length,
             total: beerStyles.length,
             color: AppColors.copper,
           ),
           _Badge(
             icon: Icons.public,
-            label: 'Pays',
+            label: context.l10n.fieldCountry,
             achieved: triedCountries.length,
             total: allCountries.length,
             color: AppColors.gold,
@@ -96,8 +94,7 @@ class _BadgeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locked = badge.achieved == 0;
-    final color =
-        locked ? Theme.of(context).colorScheme.outline : badge.color;
+    final color = locked ? Theme.of(context).colorScheme.outline : badge.color;
 
     return Container(
       width: 92,
@@ -114,9 +111,9 @@ class _BadgeCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             '${badge.achieved}/${badge.total}',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: color,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: color),
           ),
           const SizedBox(height: 2),
           Text(

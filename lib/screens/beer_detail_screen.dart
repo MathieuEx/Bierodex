@@ -4,11 +4,17 @@ import 'package:flutter/material.dart';
 
 import '../data/beer_styles.dart';
 import '../data/beers.dart';
+import '../data/countries.dart';
+import '../screens/share_tasting_card_screen.dart';
 import '../screens/style_detail_screen.dart';
 import '../services/beer_collection_service.dart';
 import '../services/user_beer_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/community_submission_card.dart';
 import '../widgets/star_rating.dart';
+import '../widgets/tasting_photo_card.dart';
+import '../widgets/tasting_profile_card.dart';
+import '../l10n/l10n.dart';
 
 class BeerDetailScreen extends StatelessWidget {
   final String beerId;
@@ -19,19 +25,16 @@ class BeerDetailScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Supprimer cette bière ?'),
-        content: Text(
-          '"$name" sera retirée de ton carnet personnel. Cette action est '
-          'définitive.',
-        ),
+        title: Text(context.l10n.beerDeleteTitle),
+        content: Text(context.l10n.beerDeleteDescription(name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Supprimer'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -45,7 +48,7 @@ class BeerDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final beer = findBeerById(beerId);
     if (beer == null) {
-      return const Scaffold(body: Center(child: Text('Bière introuvable')));
+      return Scaffold(body: Center(child: Text(context.l10n.beerNotFound)));
     }
     final style = findStyleById(beer.styleId);
     final color = style?.family.color ?? AppColors.walnut;
@@ -54,9 +57,24 @@ class BeerDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(beer.name),
         actions: [
+          ListenableBuilder(
+            listenable: BeerCollectionService.instance,
+            builder: (context, _) => BeerCollectionService.instance
+                    .isTried(beerId)
+                ? IconButton(
+                    tooltip: context.l10n.shareMyTasting,
+                    icon: const Icon(Icons.ios_share),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ShareTastingCardScreen(beerId: beerId),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
           if (beer.isCustom)
             IconButton(
-              tooltip: 'Supprimer de mon carnet',
+              tooltip: context.l10n.beerDeleteFromNotebook,
               icon: const Icon(Icons.delete_outline),
               onPressed: () => _confirmDelete(context, beer.name),
             ),
@@ -98,7 +116,7 @@ class BeerDetailScreen extends StatelessWidget {
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 4),
-                        Text('${beer.brewery} · ${beer.country}'),
+                        Text('${beer.brewery} · ${countryName(beer.country)}'),
                       ],
                     ),
                   ),
@@ -107,19 +125,16 @@ class BeerDetailScreen extends StatelessWidget {
             ),
           const SizedBox(height: 16),
           if (beer.imageUrl != null) ...[
-            Text(
-              beer.name,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text(beer.name, style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 4),
-            Text('${beer.brewery} · ${beer.country}'),
+            Text('${beer.brewery} · ${countryName(beer.country)}'),
             const SizedBox(height: 16),
           ],
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              Chip(label: Text('${beer.abv.toStringAsFixed(1)}% ABV')),
+              Chip(label: Text('${formatDecimal(beer.abv)}% ABV')),
               if (style != null)
                 Chip(
                   label: Text(style.family.label),
@@ -130,7 +145,7 @@ class BeerDetailScreen extends StatelessWidget {
               if (beer.isCustom)
                 Chip(
                   avatar: const Icon(Icons.person_outline, size: 16),
-                  label: const Text('Ajoutée par toi'),
+                  label: Text(context.l10n.beerAddedByYou),
                 ),
             ],
           ),
@@ -138,13 +153,29 @@ class BeerDetailScreen extends StatelessWidget {
           Text(beer.description, style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 24),
           _MyOpinionCard(beerId: beer.id),
+          _TastedOnly(
+            beerId: beer.id,
+            child: TastingPhotoCard(beerId: beer.id),
+          ),
+          _TastedOnly(
+            beerId: beer.id,
+            child: TastingProfileCard(beerId: beer.id),
+          ),
+          if (beer.isCustom) ...[
+            const SizedBox(height: 16),
+            CommunitySubmissionCard(beerId: beer.id),
+          ],
           const SizedBox(height: 16),
           if (style != null)
             Card(
               child: ListTile(
                 leading: Icon(Icons.local_drink_outlined, color: color),
-                title: Text('Style : ${style.name}'),
-                subtitle: Text(style.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                title: Text(context.l10n.beerStyle(style.name)),
+                subtitle: Text(
+                  style.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.of(context).push(
@@ -157,6 +188,25 @@ class BeerDetailScreen extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Espacement + contenu, affichés seulement pour une bière marquée comme
+/// bue (évite un trou vide sous « Mon avis » sinon).
+class _TastedOnly extends StatelessWidget {
+  final String beerId;
+  final Widget child;
+
+  const _TastedOnly({required this.beerId, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: BeerCollectionService.instance,
+      builder: (context, _) => BeerCollectionService.instance.isTried(beerId)
+          ? Padding(padding: const EdgeInsets.only(top: 16), child: child)
+          : const SizedBox.shrink(),
     );
   }
 }
@@ -193,18 +243,14 @@ class _BeerPhoto extends StatelessWidget {
                 );
               },
               errorBuilder: (context, error, stack) => Center(
-                child: Icon(
-                  Icons.sports_bar_outlined,
-                  size: 48,
-                  color: color,
-                ),
+                child: Icon(Icons.sports_bar_outlined, size: 48, color: color),
               ),
             ),
           ),
         ),
         const SizedBox(height: 4),
         Text(
-          'Photo : ${credit ?? "licence libre"}',
+          context.l10n.photoCredit(credit ?? context.l10n.freeLicense),
           style: Theme.of(context).textTheme.labelSmall,
         ),
       ],
@@ -235,7 +281,7 @@ class _MyOpinionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Mon avis',
+                  context.l10n.beerMyReview,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 12),
@@ -248,7 +294,7 @@ class _MyOpinionCard extends StatelessWidget {
                         wishlist ? Icons.bookmark : Icons.bookmark_outline,
                         size: 18,
                       ),
-                      label: const Text('À goûter'),
+                      label: Text(context.l10n.wishlistLabel),
                       selected: wishlist,
                       onSelected: (value) => service.setWishlist(beerId, value),
                     ),
@@ -257,7 +303,7 @@ class _MyOpinionCard extends StatelessWidget {
                         tried ? Icons.check_circle : Icons.check_circle_outline,
                         size: 18,
                       ),
-                      label: const Text('J\'ai bu cette bière'),
+                      label: Text(context.l10n.beerTried),
                       selected: tried,
                       onSelected: (value) {
                         service.setTried(beerId, value);
@@ -270,7 +316,7 @@ class _MyOpinionCard extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Text('Ma note :'),
+                      Text(context.l10n.beerMyRating),
                       const SizedBox(width: 8),
                       StarRating(
                         rating: rating,
@@ -279,7 +325,7 @@ class _MyOpinionCard extends StatelessWidget {
                       ),
                       if (rating != null)
                         IconButton(
-                          tooltip: 'Effacer la note',
+                          tooltip: context.l10n.beerClearRating,
                           icon: const Icon(Icons.close, size: 18),
                           onPressed: () => service.setRating(beerId, null),
                         ),
@@ -297,8 +343,8 @@ class _MyOpinionCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           triedAt != null
-                              ? 'Dégustée le ${_formatDate(triedAt)}'
-                              : 'Date non renseignée',
+                              ? context.l10n.tastedOn(formatDate(triedAt))
+                              : context.l10n.dateUnknown,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
@@ -314,7 +360,7 @@ class _MyOpinionCard extends StatelessWidget {
                             await service.setTriedAt(beerId, picked);
                           }
                         },
-                        child: const Text('Modifier'),
+                        child: Text(context.l10n.edit),
                       ),
                     ],
                   ),
@@ -328,12 +374,6 @@ class _MyOpinionCard extends StatelessWidget {
       },
     );
   }
-}
-
-String _formatDate(DateTime date) {
-  final day = date.day.toString().padLeft(2, '0');
-  final month = date.month.toString().padLeft(2, '0');
-  return '$day/$month/${date.year}';
 }
 
 /// Champ de note libre, géré indépendamment du [ListenableBuilder] parent
@@ -382,9 +422,9 @@ class _NoteFieldState extends State<_NoteField> {
       controller: _controller,
       minLines: 2,
       maxLines: 5,
-      decoration: const InputDecoration(
-        labelText: 'Notes de dégustation',
-        hintText: 'Arômes, contexte, avec qui...',
+      decoration: InputDecoration(
+        labelText: context.l10n.tastingNotes,
+        hintText: context.l10n.tastingNotesHint,
       ),
       onChanged: _onChanged,
     );

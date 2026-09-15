@@ -71,8 +71,16 @@ revoke insert, update, delete, truncate on beer_styles, beers, brewery_locations
 -- ---------------------------------------------------------------------------
 -- Réglages à faire dans le tableau de bord (non scriptables en SQL) :
 --   Authentication > Providers > Email
+--     - "Confirm email" activé (l'app demande le code d'inscription)
+--     - "Secure password change" activé
+--     - "Minimum password length" : 8, "Password requirements" : lettres
+--       et chiffres (mêmes règles que `AuthService.passwordProblem`)
+--     - "Leaked password protection" activé (plan Pro)
 --     - "Email OTP Expiration" : 600 s (10 min) au lieu de 3600
 --     - "Email OTP Length" : 6 (l'app attend 6 chiffres)
+--   Authentication > Emails > Templates : "Confirm signup" et "Reset
+--     password" doivent afficher le code `{{ .Token }}` (et non un lien
+--     `{{ .ConfirmationURL }}`), c'est lui que l'utilisateur saisit dans l'app
 --   Authentication > Rate Limits : garder les limites par défaut ou plus
 --     strictes (envois d'e-mails / vérifications OTP par heure et par IP)
 --   Authentication > Attack Protection : activer le captcha (Turnstile ou

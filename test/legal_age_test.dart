@@ -1,3 +1,4 @@
+import 'package:bierodex/l10n/l10n.dart';
 import 'package:bierodex/screens/age_gate_screen.dart';
 import 'package:bierodex/services/legal_age_service.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,13 @@ void main() {
   testWidgets('répondre "Non" bloque l\'accès à l\'app', (tester) async {
     SharedPreferences.setMockInitialValues({});
     await LegalAgeService.instance.load();
-    await tester.pumpWidget(const MaterialApp(home: AgeGateScreen()));
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: AgeGateScreen(),
+      ),
+    );
 
     await tester.tap(find.text('Non'));
     await tester.pump();

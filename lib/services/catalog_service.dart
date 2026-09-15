@@ -26,6 +26,7 @@ class CatalogService {
   static final CatalogService instance = CatalogService._();
 
   static const _cacheKey = 'bierodex.catalog.cache.v1';
+  static const _timeout = Duration(seconds: 10);
 
   bool _loaded = false;
   bool get isLoaded => _loaded;
@@ -34,9 +35,14 @@ class CatalogService {
     final client = Supabase.instance.client;
 
     try {
-      final styleRows = await client.from('beer_styles').select();
-      final beerRows = await client.from('beers').select();
-      final breweryRows = await client.from('brewery_locations').select();
+      // Réseau capté mais inutilisable (métro, Wi-Fi sans internet) : on
+      // n'attend pas indéfiniment avant de retomber sur le cache.
+      final results = await Future.wait([
+        client.from('beer_styles').select(),
+        client.from('beers').select(),
+        client.from('brewery_locations').select(),
+      ]).timeout(_timeout);
+      final [styleRows, beerRows, breweryRows] = results;
 
       _apply(
         styleRows: styleRows,
@@ -44,11 +50,13 @@ class CatalogService {
         breweryRows: breweryRows,
       );
       _loaded = true;
-      unawaited(_cache(
-        styleRows: styleRows,
-        beerRows: beerRows,
-        breweryRows: breweryRows,
-      ));
+      unawaited(
+        _cache(
+          styleRows: styleRows,
+          beerRows: beerRows,
+          breweryRows: breweryRows,
+        ),
+      );
     } catch (error) {
       final loadedFromCache = await _loadFromCache();
       if (!loadedFromCache) rethrow;
@@ -64,9 +72,7 @@ class CatalogService {
     beer_styles_data.beerStyles = [
       for (final row in styleRows) BeerStyle.fromJson(row),
     ];
-    beers_data.beers = [
-      for (final row in beerRows) Beer.fromJson(row),
-    ];
+    beers_data.beers = [for (final row in beerRows) Beer.fromJson(row)];
     brewery_locations_data.breweryLocations = {
       for (final row in breweryRows)
         row['brewery'] as String: BreweryLocation.fromJson(row),
@@ -97,8 +103,7 @@ class CatalogService {
     _apply(
       styleRows: (decoded['styles'] as List).cast<Map<String, dynamic>>(),
       beerRows: (decoded['beers'] as List).cast<Map<String, dynamic>>(),
-      breweryRows:
-          (decoded['breweries'] as List).cast<Map<String, dynamic>>(),
+      breweryRows: (decoded['breweries'] as List).cast<Map<String, dynamic>>(),
     );
     return true;
   }

@@ -51,7 +51,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Bierodex utilise l'appareil photo pour scanner le code-barres d'une bière et la retrouver dans le catalogue.</string>
+	<string>Bierodex utilise l'appareil photo pour scanner le code-barres d'une bière et pour photographier tes dégustations.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Bierodex accède à tes photos pour que tu puisses choisir la photo d'une dégustation.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

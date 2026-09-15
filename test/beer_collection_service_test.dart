@@ -57,17 +57,19 @@ void main() {
     expect(service.isWishlist(id), isFalse);
   });
 
-  test('marquer une bière "à goûter" retire son statut bue et sa note',
-      () async {
-    const id = 'test-tried-then-wishlist';
-    await service.setTried(id, true);
-    await service.setRating(id, 4);
+  test(
+    'marquer une bière "à goûter" retire son statut bue et sa note',
+    () async {
+      const id = 'test-tried-then-wishlist';
+      await service.setTried(id, true);
+      await service.setRating(id, 4);
 
-    await service.setWishlist(id, true);
-    expect(service.isTried(id), isFalse);
-    expect(service.ratingFor(id), isNull);
-    expect(service.isWishlist(id), isTrue);
-  });
+      await service.setWishlist(id, true);
+      expect(service.isTried(id), isFalse);
+      expect(service.ratingFor(id), isNull);
+      expect(service.isWishlist(id), isTrue);
+    },
+  );
 
   test('setNote enregistre et efface une note libre', () async {
     const id = 'test-note-beer';
@@ -95,22 +97,24 @@ void main() {
     expect(service.triedAtFor(id), date);
   });
 
-  test('mostRecentTriedId retourne la bière la plus récemment dégustée',
-      () async {
-    const older = 'test-recent-older';
-    const newer = 'test-recent-newer';
-    // D'autres tests de ce fichier dégustent des bières avec `triedAt` égal
-    // à `now()` au moment où ils tournent (quelques millisecondes avant ou
-    // après ce test) : on se place délibérément dans le futur par rapport
-    // à "maintenant" pour ne jamais se faire dépasser par ces entrées-là.
-    final base = DateTime.now().add(const Duration(days: 365));
-    await service.setTried(older, true);
-    await service.setTriedAt(older, base);
-    await service.setTried(newer, true);
-    await service.setTriedAt(newer, base.add(const Duration(days: 1)));
+  test(
+    'mostRecentTriedId retourne la bière la plus récemment dégustée',
+    () async {
+      const older = 'test-recent-older';
+      const newer = 'test-recent-newer';
+      // D'autres tests de ce fichier dégustent des bières avec `triedAt` égal
+      // à `now()` au moment où ils tournent (quelques millisecondes avant ou
+      // après ce test) : on se place délibérément dans le futur par rapport
+      // à "maintenant" pour ne jamais se faire dépasser par ces entrées-là.
+      final base = DateTime.now().add(const Duration(days: 365));
+      await service.setTried(older, true);
+      await service.setTriedAt(older, base);
+      await service.setTried(newer, true);
+      await service.setTriedAt(newer, base.add(const Duration(days: 1)));
 
-    expect(service.mostRecentTriedId, newer);
-  });
+      expect(service.mostRecentTriedId, newer);
+    },
+  );
 
   test('averageRating ignore les bières sans note', () async {
     const rated = 'test-average-rated';
@@ -120,5 +124,40 @@ void main() {
     await service.setTried(unrated, true);
 
     expect(service.averageRating, isNotNull);
+  });
+
+  test(
+    'la fiche de dégustation est effacée quand la bière n\'est plus bue',
+    () async {
+      const id = 'test-tasting-profile-beer';
+      await service.setTried(id, true);
+      await service.setTastingProfile(
+        id,
+        color: 2,
+        bitterness: 4,
+        sweetness: null,
+        body: 3,
+        aromas: const ['agrumes'],
+      );
+      expect(service.statusFor(id).hasTastingProfile, isTrue);
+      expect(service.statusFor(id).bitterness, 4);
+
+      await service.setTried(id, false);
+      expect(service.statusFor(id).hasTastingProfile, isFalse);
+      expect(service.statusFor(id).aromas, isEmpty);
+    },
+  );
+
+  test('setTastingProfile est ignoré pour une bière non bue', () async {
+    const id = 'test-tasting-profile-untried';
+    await service.setTastingProfile(
+      id,
+      color: 1,
+      bitterness: 1,
+      sweetness: 1,
+      body: 1,
+      aromas: const [],
+    );
+    expect(service.statusFor(id).hasTastingProfile, isFalse);
   });
 }
