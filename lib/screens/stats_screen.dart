@@ -438,7 +438,7 @@ class _CountryHeatmap extends StatelessWidget {
                 maxZoom: 6,
               ),
               children: [
-                MapConfig.tileLayer(),
+                MapConfig.tileLayer(context),
                 CircleLayer(circles: circles),
               ],
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter/widgets.dart';
 
 /// Fournisseur des tuiles de fond de carte, réglé comme les autres via
 /// `--dart-define-from-file=env.json` :
@@ -29,8 +30,12 @@ class MapConfig {
   /// correspondre au vrai identifiant de l'app (Android/iOS).
   static const String userAgentPackageName = 'com.bierodex.bierodex';
 
-  static TileLayer tileLayer() => TileLayer(
+  /// Sur écran haute densité, le mode rétina charge les tuiles du niveau de
+  /// zoom supérieur : sans lui, la carte du monde (zoom ~2) paraît floue et
+  /// sans frontières ni noms.
+  static TileLayer tileLayer(BuildContext context) => TileLayer(
     urlTemplate: tileUrl,
     userAgentPackageName: userAgentPackageName,
+    retinaMode: RetinaMode.isHighDensity(context),
   );
 }

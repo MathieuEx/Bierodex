@@ -80,7 +80,7 @@ class _CountryMapScreenState extends State<CountryMapScreen> {
                 maxZoom: 17,
               ),
               children: [
-                MapConfig.tileLayer(),
+                MapConfig.tileLayer(context),
                 MarkerLayer(
                   markers: [
                     for (final entry in points.entries)
