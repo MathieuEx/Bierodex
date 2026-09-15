@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!--
+  Politique de confidentialité publique (URL demandée par l'App Store et
+  Google Play). Même contenu que lib/screens/privacy_policy_screen.dart :
+  garder les deux versions synchronisées, et compléter les mentions entre
+  crochets (voir lib/config/legal_config.dart).
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bierodex – Politique de confidentialité</title>
+  <style>
+    :root { color-scheme: light dark; --bg: #F6EFE1; --ink: #2B211A; --soft: #5B4E3F; --accent: #C9752B; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #1B1612; --ink: #F3ECDD; --soft: #C9BCA4; } }
+    body { margin: 0; padding: 32px 20px 64px; background: var(--bg); color: var(--ink);
+           font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    main { max-width: 680px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; margin: 0 0 4px; }
+    h2 { font-size: 1.15rem; margin: 32px 0 8px; color: var(--accent); }
+    p { margin: 8px 0; }
+    .meta, footer { color: var(--soft); font-size: .9rem; }
+    footer { margin-top: 48px; text-align: center; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Politique de confidentialité du Bierodex</h1>
+  <p class="meta">Dernière mise à jour : 14 septembre 2026</p>
+
+  <h2>Qui est responsable ?</h2>
+  <p>Le Bierodex est édité par [Nom de l'éditeur – à compléter], responsable du traitement de tes données. Contact : [adresse de contact – à compléter].</p>
+
+  <h2>Données collectées</h2>
+  <p>Compte : ton adresse e-mail et un identifiant technique. Si tu te connectes avec Google, Google nous transmet aussi ton nom et ta photo de profil ; nous ne recevons jamais ton mot de passe Google.</p>
+  <p>Collection : les bières marquées comme bues ou à goûter, tes notes, dates de dégustation et commentaires, ainsi que les bières que tu ajoutes toi-même (nom, brasserie, code-barres, photo).</p>
+  <p>Aucune donnée de localisation, aucun contact, aucune publicité, aucun traceur publicitaire.</p>
+
+  <h2>Pourquoi ?</h2>
+  <p>Uniquement pour faire fonctionner l'app : te connecter et synchroniser ta collection entre tes appareils (base légale : exécution du service que tu demandes). Tes données ne sont ni vendues, ni partagées à des fins commerciales.</p>
+
+  <h2>Où sont-elles stockées ?</h2>
+  <p>Chez Supabase (hébergement [région Supabase – à compléter]), avec un accès limité à ton seul compte. Une copie est gardée sur ton appareil pour un usage hors-ligne ; la session de connexion y est chiffrée par le système (Keychain / Keystore).</p>
+
+  <h2>Services tiers</h2>
+  <p>Open Food Facts : quand tu scannes un code-barres inconnu, ce code est envoyé à Open Food Facts pour retrouver le produit.</p>
+  <p>OpenStreetMap et Wikimedia Commons : fonds de carte et photos, chargés directement depuis leurs serveurs (ton adresse IP leur est donc visible).</p>
+  <p>Google : uniquement si tu choisis « Continuer avec Google ».</p>
+
+  <h2>Durée de conservation</h2>
+  <p>Tant que ton compte existe. La suppression du compte efface immédiatement et définitivement toutes tes données de nos serveurs et de l'appareil utilisé.</p>
+
+  <h2>Tes droits</h2>
+  <p>Tu peux accéder à tes données, les corriger, les exporter ou demander leur suppression, et t'opposer à leur traitement. La suppression est disponible directement dans « Mon compte » ; pour le reste, écris à [adresse de contact – à compléter].</p>
+  <p>Tu peux aussi introduire une réclamation auprès de la CNIL (www.cnil.fr).</p>
+
+  <h2>Âge</h2>
+  <p>L'app présente des boissons alcoolisées et est réservée aux personnes majeures.</p>
+
+  <footer>L'abus d'alcool est dangereux pour la santé. À consommer avec modération.</footer>
+</main>
+</body>
+</html>

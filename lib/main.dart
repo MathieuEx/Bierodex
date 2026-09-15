@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
+import 'screens/age_gate_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/world_map_screen.dart';
 import 'services/auth_service.dart';
 import 'services/beer_collection_service.dart';
 import 'services/catalog_service.dart';
+import 'services/legal_age_service.dart';
 import 'services/secure_session_storage.dart';
 import 'services/user_beer_service.dart';
 import 'theme/app_theme.dart';
@@ -24,6 +26,7 @@ void main() async {
           : null,
     ),
   );
+  await LegalAgeService.instance.load();
   await BeerCollectionService.instance.load();
   runApp(const BierodexApp());
 }
@@ -38,7 +41,7 @@ class BierodexApp extends StatefulWidget {
   final Future<void>? catalogFuture;
 
   /// Les tests de widgets ne peuvent pas se connecter (aucun appel réseau) :
-  /// ils désactivent l'écran de connexion obligatoire.
+  /// ils désactivent l'écran de connexion obligatoire et celui de l'âge.
   final bool requireSignIn;
 
   const BierodexApp({super.key, this.catalogFuture, this.requireSignIn = true});
@@ -99,11 +102,21 @@ class _BierodexAppState extends State<BierodexApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       home: ListenableBuilder(
-        listenable: AuthService.instance,
-        builder: (context, catalog) =>
-            !widget.requireSignIn || AuthService.instance.isSignedIn
-            ? catalog!
-            : const LoginScreen(),
+        // Ordre d'entrée : âge légal (une fois par appareil), connexion
+        // (une fois par session), puis l'app.
+        listenable: Listenable.merge([
+          LegalAgeService.instance,
+          AuthService.instance,
+        ]),
+        builder: (context, catalog) {
+          if (!widget.requireSignIn) return catalog!;
+          if (!LegalAgeService.instance.isConfirmed) {
+            return const AgeGateScreen();
+          }
+          return AuthService.instance.isSignedIn
+              ? catalog!
+              : const LoginScreen();
+        },
         child: FutureBuilder<void>(
           future: _catalogFuture,
           builder: (context, snapshot) {

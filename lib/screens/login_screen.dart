@@ -6,10 +6,13 @@ import 'package:flutter/services.dart';
 
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/health_notice.dart';
+import 'privacy_policy_screen.dart';
 
 /// Écran d'entrée de l'app tant que personne n'est connecté (voir
 /// `BierodexApp` dans `lib/main.dart`). Deux étapes : l'adresse e-mail, puis
-/// le code à 6 chiffres reçu par e-mail. Une fois connecté, la session est
+/// le code à 6 chiffres reçu par e-mail, ou directement un compte Google.
+/// Une fois connecté, la session est
 /// conservée : cet écran ne revient qu'après une déconnexion.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -91,6 +94,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   });
 
+  void _openPrivacyPolicy() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()));
+  }
+
   void _changeEmail() {
     setState(() {
       _sentTo = null;
@@ -132,8 +141,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       _sentTo == null
                           ? 'Connecte-toi pour retrouver ta collection sur '
-                                'tous tes appareils. Pas de mot de passe : on '
-                                't\'envoie un code par e-mail.'
+                                'tous tes appareils. Pas de mot de passe à '
+                                'retenir.'
                           : 'Si l\'adresse $_sentTo est valide, un code à '
                                 '${AuthService.codeLength} chiffres vient d\'y '
                                 'être envoyé.',
@@ -157,6 +166,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ],
+                    const SizedBox(height: 32),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.foamSoft,
+                      ),
+                      onPressed: _openPrivacyPolicy,
+                      child: const Text('Politique de confidentialité'),
+                    ),
+                    const SizedBox(height: 4),
+                    const HealthNotice(onDark: true),
                   ],
                 ),
               ),
@@ -325,6 +344,8 @@ class _GoogleLogo extends StatelessWidget {
 }
 
 class _GoogleLogoPainter extends CustomPainter {
+  const _GoogleLogoPainter();
+
   static const _colors = [
     Color(0xFF4285F4),
     Color(0xFF34A853),

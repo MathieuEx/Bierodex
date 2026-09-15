@@ -1,0 +1,5 @@
+// Copier ce fichier en GoogleSignIn.xcconfig (ignoré par git) et remplacer
+// la valeur par l'ID client iOS *inversé* de la console Google Cloud :
+// "123-abc.apps.googleusercontent.com" devient
+// "com.googleusercontent.apps.123-abc".
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.xxxxx

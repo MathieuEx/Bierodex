@@ -34,6 +34,13 @@ class BeerCollectionService extends ChangeNotifier {
   static String _keyFor(String? userId) =>
       userId == null ? _prefsKey : '$_prefsKey.$userId';
 
+  /// Efface le cache local d'un compte supprimé (voir
+  /// `AuthService.deleteAccount`) : rien ne doit survivre sur l'appareil.
+  static Future<void> forgetUser(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyFor(userId));
+  }
+
   Future<void> load() async {
     if (_loaded) return;
     await _loadFor(AuthService.instance.currentUser?.id);

@@ -82,6 +82,28 @@ qui ne peut pas être commise dans le repo :
 Sans cette configuration, le bouton "Continuer avec Google" affichera
 une erreur de connexion (le provider n'est pas activé côté Supabase).
 
+**Optionnel — sélecteur de compte natif sur iOS/Android** (sans passer par
+le navigateur). Sinon, l'app garde le flux OAuth ci-dessus :
+
+1. Google Cloud : créer aussi un client **iOS** (bundle
+   `com.bierodex.bierodex`) et un client **Android** (package
+   `com.bierodex.bierodex` + empreinte SHA-1, `./gradlew signingReport`).
+2. Supabase → Providers → Google → *Client IDs* : les ID Web, iOS et
+   Android séparés par des virgules.
+3. `env.json` : `GOOGLE_WEB_CLIENT_ID` et `GOOGLE_IOS_CLIENT_ID` (voir
+   `env.example.json`).
+4. iOS : copier `ios/Flutter/GoogleSignIn.example.xcconfig` en
+   `GoogleSignIn.xcconfig` (ignoré par git) avec l'ID client iOS inversé.
+
+### Suppression de compte et mentions légales
+
+- Déployer la fonction de suppression de compte :
+  `supabase functions deploy delete-account`
+  (code dans `supabase/functions/delete-account/`).
+- Exécuter `supabase/secure_auth.sql` dans l'éditeur SQL.
+- Compléter `lib/config/legal_config.dart` et `web/confidentialite.html`
+  (éditeur, contact, région Supabase) avant toute publication.
+
 ## Lancer le projet
 
 ```bash
