@@ -1,7 +1,3 @@
-# Intégration continue : analyse, tests et builds à chaque push et pull
-# request. Aucun secret n'est nécessaire : sans env.json, l'app compile avec
-# des réglages vides (Supabase, Google, Sentry désactivés), ce qui suffit à
-# vérifier que tout build.
 name: CI
 
 on:

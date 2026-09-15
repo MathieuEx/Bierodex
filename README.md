@@ -85,11 +85,6 @@ commités (le repo est public) : ils sont fournis au build via
    API Keys sur le dashboard Supabase — la clé "anon public", jamais la
    "service_role").
 
-3. Optionnel : renseigne `SENTRY_DSN` pour le suivi des plantages (projet
-   Flutter gratuit sur sentry.io, Settings → Client Keys). Laissé vide,
-   Sentry n'est pas initialisé. Les rapports ne contiennent ni e-mail, ni
-   identifiant, ni adresse IP (voir `lib/services/crash_reporting.dart`).
-
 `env.json` est ignoré par git.
 
 ### Activer la connexion Google

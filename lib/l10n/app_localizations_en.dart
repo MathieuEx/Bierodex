@@ -556,10 +556,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Google: only if you choose \"Continue with Google\".';
 
   @override
-  String get privacyThirdPartiesParagraph4 =>
-      'Sentry: if the app crashes, a technical report (error message, device model, system and app version) is sent so the problem can be fixed. It contains neither your email address, nor your identifier, nor your IP address, nor the content of your collection (legal basis: legitimate interest in keeping the app working).';
-
-  @override
   String get privacyThirdPartiesParagraph5 =>
       'Reminders (notifications) are scheduled on your device, without any server. You can turn them off in \"My account\".';
 

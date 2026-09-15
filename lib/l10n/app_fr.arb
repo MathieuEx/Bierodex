@@ -256,7 +256,6 @@
   "privacyThirdPartiesParagraph1": "Open Food Facts : quand tu scannes un code-barres inconnu, ce code est envoyé à Open Food Facts pour retrouver le produit.",
   "privacyThirdPartiesParagraph2": "OpenStreetMap et Wikimedia Commons : fonds de carte et photos, chargés directement depuis leurs serveurs (ton adresse IP leur est donc visible).",
   "privacyThirdPartiesParagraph3": "Google : uniquement si tu choisis \"Continuer avec Google\".",
-  "privacyThirdPartiesParagraph4": "Sentry : en cas de plantage, un rapport technique (message d'erreur, modèle d'appareil, version du système et de l'app) est envoyé pour corriger le problème. Il ne contient ni ton adresse e-mail, ni ton identifiant, ni ton adresse IP, ni le contenu de ta collection (base légale : intérêt légitime à faire fonctionner l'app).",
   "privacyThirdPartiesParagraph5": "Les rappels (notifications) sont programmés sur ton appareil, sans aucun serveur. Tu peux les couper dans \"Mon compte\".",
   "privacyRetentionTitle": "Durée de conservation",
   "privacyRetentionParagraph1": "Tant que ton compte existe. La suppression du compte efface immédiatement et définitivement toutes tes données de nos serveurs et de l'appareil utilisé (profil, amis et propositions compris). Les bières déjà acceptées au catalogue commun, qui ne contiennent aucune donnée personnelle, y restent.",

@@ -14,7 +14,6 @@ import 'services/achievement_service.dart';
 import 'services/auth_service.dart';
 import 'services/beer_collection_service.dart';
 import 'services/catalog_service.dart';
-import 'services/crash_reporting.dart';
 import 'services/legal_age_service.dart';
 import 'services/notification_service.dart';
 import 'services/offline_sync_service.dart';
@@ -26,7 +25,7 @@ import 'theme/brand.dart';
 import 'widgets/achievement_unlocked.dart';
 import 'l10n/l10n.dart';
 
-void main() => CrashReporting.run(_start);
+void main() => _start();
 
 Future<void> _start() async {
   WidgetsFlutterBinding.ensureInitialized();

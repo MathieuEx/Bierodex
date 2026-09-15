@@ -561,10 +561,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Google : uniquement si tu choisis \"Continuer avec Google\".';
 
   @override
-  String get privacyThirdPartiesParagraph4 =>
-      'Sentry : en cas de plantage, un rapport technique (message d\'erreur, modèle d\'appareil, version du système et de l\'app) est envoyé pour corriger le problème. Il ne contient ni ton adresse e-mail, ni ton identifiant, ni ton adresse IP, ni le contenu de ta collection (base légale : intérêt légitime à faire fonctionner l\'app).';
-
-  @override
   String get privacyThirdPartiesParagraph5 =>
       'Les rappels (notifications) sont programmés sur ton appareil, sans aucun serveur. Tu peux les couper dans \"Mon compte\".';
 

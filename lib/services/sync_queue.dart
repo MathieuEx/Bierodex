@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'crash_reporting.dart';
 
 /// Identifiants modifiés localement mais pas encore confirmés par Supabase,
 /// pour un compte et une table donnés. Persistée sur l'appareil : une
@@ -110,7 +109,7 @@ class SyncQueue extends ChangeNotifier {
           debugPrint('Synchronisation $name reportée : $error');
           return false;
         }
-        unawaited(CrashReporting.report(error, stackTrace));
+        debugPrint('Synchronisation $name abandonnée : $error\n$stackTrace');
         await complete(id, revision);
       }
     }

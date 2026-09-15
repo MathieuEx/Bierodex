@@ -1040,12 +1040,6 @@ abstract class AppLocalizations {
   /// **'Google : uniquement si tu choisis \"Continuer avec Google\".'**
   String get privacyThirdPartiesParagraph3;
 
-  /// No description provided for @privacyThirdPartiesParagraph4.
-  ///
-  /// In fr, this message translates to:
-  /// **'Sentry : en cas de plantage, un rapport technique (message d\'erreur, modèle d\'appareil, version du système et de l\'app) est envoyé pour corriger le problème. Il ne contient ni ton adresse e-mail, ni ton identifiant, ni ton adresse IP, ni le contenu de ta collection (base légale : intérêt légitime à faire fonctionner l\'app).'**
-  String get privacyThirdPartiesParagraph4;
-
   /// No description provided for @privacyThirdPartiesParagraph5.
   ///
   /// In fr, this message translates to:
