@@ -825,6 +825,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styles => 'Styles';
 
   @override
+  String get navMap => 'Map';
+
+  @override
+  String get navCollection => 'Collection';
+
+  @override
+  String get navScan => 'Scan';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String get searchBeerHint => 'Search a beer, a brewery…';
+
+  @override
   String get beerDeleteTitle => 'Delete this beer?';
 
   @override

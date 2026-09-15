@@ -46,6 +46,10 @@ void _seedFixtureCatalog() {
   brewery_locations_data.breweryLocations = {};
 }
 
+/// Onglet de la barre de navigation du bas, repéré par son libellé.
+Finder navTab(String label) =>
+    find.descendant(of: find.byType(NavigationBar), matching: find.text(label));
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -99,7 +103,7 @@ void main() {
     await pumpApp(tester);
     await settle(tester);
 
-    await tester.tap(find.byIcon(Icons.local_drink_outlined));
+    await tester.tap(navTab('Styles'));
     await settle(tester);
 
     final paleAleFinder = find.text('Pale Ale');
@@ -115,7 +119,7 @@ void main() {
     await pumpApp(tester);
     await settle(tester);
 
-    await tester.tap(find.byIcon(Icons.local_drink_outlined));
+    await tester.tap(navTab('Styles'));
     await settle(tester);
 
     final paleAleFinder = find.text('Pale Ale');
@@ -134,16 +138,13 @@ void main() {
     await tester.tap(starFinder);
     await settle(tester);
 
-    // Retour à la carte (deux pages empilées : style puis bière, en plus de
-    // l'écran styles lui-même).
-    await tester.tap(find.byType(BackButton));
-    await settle(tester);
+    // Retour à l'onglet Styles (deux pages empilées : style puis bière).
     await tester.tap(find.byType(BackButton));
     await settle(tester);
     await tester.tap(find.byType(BackButton));
     await settle(tester);
 
-    await tester.tap(find.byIcon(Icons.local_bar_outlined));
+    await tester.tap(navTab('Collection'));
     await settle(tester);
 
     expect(find.text('Sierra Nevada Pale Ale'), findsOneWidget);

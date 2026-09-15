@@ -5,23 +5,16 @@ import 'package:latlong2/latlong.dart' as ll;
 import '../data/beers.dart';
 import '../data/brewery_locations.dart';
 import '../data/countries.dart';
-import '../services/auth_service.dart';
 import '../services/beer_collection_service.dart';
 import '../theme/app_theme.dart';
-import 'account_screen.dart';
-import 'barcode_scanner_screen.dart';
 import 'country_map_screen.dart';
-import 'my_collection_tab.dart';
 import 'search_screen.dart';
-import 'stats_screen.dart';
-import 'styles_tab.dart';
 import '../l10n/l10n.dart';
 
-/// Écran unique de l'app : une carte du monde (tuiles OpenStreetMap), avec
-/// un repère par pays ayant au moins une brasserie référencée. Toucher un
-/// repère ouvre la carte détaillée du pays (`CountryMapScreen`). Styles,
-/// recherche, collection et compte restent accessibles via les icônes en
-/// haut de l'écran.
+/// Onglet d'accueil : une carte du monde (tuiles OpenStreetMap), avec un
+/// repère par pays ayant au moins une brasserie référencée. Toucher un
+/// repère ouvre la carte détaillée du pays (`CountryMapScreen`). Les autres
+/// sections sont dans la barre de navigation du bas (`HomeShell`).
 class WorldMapScreen extends StatefulWidget {
   const WorldMapScreen({super.key});
 
@@ -114,46 +107,6 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
     _mapController.move(center, 3.4);
   }
 
-  void _openStyles() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          appBar: AppBar(title: Text(context.l10n.stylesTitle)),
-          body: const StylesTab(),
-        ),
-      ),
-    );
-  }
-
-  void _openScanner() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()));
-  }
-
-  void _openCollection() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          appBar: AppBar(title: Text(context.l10n.collectionTitle)),
-          body: const MyCollectionTab(),
-        ),
-      ),
-    );
-  }
-
-  void _openStats() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const StatsScreen()));
-  }
-
-  void _openAccount() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const AccountScreen()));
-  }
-
   @override
   Widget build(BuildContext context) {
     final markers = [
@@ -199,7 +152,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
             top: 0,
             left: 0,
             right: 0,
-            height: 130,
+            height: 160,
             child: IgnorePointer(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -224,11 +177,6 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                     context: context,
                     delegate: BeerSearchDelegate(),
                   ),
-                  onScan: _openScanner,
-                  onStyles: _openStyles,
-                  onCollection: _openCollection,
-                  onStats: _openStats,
-                  onAccount: _openAccount,
                 ),
                 const Spacer(),
                 _ContinentChips(onContinent: _goToContinent),
@@ -302,106 +250,68 @@ class _AttributionBadge extends StatelessWidget {
   }
 }
 
+/// Bandeau : le nom de l'app et une barre de recherche pleine largeur.
+/// La navigation vers les autres sections vit dans la barre du bas
+/// (`HomeShell`), la carte ne garde que ce qui la concerne.
 class _TopBar extends StatelessWidget {
   final VoidCallback onSearch;
-  final VoidCallback onScan;
-  final VoidCallback onStyles;
-  final VoidCallback onCollection;
-  final VoidCallback onStats;
-  final VoidCallback onAccount;
 
-  const _TopBar({
-    required this.onSearch,
-    required this.onScan,
-    required this.onStyles,
-    required this.onCollection,
-    required this.onStats,
-    required this.onAccount,
-  });
+  const _TopBar({required this.onSearch});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 6, 0),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.sports_bar, color: AppColors.copper, size: 22),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'BIERODEX',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.foam,
-                letterSpacing: 1.4,
+          Row(
+            children: [
+              const Icon(Icons.sports_bar, color: AppColors.copper, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                'BIERODEX',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.foam,
+                  letterSpacing: 1.4,
+                ),
               ),
-              overflow: TextOverflow.ellipsis,
+            ],
+          ),
+          const SizedBox(height: 10),
+          Material(
+            color: AppColors.stout.withValues(alpha: 0.72),
+            shape: StadiumBorder(
+              side: BorderSide(color: AppColors.foam.withValues(alpha: 0.18)),
             ),
-          ),
-          _MapIconButton(
-            icon: Icons.search,
-            tooltip: context.l10n.search,
-            onPressed: onSearch,
-          ),
-          _MapIconButton(
-            icon: Icons.qr_code_scanner,
-            tooltip: context.l10n.scanBeer,
-            onPressed: onScan,
-          ),
-          _MapIconButton(
-            icon: Icons.local_drink_outlined,
-            tooltip: context.l10n.styles,
-            onPressed: onStyles,
-          ),
-          _MapIconButton(
-            icon: Icons.local_bar_outlined,
-            tooltip: context.l10n.collectionTitle,
-            onPressed: onCollection,
-          ),
-          _MapIconButton(
-            icon: Icons.insights_outlined,
-            tooltip: context.l10n.statsTitle,
-            onPressed: onStats,
-          ),
-          ListenableBuilder(
-            listenable: AuthService.instance,
-            builder: (context, _) {
-              final signedIn = AuthService.instance.isSignedIn;
-              return _MapIconButton(
-                icon: signedIn ? Icons.person : Icons.person_outline,
-                tooltip: context.l10n.accountTitle,
-                onPressed: onAccount,
-              );
-            },
+            child: InkWell(
+              customBorder: const StadiumBorder(),
+              onTap: onSearch,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 13,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.search, color: AppColors.foam, size: 22),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        context.l10n.searchBeerHint,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.foamSoft,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Bouton d'icône posé directement sur la carte : le voile en haut d'écran
-/// suffit à sa lisibilité, pas besoin d'un fond de bouton standard.
-class _MapIconButton extends StatelessWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  const _MapIconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(icon, size: 20),
-      color: AppColors.foam,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
     );
   }
 }
