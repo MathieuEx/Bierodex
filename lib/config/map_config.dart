@@ -1,4 +1,5 @@
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter/widgets.dart';
 
 /// Fournisseur des tuiles de fond de carte, réglé comme les autres via
 /// `--dart-define-from-file=env.json` :
@@ -15,10 +16,22 @@ class MapConfig {
   static const String _osmUrl =
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-  static const String tileUrl = String.fromEnvironment(
-    'MAP_TILE_URL',
-    defaultValue: _osmUrl,
-  );
+  /// Style d'OpenStreetMap France : mêmes données, mais les noms sont
+  /// affichés en français quand ils existent (`name:fr`), là où le style
+  /// standard garde la langue locale (Tokyo en japonais, etc.).
+  static const String _osmFrUrl =
+      'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
+
+  static const String _customTileUrl = String.fromEnvironment('MAP_TILE_URL');
+
+  /// URL des tuiles : celle de `MAP_TILE_URL` si fournie, sinon OSM France
+  /// quand l'app est en français et OSM standard pour les autres langues.
+  static String tileUrl(BuildContext context) {
+    if (_customTileUrl.isNotEmpty) return _customTileUrl;
+    return Localizations.localeOf(context).languageCode == 'fr'
+        ? _osmFrUrl
+        : _osmUrl;
+  }
 
   static const String attribution = String.fromEnvironment(
     'MAP_ATTRIBUTION',
@@ -29,8 +42,13 @@ class MapConfig {
   /// correspondre au vrai identifiant de l'app (Android/iOS).
   static const String userAgentPackageName = 'com.bierodex.bierodex';
 
-  static TileLayer tileLayer() => TileLayer(
-    urlTemplate: tileUrl,
+  /// Sur écran haute densité, le mode rétina charge les tuiles du niveau de
+  /// zoom supérieur : sans lui, la carte du monde (zoom ~2) paraît floue et
+  /// sans frontières ni noms.
+  static TileLayer tileLayer(BuildContext context) => TileLayer(
+    urlTemplate: tileUrl(context),
+    subdomains: const ['a', 'b', 'c'],
     userAgentPackageName: userAgentPackageName,
+    retinaMode: RetinaMode.isHighDensity(context),
   );
 }

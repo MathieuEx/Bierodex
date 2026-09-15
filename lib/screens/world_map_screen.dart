@@ -140,7 +140,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                 maxZoom: 7,
               ),
               children: [
-                MapConfig.tileLayer(),
+                MapConfig.tileLayer(context),
                 MarkerLayer(markers: markers),
               ],
             ),
