@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart' as ll;
+import 'package:maplibre_gl/maplibre_gl.dart';
 
-import '../config/map_config.dart';
 import '../data/beers.dart';
 import '../data/brewery_locations.dart';
 import '../data/countries.dart';
@@ -13,8 +11,14 @@ import 'country_map_screen.dart';
 import 'search_screen.dart';
 import '../l10n/l10n.dart';
 
-/// Onglet d'accueil : une carte du monde (tuiles OpenStreetMap), avec un
-/// repère par pays ayant au moins une brasserie référencée. Toucher un
+/// Style vectoriel gratuit, sans clé API (OpenFreeMap, données
+/// OpenStreetMap) : https://openfreemap.org. Le bouton d'attribution natif
+/// de MapLibre (`attributionEnabled`, activé par défaut) reste visible,
+/// c'est lui qui porte la mention légale requise par la licence OSM.
+const _styleUrl = 'https://tiles.openfreemap.org/styles/liberty';
+
+/// Onglet d'accueil : une carte du monde (MapLibre, style vectoriel), avec
+/// un repère par pays ayant au moins une brasserie référencée. Toucher un
 /// repère ouvre la carte détaillée du pays (`CountryMapScreen`). Les autres
 /// sections sont dans la barre de navigation du bas (`HomeShell`).
 class WorldMapScreen extends StatefulWidget {
@@ -25,14 +29,21 @@ class WorldMapScreen extends StatefulWidget {
 }
 
 class _WorldMapScreenState extends State<WorldMapScreen> {
-  final _mapController = MapController();
+  MapLibreMapController? _controller;
+  bool _styleLoaded = false;
+
+  /// Un repère par pays, gardé pour retrouver le pays touché (callback
+  /// `onCircleTapped`, qui ne donne que l'annotation) et pour recolorer
+  /// sans tout recréer quand la progression change.
+  final Map<String, Circle> _countryCircles = {};
+  final Map<Circle, String> _circleCountries = {};
 
   static const _continentCenters = {
-    'Europe': ll.LatLng(50, 15),
-    'Amériques': ll.LatLng(10, -75),
-    'Asie': ll.LatLng(28, 95),
-    'Afrique': ll.LatLng(2, 20),
-    'Océanie': ll.LatLng(-25, 140),
+    'Europe': LatLng(50, 15),
+    'Amériques': LatLng(10, -75),
+    'Asie': LatLng(28, 95),
+    'Afrique': LatLng(2, 20),
+    'Océanie': LatLng(-25, 140),
   };
 
   /// Couleur d'un pays sans aucune bière essayée : un ivoire chaud, lisible
@@ -44,19 +55,17 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
   @override
   void initState() {
     super.initState();
-    // Le nombre/la couleur des repères dépend de la progression : un
-    // `setState` suffit à reconstruire la liste de marqueurs au prochain
-    // build.
     BeerCollectionService.instance.addListener(_onProgressChanged);
   }
 
   @override
   void dispose() {
     BeerCollectionService.instance.removeListener(_onProgressChanged);
+    _controller?.onCircleTapped.remove(_onCircleTapped);
     super.dispose();
   }
 
-  void _onProgressChanged() => setState(() {});
+  void _onProgressChanged() => _syncCountryCircles();
 
   double _progressRatio(String country) {
     final countryBeers = beersForCountry(country);
@@ -77,6 +86,65 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
       return Color.lerp(_untouchedColor, AppColors.amber, ratio / 0.5)!;
     }
     return Color.lerp(AppColors.amber, AppColors.gold, (ratio - 0.5) / 0.5)!;
+  }
+
+  /// `CircleOptions.circleColor` attend une chaîne CSS (`#rrggbb`), pas un
+  /// `Color` Flutter.
+  String _hex(Color color) {
+    int channel(double v) => (v * 255).round().clamp(0, 255);
+    final r = channel(color.r).toRadixString(16).padLeft(2, '0');
+    final g = channel(color.g).toRadixString(16).padLeft(2, '0');
+    final b = channel(color.b).toRadixString(16).padLeft(2, '0');
+    return '#$r$g$b';
+  }
+
+  void _onMapCreated(MapLibreMapController controller) {
+    _controller = controller;
+    controller.onCircleTapped.add(_onCircleTapped);
+  }
+
+  void _onCircleTapped(Circle circle) {
+    final country = _circleCountries[circle];
+    if (country != null) _openCountry(country);
+  }
+
+  Future<void> _onStyleLoaded() async {
+    _styleLoaded = true;
+    await _syncCountryCircles();
+  }
+
+  /// Crée les repères manquants et recolore les existants selon la
+  /// progression courante — plutôt que de tout détruire/recréer à chaque
+  /// changement, pour garder la même identité d'annotation (et donc le
+  /// bon lien vers le pays au tap).
+  Future<void> _syncCountryCircles() async {
+    final controller = _controller;
+    if (controller == null || !_styleLoaded) return;
+
+    for (final entry in countryMarkers.entries) {
+      final country = entry.key;
+      final color = _hex(_progressColor(_progressRatio(country)));
+      final existing = _countryCircles[country];
+      if (existing == null) {
+        final circle = await controller.addCircle(
+          CircleOptions(
+            geometry: LatLng(entry.value.lat, entry.value.lng),
+            circleRadius: 8,
+            circleColor: color,
+            circleOpacity: 1,
+            circleStrokeColor: _hex(AppColors.foam),
+            circleStrokeWidth: 1.5,
+          ),
+        );
+        _countryCircles[country] = circle;
+        _circleCountries[circle] = country;
+      } else {
+        await controller.updateCircle(
+          existing,
+          CircleOptions(circleColor: color),
+        );
+      }
+    }
   }
 
   void _openCountry(String country) {
@@ -105,44 +173,32 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
 
   void _goToContinent(String continent) {
     final center = _continentCenters[continent];
-    if (center == null) return;
-    _mapController.move(center, 3.4);
+    final controller = _controller;
+    if (center == null || controller == null) return;
+    controller.animateCamera(
+      CameraUpdate.newLatLngZoom(center, 3.4),
+      duration: const Duration(milliseconds: 700),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final markers = [
-      for (final entry in countryMarkers.entries)
-        Marker(
-          point: ll.LatLng(entry.value.lat, entry.value.lng),
-          width: 26,
-          height: 26,
-          child: GestureDetector(
-            onTap: () => _openCountry(entry.key),
-            child: _CountryDot(
-              color: _progressColor(_progressRatio(entry.key)),
-            ),
-          ),
-        ),
-    ];
-
     return Scaffold(
       backgroundColor: AppColors.night,
       body: Stack(
         children: [
           Positioned.fill(
-            child: FlutterMap(
-              mapController: _mapController,
-              options: const MapOptions(
-                initialCenter: ll.LatLng(25, 15),
-                initialZoom: 2.2,
-                minZoom: 2,
-                maxZoom: 7,
+            child: MapLibreMap(
+              styleString: _styleUrl,
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(25, 15),
+                zoom: 2.2,
               ),
-              children: [
-                MapConfig.tileLayer(context),
-                MarkerLayer(markers: markers),
-              ],
+              minMaxZoomPreference: const MinMaxZoomPreference(2, 7),
+              rotateGesturesEnabled: false,
+              tiltGesturesEnabled: false,
+              onMapCreated: _onMapCreated,
+              onStyleLoadedCallback: _onStyleLoaded,
             ),
           ),
           // Voile sombre en haut d'écran : garantit la lisibilité du bandeau
@@ -180,70 +236,10 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                 const Spacer(),
                 _ContinentChips(onContinent: _goToContinent),
                 const SizedBox(height: 6),
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: _AttributionBadge(),
-                  ),
-                ),
-                const SizedBox(height: 6),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Repère pays : un point dont la taille et la couleur suivent la
-/// progression (voir `_progressColor`), avec un liseré clair pour rester
-/// visible aussi bien sur l'océan que sur les terres.
-class _CountryDot extends StatelessWidget {
-  final Color color;
-
-  const _CountryDot({required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 16,
-        height: 16,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-          border: Border.all(color: AppColors.foam, width: 1.5),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black45,
-              blurRadius: 3,
-              offset: Offset(0, 1),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AttributionBadge extends StatelessWidget {
-  const _AttributionBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.white70,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        child: Text(
-          MapConfig.attribution,
-          style: TextStyle(fontSize: 10, color: Colors.black87),
-        ),
       ),
     );
   }

@@ -19,7 +19,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.10.7
+  # maplibre_gl exige Dart 3.12+ (voir lib/screens/world_map_screen.dart).
+  sdk: ^3.12.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -38,6 +39,7 @@ dependencies:
   supabase_flutter: ^2.17.2
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
+  maplibre_gl: ^0.28.0
   mobile_scanner: ^7.4.1
   http: ^1.6.0
   uuid: ^4.6.0
